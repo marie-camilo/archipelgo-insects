@@ -4,6 +4,7 @@ const MapScene = {
     camera: null,
     islands: [], // Contiendra { pivot, mesh, data, offset }
     time: 0,
+    introComplete: false,
 
     init() {
         console.log("🗺️ MapScene.init() starting...");
@@ -15,7 +16,6 @@ const MapScene = {
         this.scene = new BABYLON.Scene(this.engine);
 
         // Ambiance
-
         const skyColor = new BABYLON.Color3(0.65, 0.85, 0.95);
         this.scene.clearColor = new BABYLON.Color4(skyColor.r, skyColor.g, skyColor.b, 1);
         this.scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR;
@@ -23,9 +23,9 @@ const MapScene = {
         this.scene.fogEnd = 300.0;
         this.scene.fogColor = skyColor;
 
-        // 2. Caméra
-        this.camera = new BABYLON.ArcRotateCamera("camera", -Math.PI/2, Math.PI/3, 60, BABYLON.Vector3.Zero(), this.scene);
-        this.camera.attachControl(canvas, true);
+        // 2. Caméra (Position initiale pour l'intro)
+        this.camera = new BABYLON.ArcRotateCamera("camera", -Math.PI/2, Math.PI/3, 150, BABYLON.Vector3.Zero(), this.scene);
+        this.camera.attachControl(canvas, false); // Désactivé pendant l'intro
         this.camera.lowerRadiusLimit = 20;
         this.camera.upperRadiusLimit = 100;
         this.camera.upperBetaLimit = Math.PI / 2 - 0.1;
@@ -41,7 +41,6 @@ const MapScene = {
         dirLight.position = new BABYLON.Vector3(50, 20, 10);
         dirLight.diffuse = new BABYLON.Color3(1, 0.9, 0.7);
         dirLight.specular = new BABYLON.Color3(1, 0.8, 0.6);
-
         dirLight.intensity = 2.0;
 
         // Ombres
@@ -50,9 +49,12 @@ const MapScene = {
 
         // 4. Création
         this.createOcean();
-        this.loadIslands(shadowGenerator); // Nouvelle fonction de chargement
+        this.loadIslands(shadowGenerator);
 
-        // 5. Boucle
+        // 5. Lancer l'animation d'intro
+        this.playIntroAnimation();
+
+        // 6. Boucle
         this.engine.runRenderLoop(() => {
             if (this.scene) {
                 this.animateEnvironment();
@@ -62,6 +64,64 @@ const MapScene = {
 
         window.addEventListener("resize", () => { if (this.engine) this.engine.resize(); });
         setTimeout(() => this.engine.resize(), 50);
+    },
+
+    playIntroAnimation() {
+        // CONFIG DU TRAVELLING
+        const startRadius = 130;
+        const startBeta = 1.1;
+        const startAlpha = Math.PI / 2; // Position Nord / Arrière
+
+        // FINAL : Ta vue globale habituelle
+        const endRadius = 75;
+        const endBeta = 1.2;
+        const endAlpha = -Math.PI / 2; // Retour au Sud / Avant
+
+        const animationDuration = 300; // 5 secondes pour un vol fluide
+
+        // Initialisation de la caméra au point de départ
+        this.camera.radius = startRadius;
+        this.camera.beta = startBeta;
+        this.camera.alpha = startAlpha;
+
+        // CRÉATION DES ANIMATIONS
+        const radiusAnim = new BABYLON.Animation("camRad", "radius", 60,
+            BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+
+        const betaAnim = new BABYLON.Animation("camBeta", "beta", 60,
+            BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+
+        const alphaAnim = new BABYLON.Animation("camAlpha", "alpha", 60,
+            BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+
+        // Clés d'animation
+        radiusAnim.setKeys([{ frame: 0, value: startRadius }, { frame: animationDuration, value: endRadius }]);
+        betaAnim.setKeys([{ frame: 0, value: startBeta }, { frame: animationDuration, value: endBeta }]);
+        alphaAnim.setKeys([{ frame: 0, value: startAlpha }, { frame: animationDuration, value: endAlpha }]);
+
+        // LISSAGE
+        const easingFunction = new BABYLON.CubicEase();
+        easingFunction.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
+
+        [radiusAnim, betaAnim, alphaAnim].forEach(anim => anim.setEasingFunction(easingFunction));
+
+        this.camera.animations = [radiusAnim, betaAnim, alphaAnim];
+        this.camera.detachControl();
+
+        this.scene.beginAnimation(this.camera, 0, animationDuration, false, 1, () => {
+            this.introComplete = true;
+            const canvas = document.getElementById("renderCanvas");
+            this.camera.attachControl(canvas, true);
+
+            // Verrouillage des limites pour la navigation libre
+            this.camera.lowerRadiusLimit = 25;
+            this.camera.upperRadiusLimit = 150;
+
+            // Affichage de l'UI
+            const mapUI = document.querySelector('.map-ui');
+            if(mapUI) mapUI.style.opacity = "1";
+            console.log("Survol terminé.");
+        });
     },
 
     createOcean() {
@@ -238,10 +298,6 @@ const MapScene = {
         // --- ANIMATION DES ÎLES (Flottement) ---
         this.islands.forEach((obj) => {
             if (obj.pivot) {
-                // AVANT tu avais probablement :
-                // obj.pivot.position.y = Math.sin(this.time + obj.offset) * 0.2;
-
-                // APRÈS (LA CORRECTION) :
                 // On prend la position Y de base (ex: -500) et on ajoute le petit mouvement de vague
                 const baseY = obj.data.position.y || 0;
                 obj.pivot.position.y = baseY + Math.sin(this.time + obj.offset) * 0.3;
