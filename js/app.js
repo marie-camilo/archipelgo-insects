@@ -82,17 +82,25 @@ const ArchipelagoApp = {
     }, 100);
   },
 
-  selectInsect(insectData) {
-    this.selectedInsect = insectData;
-    UIManager.showInsectPanel(insectData);
-    JournalManager.addInsect(insectData.id);
-    UIManager.updateIslandProgress(this.currentIsland);
-  },
+    selectInsect(insectData) {
+        this.selectedInsect = insectData;
+        UIManager.showInsectPanel(insectData);
+        document.activeElement.blur();
+        JournalManager.addInsect(insectData.id);
+        UIManager.updateIslandProgress(this.currentIsland);
+    },
 
-  closeInsectPanel() {
-    UIManager.hideInsectPanel();
-    this.selectedInsect = null;
-  },
+    closeInsectPanel() {
+        UIManager.hideInsectPanel();
+        this.selectedInsect = null;
+
+        if (typeof IslandScene !== 'undefined' && IslandScene.camera) {
+            IslandScene.resetView();
+
+            const canvas = document.getElementById("islandCanvas");
+            IslandScene.camera.attachControl(canvas, true);
+        }
+    },
 
   addToJournal() {
     if (this.selectedInsect) {
@@ -132,7 +140,6 @@ const ArchipelagoApp = {
 
     JournalManager.init();
 
-    // MODIFICATION ICI AUSSI : Si on restart, on revient sur la carte
     this.showMap();
   },
 };

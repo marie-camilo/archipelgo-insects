@@ -1,7 +1,3 @@
-/* ═══════════════════════════════════════════════════════════════════════
-   L'ARCHIPEL DES INSECTES - CONFIGURATION
-   ═══════════════════════════════════════════════════════════════════════ */
-
 const CONFIG = {
   engine: { antialias: true, preserveDrawingBuffer: true },
   camera: {

@@ -47,6 +47,30 @@ const UIManager = {
         tooltip.classList.add("visible");
     },
 
+    showInsectPanel(insectData) {
+        const panel = document.getElementById("right-panel");
+        if (!panel) return;
+
+        // Remplissage des textes
+        document.getElementById("insect-name").textContent = insectData.name;
+        document.getElementById("insect-scientific").textContent = insectData.scientific;
+        document.getElementById("insect-role").textContent = insectData.role || "Non défini";
+        document.getElementById("insect-habitat").textContent = insectData.habitat || "Non défini";
+        document.getElementById("insect-anecdote").textContent = insectData.anecdote || "";
+
+        // Icône / Placeholder
+        const placeholder = document.querySelector(".model-placeholder");
+        if (placeholder) placeholder.textContent = insectData.icon || "🪲";
+
+        // Animation d'ouverture
+        panel.classList.add("open");
+    },
+
+    hideInsectPanel() {
+        const panel = document.getElementById("right-panel");
+        if (panel) panel.classList.remove("open");
+    },
+
     hideIslandTooltip() {
         const tooltip = document.getElementById("island-tooltip");
         if(tooltip) tooltip.classList.remove("visible");

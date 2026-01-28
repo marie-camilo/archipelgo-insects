@@ -20,6 +20,8 @@ const ISLANDS_DATA = [
     scale: 1.5,
     ecosystem: "Forêt tempérée",
     position: { x: 20, y: -5, z: -15 },
+      modelOffset: -60,
+      waterLevel: 0,
     color: "#4caf50",
     status: "unexplored",
     insects: [
@@ -33,6 +35,8 @@ const ISLANDS_DATA = [
     scale: 0.02,
     ecosystem: "Forêt glacée",
     position: { x: 15, y: 10, z: 40 },
+      modelOffset: 80,
+      waterLevel: 0,
     color: "#e8f1e8",
     status: "unexplored",
     insects: [
@@ -46,6 +50,8 @@ const ISLANDS_DATA = [
     scale: 1,
     ecosystem: "Forêt glacée",
     position: { x: 25, y: -3, z: 2 },
+      modelOffset: -40,
+      waterLevel: 0,
     color: "#e8f1e8",
     status: "unexplored",
     insects: [
@@ -98,6 +104,8 @@ const ISLANDS_DATA = [
     scale: 4.5,
     ecosystem: "Haute altitude",
     position: { x: 0, y: 0, z: 25 },
+      modelOffset: -8,
+      waterLevel: 0,
     color: "#bd546f",
     status: "unexplored",
     insects: [
