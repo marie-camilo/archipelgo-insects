@@ -1,0 +1,776 @@
+:root {
+  /* Ocean & Nature Palette */
+  --ocean-deep: #0d47a1;
+  --ocean-medium: #1976d2;
+  --ocean-light: #42a5f5;
+  --ocean-surface: #64b5f6;
+  
+  --island-green: #7cb342;
+  --island-brown: #8d6e63;
+  --sand-light: #ffecb3;
+  
+  --sky-gradient-start: #e3f2fd;
+  --sky-gradient-end: #90caf9;
+  
+  --forest-dark: #33691e;
+  --forest-light: #8bc34a;
+  
+  --ui-dark: #263238;
+  --ui-panel: rgba(38, 50, 56, 0.95);
+  --ui-text: #eceff1;
+  --ui-accent: #ffb74d;
+  
+  /* Typography */
+  --font-title: "Merriweather", serif;
+  --font-body: "Open Sans", sans-serif;
+  
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  
+  /* Transitions */
+  --transition-fast: 0.2s;
+  --transition-base: 0.3s;
+  --transition-slow: 0.5s;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body,
+html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-body);
+  color: var(--ui-text);
+  background: linear-gradient(180deg, var(--sky-gradient-start) 0%, var(--sky-gradient-end) 100%);
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  outline: none;
+  touch-action: none;
+  z-index: 1;
+}
+
+.screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    opacity: 0;
+    transition: opacity var(--transition-slow);
+}
+
+.screen.active {
+    display: block;
+    opacity: 1;
+}
+
+#welcome-screen {
+  background: linear-gradient(135deg, #0d47a1 0%, #1976d2 50%, #42a5f5 100%);
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.ocean-bg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(180deg, transparent 0%, rgba(13, 71, 161, 0.3) 100%);
+  animation: wave 8s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.welcome-content {
+  text-align: center;
+  z-index: 10;
+  max-width: 800px;
+  padding: var(--spacing-xl);
+}
+
+.title-main {
+  font-family: var(--font-title);
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+  color: white;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 1s ease-out;
+}
+
+.subtitle {
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: var(--spacing-xl);
+  line-height: 1.6;
+  animation: fadeInUp 1s ease-out 0.3s backwards;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   INTRO SCREEN
+   ───────────────────────────────────────────────────────────────────── */
+
+#intro-screen {
+  background: linear-gradient(135deg, #263238 0%, #37474f 100%);
+  justify-content: center;
+  align-items: center;
+}
+
+.intro-content {
+  max-width: 700px;
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.intro-text {
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  line-height: 1.9;
+  color: var(--ui-text);
+  margin-bottom: var(--spacing-xl);
+  animation: fadeIn 1.5s ease-out;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   BUTTONS
+   ───────────────────────────────────────────────────────────────────── */
+
+.btn-primary,
+.btn-secondary {
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: fadeInUp 1s ease-out 0.6s backwards;
+}
+
+.btn-primary {
+  background: var(--ui-accent);
+  color: var(--ui-dark);
+  box-shadow: 0 4px 15px rgba(255, 183, 77, 0.4);
+}
+
+.btn-primary:hover {
+  background: #ffa726;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 183, 77, 0.6);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--ui-text);
+  border: 2px solid var(--ui-text);
+  padding: 0.8rem 1.5rem;
+  font-size: 0.95rem;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--ui-accent);
+  color: var(--ui-accent);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   MAP VIEW
+   ───────────────────────────────────────────────────────────────────── */
+
+#map-view {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 5;
+}
+
+#renderCanvas {
+    background-color: #e3f2fd; /* Bleu très pâle */
+}
+
+.map-ui {
+  position: absolute;
+  top: var(--spacing-lg);
+  left: var(--spacing-lg);
+  background: var(--ui-panel);
+  padding: var(--spacing-md);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  max-width: 350px;
+  z-index: 10;
+  pointer-events: all;
+}
+
+.map-title {
+  font-family: var(--font-title);
+  font-size: 1.8rem;
+  margin-bottom: var(--spacing-xs);
+  color: var(--ui-accent);
+}
+
+.map-subtitle {
+  font-size: 0.95rem;
+  color: rgba(236, 239, 241, 0.8);
+  margin-bottom: var(--spacing-md);
+}
+
+.island-legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.9rem;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   ISLAND TOOLTIP
+   ───────────────────────────────────────────────────────────────────── */
+
+.island-tooltip {
+  position: absolute;
+  background: var(--ui-panel);
+  padding: var(--spacing-md);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all var(--transition-base);
+  max-width: 250px;
+  backdrop-filter: blur(10px);
+  z-index: 20;
+}
+
+.island-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tooltip-title {
+  font-family: var(--font-title);
+  font-size: 1.3rem;
+  margin-bottom: var(--spacing-xs);
+  color: var(--ui-accent);
+}
+
+.tooltip-ecosystem {
+  font-size: 0.9rem;
+  color: rgba(236, 239, 241, 0.8);
+  margin-bottom: var(--spacing-xs);
+}
+
+.tooltip-progress {
+  font-size: 0.85rem;
+  color: var(--ocean-light);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   BOAT TRAVEL
+   ───────────────────────────────────────────────────────────────────── */
+
+#boat-travel {
+  background: linear-gradient(180deg, #64b5f6 0%, #1976d2 100%);
+}
+
+.travel-overlay {
+  position: absolute;
+  bottom: var(--spacing-xl);
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.travel-message {
+  background: var(--ui-panel);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+#travel-text {
+  font-size: 1.2rem;
+  color: var(--ui-text);
+  margin-bottom: var(--spacing-sm);
+}
+
+.wave-animation {
+  width: 60px;
+  height: 4px;
+  background: var(--ui-accent);
+  margin: 0 auto;
+  border-radius: 2px;
+  animation: loading 1.5s ease-in-out infinite;
+}
+
+@keyframes loading {
+  0%, 100% { transform: scaleX(0.5); opacity: 0.5; }
+  50% { transform: scaleX(1); opacity: 1; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   ISLAND EXPLORATION
+   ───────────────────────────────────────────────────────────────────── */
+
+#island-exploration {
+  background: linear-gradient(180deg, #81c784 0%, #66bb6a 100%);
+}
+
+/* Side Panels */
+.side-panel {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 350px;
+  background: var(--ui-panel);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+  padding: var(--spacing-lg);
+  overflow-y: auto;
+  transform: translateX(0);
+  transition: transform var(--transition-base);
+  z-index: 999 !important; /* Très important */
+  pointer-events: auto;
+}
+
+.left-panel {
+  left: 0;
+}
+
+.right-panel {
+    right: 0;
+    transform: translateX(100%); /* Caché à droite par défaut */
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex !important; /* Force l'affichage flex */
+    flex-direction: column;
+}
+
+.right-panel.open {
+    transform: translateX(0) !important; /* Devient visible */
+    box-shadow: -5px 0 25px rgba(0,0,0,0.5); /* Ombre portée pour bien le détacher */
+}
+
+.panel-close {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  color: var(--ui-text);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.panel-close:hover {
+  background: var(--ui-accent);
+  color: var(--ui-dark);
+  transform: rotate(90deg);
+}
+
+.panel-title {
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  color: var(--ui-accent);
+  margin-bottom: var(--spacing-xs);
+}
+
+.panel-ecosystem {
+  font-size: 0.9rem;
+  color: rgba(236, 239, 241, 0.7);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Progress Section */
+.progress-section {
+  margin: var(--spacing-md) 0;
+  padding: var(--spacing-md);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.progress-section h4 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: var(--spacing-sm);
+  color: var(--ui-accent);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-xs);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--island-green), var(--forest-light));
+  width: 0%;
+  transition: width var(--transition-slow);
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  color: rgba(236, 239, 241, 0.8);
+}
+
+.panel-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
+}
+
+/* Insect Info Panel */
+.insect-header {
+  margin-bottom: var(--spacing-md);
+  padding-top: var(--spacing-xl);
+}
+
+.insect-name {
+  font-family: var(--font-title);
+  font-size: 1.6rem;
+  color: var(--ui-accent);
+  margin-bottom: var(--spacing-xs);
+}
+
+.insect-scientific {
+  font-style: italic;
+  font-size: 0.95rem;
+  color: rgba(236, 239, 241, 0.7);
+}
+
+.insect-model-preview {
+  width: 100%;
+  height: 200px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.model-placeholder {
+  font-size: 5rem;
+}
+
+.insect-info {
+  margin-bottom: var(--spacing-md);
+}
+
+.info-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.info-section h4 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ui-accent);
+  margin-bottom: var(--spacing-xs);
+}
+
+.info-section p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(236, 239, 241, 0.9);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(255, 152, 0, 0.2);
+  border: 1px solid #ff9800;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #ffb74d;
+}
+
+.btn-add-journal {
+  width: 100%;
+  margin-top: var(--spacing-md);
+}
+
+/* Help Overlay */
+.help-overlay {
+  position: absolute;
+  bottom: var(--spacing-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ui-panel);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   JOURNAL
+   ───────────────────────────────────────────────────────────────────── */
+
+#journal-screen {
+  background: linear-gradient(135deg, #263238 0%, #37474f 100%);
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+}
+
+.journal-container {
+  max-width: 1200px;
+  width: 90%;
+  background: var(--ui-panel);
+  border-radius: 12px;
+  padding: var(--spacing-xl);
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+  position: relative;
+  margin: var(--spacing-lg) auto;
+}
+
+.journal-close {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  color: var(--ui-text);
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.journal-close:hover {
+  background: var(--ui-accent);
+  color: var(--ui-dark);
+  transform: rotate(90deg);
+}
+
+.journal-title {
+  font-family: var(--font-title);
+  font-size: 2.5rem;
+  color: var(--ui-accent);
+  margin-bottom: var(--spacing-xs);
+  text-align: center;
+}
+
+.journal-subtitle {
+  text-align: center;
+  color: rgba(236, 239, 241, 0.7);
+  margin-bottom: var(--spacing-xl);
+}
+
+.journal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.journal-item {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: var(--spacing-md);
+  text-align: center;
+  transition: all var(--transition-base);
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.journal-item:hover {
+  transform: translateY(-5px);
+  border-color: var(--ui-accent);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.journal-item.locked {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.journal-item.locked:hover {
+  transform: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.journal-item-icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.journal-item-name {
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+  color: var(--ui-text);
+}
+
+.journal-item-scientific {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: rgba(236, 239, 241, 0.6);
+}
+
+.journal-stats {
+  text-align: center;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(236, 239, 241, 0.8);
+}
+
+.journal-stats p {
+  margin-bottom: var(--spacing-xs);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   CONCLUSION
+   ───────────────────────────────────────────────────────────────────── */
+
+#conclusion-screen {
+  background: linear-gradient(135deg, #1b5e20 0%, #388e3c 100%);
+  justify-content: center;
+  align-items: center;
+}
+
+.conclusion-content {
+  max-width: 800px;
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.conclusion-title {
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  color: var(--ui-accent);
+  margin-bottom: var(--spacing-md);
+}
+
+.conclusion-message {
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  line-height: 1.8;
+  margin-bottom: var(--spacing-xl);
+  color: var(--ui-text);
+}
+
+.conclusion-stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--ui-accent);
+  font-family: var(--font-title);
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: rgba(236, 239, 241, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   ANIMATIONS
+   ───────────────────────────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .side-panel {
+    width: 100%;
+    max-width: 350px;
+  }
+  
+  .map-ui {
+    max-width: 90%;
+  }
+  
+  .journal-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .conclusion-stats {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+}
