@@ -221,6 +221,14 @@ const ISLANDS_DATA = [
     },
 ];
 
+const SCIENTIFIC_QUOTES = [
+    "Saviez-vous ? Les libellules existent depuis plus de 300 millions d'années.",
+    "L'abeille est le seul insecte au monde qui produit de la nourriture consommée par l'homme.",
+    "Un scarabée peut porter jusqu'à 850 fois son propre poids !",
+    "La métamorphose transforme totalement l'anatomie d'un insecte.",
+    "Certains papillons parcourent des milliers de kilomètres pour migrer."
+];
+
 const JOURNAL_STATE = {
     discoveredInsects: [],
     exploredIslands: [],

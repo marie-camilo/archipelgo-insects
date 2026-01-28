@@ -50,9 +50,9 @@ const ArchipelagoApp = {
       BoatScene.init();
     }, 100);
 
-    setTimeout(() => {
-      this.exploreIsland(islandId);
-    }, CONFIG.animation.boatTravelDuration);
+      setTimeout(() => {
+          this.exploreIsland(islandId);
+      }, 5000);
   },
 
   exploreIsland(islandId) {

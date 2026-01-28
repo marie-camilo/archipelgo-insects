@@ -4,33 +4,33 @@
   --ocean-medium: #1976d2;
   --ocean-light: #42a5f5;
   --ocean-surface: #64b5f6;
-  
+
   --island-green: #7cb342;
   --island-brown: #8d6e63;
   --sand-light: #ffecb3;
-  
+
   --sky-gradient-start: #e3f2fd;
   --sky-gradient-end: #90caf9;
-  
+
   --forest-dark: #33691e;
   --forest-light: #8bc34a;
-  
+
   --ui-dark: #263238;
   --ui-panel: rgba(38, 50, 56, 0.95);
   --ui-text: #eceff1;
   --ui-accent: #ffb74d;
-  
+
   /* Typography */
   --font-title: "Merriweather", serif;
   --font-body: "Open Sans", sans-serif;
-  
+
   /* Spacing */
   --spacing-xs: 0.5rem;
   --spacing-sm: 1rem;
   --spacing-md: 1.5rem;
   --spacing-lg: 2rem;
   --spacing-xl: 3rem;
-  
+
   /* Transitions */
   --transition-fast: 0.2s;
   --transition-base: 0.3s;
@@ -385,50 +385,6 @@ canvas {
   display: flex;
   justify-content: space-between;
   color: #85929e;
-}
-
-/* ─────────────────────────────────────────────────────────────────────
-   BOAT TRAVEL
-   ───────────────────────────────────────────────────────────────────── */
-
-#boat-travel {
-  background: linear-gradient(180deg, #64b5f6 0%, #1976d2 100%);
-}
-
-.travel-overlay {
-  position: absolute;
-  bottom: var(--spacing-xl);
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-}
-
-.travel-message {
-  background: var(--ui-panel);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-}
-
-#travel-text {
-  font-size: 1.2rem;
-  color: var(--ui-text);
-  margin-bottom: var(--spacing-sm);
-}
-
-.wave-animation {
-  width: 60px;
-  height: 4px;
-  background: var(--ui-accent);
-  margin: 0 auto;
-  border-radius: 2px;
-  animation: loading 1.5s ease-in-out infinite;
-}
-
-@keyframes loading {
-  0%, 100% { transform: scaleX(0.5); opacity: 0.5; }
-  50% { transform: scaleX(1); opacity: 1; }
 }
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -1031,17 +987,116 @@ canvas {
     width: 100%;
     max-width: 350px;
   }
-  
+
   .map-ui {
     max-width: 90%;
   }
-  
+
   .journal-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
-  
+
   .conclusion-stats {
     flex-direction: column;
     gap: var(--spacing-md);
   }
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   ÉCRAN DE VOYAGE (BATEAU) - CORRECTION FORCEE
+   ───────────────────────────────────────────────────────────────────── */
+
+#boat-travel-screen {
+    position: fixed; /* On utilise fixed pour être sûr qu'il prend tout l'écran */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 2000;
+}
+
+/* 1. Le Canvas 3D */
+#boatCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    outline: none;
+}
+
+/* 2. L'Interface (Overlay) */
+.travel-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    /* CENTRAGE ABSOLU FLEXBOX */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    background: transparent; /* Pas de fond gris ici */
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Conteneur du message pour s'assurer qu'il ne dépasse pas */
+.travel-message {
+    width: 90%;            /* Largeur safe */
+    max-width: 800px;
+    display: flex;         /* Flexbox interne aussi */
+    flex-direction: column;
+    align-items: center;   /* Centre les enfants (le titre et la quote) */
+    text-align: center;    /* Centre le texte */
+}
+
+#travel-text {
+    font-family: var(--font-title);
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: white;
+    margin-bottom: 2rem;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    width: 100%; /* S'assure que le titre prend la largeur pour se centrer */
+}
+
+/* 3. LA CITATION (Glassmorphism Blanc) */
+.travel-quote {
+    /* Force le centrage même si le flex échoue */
+    margin-left: auto !important;
+    margin-right: auto !important;
+
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: 1.3rem;
+    line-height: 1.6;
+    color: #ffffff; /* Texte blanc pur */
+
+    /* VRAI GLASSMORPHISM CLAIR */
+    background: rgba(255, 255, 255, 0.15);      /* Fond blanc transparent (pas gris) */
+    backdrop-filter: blur(15px);                /* Flou intense */
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Bordure blanche fine */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);  /* Ombre douce */
+
+    padding: 2rem;
+    border-radius: 20px;
+
+    /* Empêche de sortir de l'écran */
+    max-width: 100%;
+    box-sizing: border-box;
+
+    /* Animation */
+    opacity: 0;
+    transform: translateY(20px);
+    animation: quoteAppear 1s ease-out forwards 0.5s;
+}
+
+@keyframes quoteAppear {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
