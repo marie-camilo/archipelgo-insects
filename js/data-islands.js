@@ -91,6 +91,19 @@ const ISLANDS_DATA = [
       { id: "apollo", name: "Apollon", scientific: "Parnassius apollo", position: { x: 0, y: 1, z: 1 }, icon: "🦋", role: "Pollinisateur", habitat: "Montagne", anecdote: "Survivant du froid", status: "menacé" }
     ],
   },
+  {
+    id: "flower",
+    name: "Île Fleurie",
+    modelFile: "flower-island.glb",
+    scale: 4.5,
+    ecosystem: "Haute altitude",
+    position: { x: 0, y: 0, z: 25 },
+    color: "#bd546f",
+    status: "unexplored",
+    insects: [
+      { id: "apollo", name: "Apollon", scientific: "Parnassius apollo", position: { x: 0, y: 1, z: 1 }, icon: "🦋", role: "Pollinisateur", habitat: "Montagne", anecdote: "Survivant du froid", status: "menacé" }
+    ],
+  },
 ];
 
 const JOURNAL_STATE = {
