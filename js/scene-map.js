@@ -26,6 +26,7 @@ const MapScene = {
         this.camera.attachControl(canvas, true);
         this.camera.lowerRadiusLimit = 20;
         this.camera.upperRadiusLimit = 100;
+        this.camera.upperBetaLimit = Math.PI / 2 - 0.1;
         this.camera.wheelPrecision = 40;
         this.camera.panningSensibility = 0;
 
