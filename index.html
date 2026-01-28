@@ -7,10 +7,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-            href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Open+Sans:wght@300;400;600&display=swap"
-            rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet" />
 
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
@@ -47,7 +44,9 @@
     <div id="island-tooltip" class="island-tooltip">
         <h3 class="tooltip-title">Nom Île</h3>
         <p class="tooltip-ecosystem">Écosystème</p>
-        <p class="tooltip-progress">0/4 découverts</p>
+        <div class="tooltip-progress-container">
+            <div class="tooltip-progress-bar"></div>
+        </div>
     </div>
 </div>
 
@@ -65,22 +64,29 @@
     <canvas id="islandCanvas"></canvas>
 
     <div id="left-panel" class="side-panel left-panel">
-        <h3 class="panel-title" id="island-name">Nom de l'île</h3>
-        <p class="panel-ecosystem" id="island-ecosystem">Écosystème</p>
+        <div class="panel-header">
+            <h3 class="panel-title" id="island-name">Nom de l'île</h3>
+            <p class="panel-ecosystem" id="island-ecosystem">Écosystème</p>
+        </div>
+
+        <div class="info-section env-container">
+            <h4>Analyse du Biome</h4>
+            <p id="island-env-desc" class="educational-text">Chargement des données environnementales...</p>
+        </div>
 
         <div class="progress-section">
-            <h4>Progression</h4>
+            <h4>Registre d'Exploration</h4>
             <div class="progress-bar">
                 <div class="progress-fill" id="progress-fill"></div>
             </div>
-            <p class="progress-text" id="progress-text">0/0 insectes découverts</p>
+            <p class="progress-text" id="progress-text">0/0 spécimens identifiés</p>
         </div>
 
         <div class="panel-actions">
             <button class="btn-primary" onclick="ArchipelagoApp.openJournal()">
-                Carnet de Bord
+                Ouvrir le Carnet
             </button>
-            <button class="btn-primary" onclick="ArchipelagoApp.returnToMap()">
+            <button class="btn-secondary" onclick="ArchipelagoApp.returnToMap()">
                 Retour à la carte
             </button>
         </div>
@@ -91,42 +97,45 @@
 
         <div class="insect-header">
             <h3 class="insect-name" id="insect-name">Nom Insecte</h3>
-            <p class="insect-scientific" id="insect-scientific">Nom latin</p>
+            <div class="insect-meta">
+                <p id="insect-scientific" class="scientific-name">Nom latin</p>
+                <p id="insect-taxonomy" class="taxonomy-info">Classification</p>
+            </div>
         </div>
 
         <div class="insect-model-preview" id="insect-preview">
             <div class="model-placeholder">?</div>
         </div>
 
-        <div class="insect-info">
+        <div class="insect-info-scroll">
             <div class="info-section">
                 <h4>Rôle Écologique</h4>
-                <p id="insect-role">...</p>
+                <p id="insect-role" class="educational-text">...</p>
             </div>
 
             <div class="info-section">
-                <h4>Habitat</h4>
-                <p id="insect-habitat">...</p>
+                <h4>Habitat Spécifique</h4>
+                <p id="insect-habitat" class="educational-text">...</p>
             </div>
 
             <div class="info-section">
-                <h4>Anecdote</h4>
-                <p id="insect-anecdote">...</p>
+                <h4>Note du Naturaliste</h4>
+                <p id="insect-anecdote" class="educational-text italic">...</p>
             </div>
 
             <div class="status-badge" id="insect-status">
-                <span class="status-icon">⚠️</span>
-                <span>Statut</span>
+                <span class="status-icon">🛡️</span>
+                <span>Statut de conservation</span>
             </div>
         </div>
 
         <button class="btn-primary btn-add-journal" onclick="ArchipelagoApp.addToJournal()">
-            Ajouter au carnet
+            Ajouter au carnet de bord
         </button>
     </div>
 
     <div class="help-overlay" id="help-overlay">
-        <p>Cliquez sur les insectes pour les découvrir</p>
+        <p>Explorez l'île et cliquez sur les signaux lumineux</p>
     </div>
 </div>
 
@@ -135,39 +144,38 @@
         <button class="journal-close" onclick="ArchipelagoApp.closeJournal()">×</button>
 
         <h2 class="journal-title">Carnet de Bord Scientifique</h2>
-        <p class="journal-subtitle">Collection d'insectes découverts</p>
+        <p class="journal-subtitle">Base de données des arthropodes découverts</p>
 
-        <div class="journal-grid" id="journal-grid">
-        </div>
+        <div class="journal-grid" id="journal-grid"></div>
 
         <div class="journal-stats">
-            <p><strong>Total découvert :</strong> <span id="total-discovered">0</span> / <span id="total-insects">20</span></p>
-            <p><strong>Îles explorées :</strong> <span id="islands-explored">0</span> / 5</p>
+            <p><strong>Spécimens collectés :</strong> <span id="total-discovered">0</span> / <span id="total-insects">20</span></p>
+            <p><strong>Biomes cartographiés :</strong> <span id="islands-explored">0</span> / 5</p>
         </div>
     </div>
 </div>
 
 <div id="conclusion-screen" class="screen">
     <div class="conclusion-content">
-        <h2 class="conclusion-title">Félicitations !</h2>
+        <h2 class="conclusion-title">Mission Accomplie</h2>
         <p class="conclusion-message">
-            Les insectes sont les fondations invisibles de nos écosystèmes.<br /><br />
-            Les comprendre, c'est apprendre à mieux protéger notre environnement.
+            Vous avez parcouru l'archipel et documenté la vie de ses plus petits habitants.
+            Votre carnet de bord est désormais une ressource précieuse pour la protection de ces écosystèmes fragiles.
         </p>
 
         <div class="conclusion-stats">
             <div class="stat-item">
-                <span class="stat-number">20</span>
-                <span class="stat-label">Insectes découverts</span>
+                <span class="stat-number" id="final-insects">20</span>
+                <span class="stat-label">Identifications</span>
             </div>
             <div class="stat-item">
-                <span class="stat-number">5</span>
+                <span class="stat-number" id="final-islands">5</span>
                 <span class="stat-label">Îles explorées</span>
             </div>
         </div>
 
         <button class="btn-primary" onclick="ArchipelagoApp.restart()">
-            Recommencer l'exploration
+            Nouvelle Expédition
         </button>
     </div>
 </div>
@@ -176,11 +184,9 @@
 <script src="js/data-islands.js"></script>
 <script src="js/ui-manager.js"></script>
 <script src="js/journal.js"></script>
-
 <script src="js/scene-map.js"></script>
 <script src="js/scene-boat.js"></script>
 <script src="js/scene-island.js"></script>
-
 <script src="js/app.js"></script>
 </body>
 </html>

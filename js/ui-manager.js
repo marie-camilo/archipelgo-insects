@@ -47,22 +47,84 @@ const UIManager = {
         tooltip.classList.add("visible");
     },
 
+    updateIslandInfo(islandData) {
+        document.getElementById("island-name").textContent = islandData.name;
+        document.getElementById("island-ecosystem").textContent = islandData.ecosystem;
+
+        const envDesc = document.getElementById("island-env-desc");
+        if (envDesc) {
+            envDesc.textContent = islandData.environmentDesc || "Description non disponible.";
+        }
+    },
+
+    // Met à jour la barre de progression du panneau de gauche (Island Exploration)
+    updateIslandProgress(islandId) {
+        const island = ISLANDS_DATA.find(i => i.id === islandId);
+        if (!island) return;
+
+        // On compte combien d'insectes de CETTE île sont dans le journal
+        const discoveredCount = JOURNAL_STATE.discoveredInsects.filter(
+            id => island.insects.some(insect => insect.id === id)
+        ).length;
+
+        const totalCount = island.insects.length;
+        const percentage = (discoveredCount / totalCount) * 100;
+
+        // Mise à jour de la barre visuelle
+        const fill = document.getElementById("progress-fill");
+        if (fill) fill.style.width = percentage + "%";
+
+        // Mise à jour du texte (ex: 1/2 spécimens identifiés)
+        const text = document.getElementById("progress-text");
+        if (text) text.textContent = `${discoveredCount}/${totalCount} spécimens identifiés`;
+
+        console.log(`📊 Progression ${island.name} : ${discoveredCount}/${totalCount}`);
+    },
+
+    // Affiche/Masque l'overlay d'aide au centre
+    showHelp(text, duration = 3000) {
+        const help = document.getElementById("help-overlay");
+        if (!help) return;
+
+        help.querySelector("p").textContent = text;
+        help.style.display = "block";
+
+        setTimeout(() => {
+            help.style.display = "none";
+        }, duration);
+    },
+
+    // Affiche la fiche de l'insecte (Right Panel)
     showInsectPanel(insectData) {
         const panel = document.getElementById("right-panel");
         if (!panel) return;
 
-        // Remplissage des textes
+        // Remplissage texte
         document.getElementById("insect-name").textContent = insectData.name;
         document.getElementById("insect-scientific").textContent = insectData.scientific;
-        document.getElementById("insect-role").textContent = insectData.role || "Non défini";
-        document.getElementById("insect-habitat").textContent = insectData.habitat || "Non défini";
-        document.getElementById("insect-anecdote").textContent = insectData.anecdote || "";
+        document.getElementById("insect-taxonomy").textContent = insectData.taxonomy || "";
+        document.getElementById("insect-role").textContent = insectData.role;
+        document.getElementById("insect-habitat").textContent = insectData.habitat;
+        document.getElementById("insect-anecdote").textContent = insectData.anecdote;
 
-        // Icône / Placeholder
-        const placeholder = document.querySelector(".model-placeholder");
-        if (placeholder) placeholder.textContent = insectData.icon || "🪲";
+        // Gestion du badge de statut
+        const statusBadge = document.getElementById("insect-status");
+        const statusText = insectData.status.toLowerCase();
 
-        // Animation d'ouverture
+        // Nettoyage des anciennes classes
+        statusBadge.classList.remove('status-safe', 'status-warning', 'status-danger');
+
+        // Logique de couleur
+        if (statusText.includes("danger") || statusText.includes("menacé")) {
+            statusBadge.classList.add('status-danger');
+        } else if (statusText.includes("vulnérable") || statusText.includes("surveillance")) {
+            statusBadge.classList.add('status-warning');
+        } else {
+            statusBadge.classList.add('status-safe');
+        }
+
+        statusBadge.querySelector('span:last-child').textContent = insectData.status;
+
         panel.classList.add("open");
     },
 

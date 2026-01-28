@@ -62,6 +62,8 @@ const ArchipelagoApp = {
     this.showScreen("island-exploration");
     const island = ISLANDS_DATA.find(i => i.id === islandId);
 
+    UIManager.updateIslandInfo(island);
+
     document.getElementById("island-name").textContent = island.name;
     document.getElementById("island-ecosystem").textContent = "Écosystème : " + island.ecosystem;
 
