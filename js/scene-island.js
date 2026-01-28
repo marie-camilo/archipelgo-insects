@@ -21,7 +21,7 @@ const IslandScene = {
 
         // Brouillard léger pour fondre l'horizon
         this.scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
-        this.scene.fogDensity = 0.01;
+        this.scene.fogDensity = 0.005;
         this.scene.fogColor = this.scene.clearColor;
 
         this.currentIsland = ISLANDS_DATA.find(i => i.id === islandId);
@@ -39,9 +39,9 @@ const IslandScene = {
         hemiLight.intensity = 0.6;
         hemiLight.groundColor = new BABYLON.Color3(0.2, 0.2, 0.2);
 
-        const dirLight = new BABYLON.DirectionalLight("sun", new BABYLON.Vector3(-1, -2, -1), this.scene);
-        dirLight.position = new BABYLON.Vector3(20, 40, 20);
-        dirLight.intensity = 1.0;
+        const dirLight = new BABYLON.DirectionalLight("dirLight", new BABYLON.Vector3(-1, -1, -1), this.scene);
+        dirLight.position = new BABYLON.Vector3(50, 20, 10);
+        dirLight.intensity = 1.8;
 
         const shadowGenerator = new BABYLON.ShadowGenerator(1024, dirLight);
         shadowGenerator.useBlurExponentialShadowMap = true;

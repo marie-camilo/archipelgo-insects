@@ -15,10 +15,12 @@ const MapScene = {
         this.scene = new BABYLON.Scene(this.engine);
 
         // Ambiance
+
         const skyColor = new BABYLON.Color3(0.65, 0.85, 0.95);
         this.scene.clearColor = new BABYLON.Color4(skyColor.r, skyColor.g, skyColor.b, 1);
-        this.scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
-        this.scene.fogDensity = 0.01;
+        this.scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR;
+        this.scene.fogStart = 60.0;
+        this.scene.fogEnd = 300.0;
         this.scene.fogColor = skyColor;
 
         // 2. Caméra
@@ -27,16 +29,20 @@ const MapScene = {
         this.camera.lowerRadiusLimit = 20;
         this.camera.upperRadiusLimit = 100;
         this.camera.upperBetaLimit = Math.PI / 2 - 0.1;
-        this.camera.wheelPrecision = 40;
-        this.camera.panningSensibility = 0;
+        this.camera.wheelPrecision = 10;
+        this.camera.panningSensibility = 30;
 
         // 3. Lumières
         const hemiLight = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(0, 1, 0), this.scene);
         hemiLight.intensity = 0.8;
 
-        const dirLight = new BABYLON.DirectionalLight("dirLight", new BABYLON.Vector3(-1, -2, -1), this.scene);
-        dirLight.position = new BABYLON.Vector3(20, 50, 20);
-        dirLight.intensity = 1.5;
+        // Soleil rasant
+        const dirLight = new BABYLON.DirectionalLight("dirLight", new BABYLON.Vector3(-1, -0.5, -1), this.scene);
+        dirLight.position = new BABYLON.Vector3(50, 20, 10);
+        dirLight.diffuse = new BABYLON.Color3(1, 0.9, 0.7);
+        dirLight.specular = new BABYLON.Color3(1, 0.8, 0.6);
+
+        dirLight.intensity = 2.0;
 
         // Ombres
         const shadowGenerator = new BABYLON.ShadowGenerator(2048, dirLight);
@@ -59,14 +65,28 @@ const MapScene = {
     },
 
     createOcean() {
-        const ocean = BABYLON.MeshBuilder.CreateGround("ocean", {width: 300, height: 300}, this.scene);
-        const oceanMat = new BABYLON.StandardMaterial("oceanMat", this.scene);
-        oceanMat.diffuseColor = new BABYLON.Color3(0.0, 0.5, 0.8);
-        oceanMat.specularColor = new BABYLON.Color3(0.8, 0.8, 0.8);
-        oceanMat.alpha = 0.85;
-        ocean.material = oceanMat;
-        ocean.position.y = -0.5; // Juste en dessous du zéro
-        this.waterMesh = ocean;
+        const waterMesh = BABYLON.MeshBuilder.CreateGround("ocean", {width: 400, height: 400, subdivisions: 40, updatable: true}, this.scene);
+        waterMesh.convertToFlatShadedMesh();
+
+        // 3. Matériau de l'eau
+        const waterMat = new BABYLON.StandardMaterial("waterMat", this.scene);
+        waterMat.diffuseColor = new BABYLON.Color3(0.02, 0.05, 0.15);
+        waterMat.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+        waterMat.specularPower = 32;
+        waterMat.emissiveColor = new BABYLON.Color3(0, 0, 0);
+        waterMat.alpha = 0.95;
+        waterMat.roughness = 0; // Très lisse
+
+        waterMesh.material = waterMat;
+        waterMesh.position.y = -1; // Un peu sous les îles
+
+        // On permet au maillage de recevoir les ombres des îles
+        waterMesh.receiveShadows = true;
+
+        // On stocke les données initiales pour les calculs de vagues
+        this.waterMesh = waterMesh;
+        // On sauvegarde la position originale des sommets (X, Y, Z)
+        this.basePositions = waterMesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
     },
 
     loadIslands(shadowGenerator) {
@@ -103,11 +123,13 @@ const MapScene = {
                         m.isPickable = false;
                         m.receiveShadows = true;
                         shadowGenerator.addShadowCaster(m);
+                        if (m.material) {
+                            m.material.fogEnabled = false;
+                        }
                     });
 
-                    // On stocke les références dans notre tableau pour les utiliser dans les interactions
                     this.islands[index].visualMesh = root;
-                    this.islands[index].baseScaleVector = baseScaleVector; // SAUVEGARDE DE LA TAILLE DE BASE
+                    this.islands[index].baseScaleVector = baseScaleVector;
                 })
                 .catch((err) => {
                     console.error("Erreur modèle:", islandData.modelFile, err);
@@ -181,18 +203,50 @@ const MapScene = {
     },
 
     animateEnvironment() {
-        this.time += 0.01;
+        this.time += 0.01; // Vitesse du temps
 
-        // Eau
-        if (this.waterMesh) {
-            this.waterMesh.position.y = -0.5 + Math.sin(this.time * 0.5) * 0.1;
+        // --- ANIMATION DE L'OCÉAN LOW POLY ---
+        if (this.waterMesh && this.basePositions) {
+            // On récupère le tableau actuel des positions (c'est une copie pour travailler dessus)
+            const positions = [...this.basePositions];
+
+            // On boucle sur chaque vertex (point) du maillage
+            // Le tableau est une suite de [x, y, z, x, y, z, ...]
+            for (let i = 0; i < positions.length; i += 3) {
+                const x = positions[i];
+                const z = positions[i + 2];
+
+                // FORMULE MAGIQUE DES VAGUES
+                // On calcule un nouveau Y basé sur des Sinus et Cosinus mélangés
+                const waveHeight = 1.0; // Hauteur des vagues
+                const waveFreq = 0.15;  // Fréquence (taille des vagues)
+
+                // y = sin(x * freq + temps) + cos(z * freq + temps)
+                const y = Math.sin(x * waveFreq + this.time) * Math.cos(z * waveFreq + this.time) * waveHeight;
+
+                // On applique la hauteur
+                positions[i + 1] = y;
+            }
+
+            // On met à jour le maillage avec les nouvelles positions
+            this.waterMesh.updateVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
+
+            // IMPORTANT : On recalcule les "normales" pour que la lumière brille sur les nouvelles facettes
+            this.waterMesh.createNormals(false);
         }
 
-        // Îles
+        // --- ANIMATION DES ÎLES (Flottement) ---
         this.islands.forEach((obj) => {
             if (obj.pivot) {
-                // Flottement doux
-                obj.pivot.position.y = Math.sin(this.time + obj.offset) * 0.2;
+                // AVANT tu avais probablement :
+                // obj.pivot.position.y = Math.sin(this.time + obj.offset) * 0.2;
+
+                // APRÈS (LA CORRECTION) :
+                // On prend la position Y de base (ex: -500) et on ajoute le petit mouvement de vague
+                const baseY = obj.data.position.y || 0;
+                obj.pivot.position.y = baseY + Math.sin(this.time + obj.offset) * 0.3;
+
+                // Pareil pour la rotation si besoin
                 obj.pivot.rotation.y = Math.sin(this.time * 0.2 + obj.offset) * 0.05;
             }
         });

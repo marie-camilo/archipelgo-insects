@@ -2,10 +2,10 @@ const ISLANDS_DATA = [
   {
     id: "pollinators",
     name: "Île des Pollinisateurs",
-    modelFile: "autumn-island.glb",
-    scale: 0.06,
+    modelFile: "warm-island.glb",
+    scale: 0.2,
     ecosystem: "Prairies fleuries",
-    position: { x: -15, y: 3, z: 0 },
+    position: { x: -20, y: 0, z: 5 },
     color: "#ffeb3b",
     status: "unexplored",
     insects: [
@@ -14,13 +14,39 @@ const ISLANDS_DATA = [
     ],
   },
   {
-    id: "forest",
+    id: "forest_green",
     name: "Île de la Forêt",
     modelFile: "forest-island.glb",
     scale: 1.5,
     ecosystem: "Forêt tempérée",
-    position: { x: 20, y: -30, z: -15 },
+    position: { x: 20, y: -5, z: -15 },
     color: "#4caf50",
+    status: "unexplored",
+    insects: [
+      { id: "beetle", name: "Scarabée", scientific: "Coleoptera", position: { x: 1, y: 0.5, z: 1 }, icon: "🪲", role: "Nettoyeur", habitat: "Bois mort", anecdote: "Une armure solide", status: "commun" }
+    ],
+  },
+  {
+    id: "floating_forest",
+    name: "Îles Flotantes",
+    modelFile: "floating-island.glb",
+    scale: 0.02,
+    ecosystem: "Forêt glacée",
+    position: { x: 15, y: 10, z: 40 },
+    color: "#e8f1e8",
+    status: "unexplored",
+    insects: [
+      { id: "beetle", name: "Scarabée", scientific: "Coleoptera", position: { x: 1, y: 0.5, z: 1 }, icon: "🪲", role: "Nettoyeur", habitat: "Bois mort", anecdote: "Une armure solide", status: "commun" }
+    ],
+  },
+  {
+    id: "winter",
+    name: "Îles Ennéigées",
+    modelFile: "winter-island.glb",
+    scale: 1,
+    ecosystem: "Forêt glacée",
+    position: { x: 25, y: -3, z: 2 },
+    color: "#e8f1e8",
     status: "unexplored",
     insects: [
       { id: "beetle", name: "Scarabée", scientific: "Coleoptera", position: { x: 1, y: 0.5, z: 1 }, icon: "🪲", role: "Nettoyeur", habitat: "Bois mort", anecdote: "Une armure solide", status: "commun" }
