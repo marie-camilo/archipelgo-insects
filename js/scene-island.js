@@ -147,9 +147,15 @@ const IslandScene = {
             const ray = new BABYLON.Ray(new BABYLON.Vector3(posX, 1000, posZ), new BABYLON.Vector3(0, -1, 0), 2000);
             const hit = this.scene.pickWithRay(ray, (m) => m.name !== "ocean" && m.isVisible && m.isPickable !== false);
 
-            let finalY = hit.hit ? hit.pickedPoint.y + 0.5 : 5; // Un peu plus près du sol
+            // --- LOGIQUE DE VOL ---
+            // On récupère le niveau du sol. S'il n'y a pas de sol, on met 0.
+            let groundY = hit.hit ? hit.pickedPoint.y : 0;
 
-            // 1. HITBOX (Pour cliquer)
+            // On ajoute l'altitude définie dans le JSON (ou 0.5 par défaut pour les rampants)
+            let altitude = insectData.altitude !== undefined ? insectData.altitude : 0.5;
+            let finalY = groundY + altitude;
+
+            // 1. HITBOX
             const hitBox = BABYLON.MeshBuilder.CreateSphere("hit_" + insectData.id, {diameter: 5}, this.scene);
             hitBox.position = new BABYLON.Vector3(posX, finalY, posZ);
             hitBox.visibility = 0;
@@ -163,24 +169,13 @@ const IslandScene = {
                 .then((result) => {
                     const insectRoot = result.meshes[0];
                     insectRoot.parent = hitBox;
-
                     insectRoot.scaling = new BABYLON.Vector3(scale, scale, scale);
-                    insectRoot.position = new BABYLON.Vector3(0, -0.5, 0); // Ajustement fin
 
-                    result.meshes.forEach(m => {
-                        m.isPickable = false;
-                        // Suppression de l'emissiveColor pour retirer l'effet "brillant/foggy"
-                    });
+                    // On centre le modèle dans sa hitbox
+                    insectRoot.position = BABYLON.Vector3.Zero();
 
+                    result.meshes.forEach(m => { m.isPickable = false; });
                     this.insectsMeshes.push({ visual: insectRoot, hitbox: hitBox, offset: Math.random() * 100 });
-
-                    // J'ai supprimé createSparkles() comme demandé pour retirer le "fog"
-                })
-                .catch(() => {
-                    // Fallback propre
-                    const orb = BABYLON.MeshBuilder.CreateSphere("fallback", {diameter: 2}, this.scene);
-                    orb.parent = hitBox;
-                    this.insectsMeshes.push({ visual: orb, hitbox: hitBox, offset: Math.random() * 100 });
                 });
 
             // 3. INTERACTION
