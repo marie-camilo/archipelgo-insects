@@ -1,12 +1,21 @@
+/* UI MANAGER - Avec Preview 3D */
+
 const UIManager = {
+    // Variables pour la preview 3D
+    previewEngine: null,
+    previewScene: null,
+    previewCamera: null,
+    currentPreviewMesh: null,
+
     showIslandTooltip(islandData, mesh) {
         const tooltip = document.getElementById("island-tooltip");
         if(!tooltip) return;
 
-        // 1. Calcul de la position (Inchangé)
-        const engine = MapScene.engine;
-        const scene = MapScene.scene;
-        const camera = MapScene.camera;
+        const engine = MapScene.engine || IslandScene.engine;
+        const scene = MapScene.scene || IslandScene.scene;
+        const camera = MapScene.camera || IslandScene.camera;
+
+        if(!engine || !scene || !camera) return;
 
         const screenPos = BABYLON.Vector3.Project(
             mesh.getAbsolutePosition(),
@@ -15,14 +24,12 @@ const UIManager = {
             camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
         );
 
-        // 2. Injection du contenu moderne
         const discovered = JOURNAL_STATE.discoveredInsects.filter(
             id => islandData.insects.some(i => i.id === id)
         ).length;
         const total = islandData.insects.length;
         const percent = (discovered / total) * 100;
 
-        // On ajoute des icônes selon l'écosystème
         let ecoIcon = "🌱";
         if(islandData.id === "aquatic") ecoIcon = "💧";
         if(islandData.id === "winter") ecoIcon = "❄️";
@@ -40,10 +47,8 @@ const UIManager = {
             </div>
         `;
 
-        // 3. Positionnement et visibilité
         tooltip.style.left = screenPos.x + "px";
         tooltip.style.top = screenPos.y + "px";
-
         tooltip.classList.add("visible");
     },
 
@@ -57,12 +62,10 @@ const UIManager = {
         }
     },
 
-    // Met à jour la barre de progression du panneau de gauche (Island Exploration)
     updateIslandProgress(islandId) {
         const island = ISLANDS_DATA.find(i => i.id === islandId);
         if (!island) return;
 
-        // On compte combien d'insectes de CETTE île sont dans le journal
         const discoveredCount = JOURNAL_STATE.discoveredInsects.filter(
             id => island.insects.some(insect => insect.id === id)
         ).length;
@@ -70,18 +73,13 @@ const UIManager = {
         const totalCount = island.insects.length;
         const percentage = (discoveredCount / totalCount) * 100;
 
-        // Mise à jour de la barre visuelle
         const fill = document.getElementById("progress-fill");
         if (fill) fill.style.width = percentage + "%";
 
-        // Mise à jour du texte (ex: 1/2 spécimens identifiés)
         const text = document.getElementById("progress-text");
         if (text) text.textContent = `${discoveredCount}/${totalCount} spécimens identifiés`;
-
-        console.log(`📊 Progression ${island.name} : ${discoveredCount}/${totalCount}`);
     },
 
-    // Affiche/Masque l'overlay d'aide au centre
     showHelp(text, duration = 3000) {
         const help = document.getElementById("help-overlay");
         if (!help) return;
@@ -94,12 +92,11 @@ const UIManager = {
         }, duration);
     },
 
-    // Affiche la fiche de l'insecte (Right Panel)
     showInsectPanel(insectData) {
         const panel = document.getElementById("right-panel");
         if (!panel) return;
 
-        // Remplissage texte
+        // 1. Remplissage texte
         document.getElementById("insect-name").textContent = insectData.name;
         document.getElementById("insect-scientific").textContent = insectData.scientific;
         document.getElementById("insect-taxonomy").textContent = insectData.taxonomy || "";
@@ -107,14 +104,11 @@ const UIManager = {
         document.getElementById("insect-habitat").textContent = insectData.habitat;
         document.getElementById("insect-anecdote").textContent = insectData.anecdote;
 
-        // Gestion du badge de statut
+        // 2. Gestion du badge de statut
         const statusBadge = document.getElementById("insect-status");
         const statusText = insectData.status.toLowerCase();
-
-        // Nettoyage des anciennes classes
         statusBadge.classList.remove('status-safe', 'status-warning', 'status-danger');
 
-        // Logique de couleur
         if (statusText.includes("danger") || statusText.includes("menacé")) {
             statusBadge.classList.add('status-danger');
         } else if (statusText.includes("vulnérable") || statusText.includes("surveillance")) {
@@ -122,8 +116,10 @@ const UIManager = {
         } else {
             statusBadge.classList.add('status-safe');
         }
-
         statusBadge.querySelector('span:last-child').textContent = insectData.status;
+
+        // 3. LANCEMENT DE LA PREVIEW 3D
+        this.initInsectPreview(insectData);
 
         panel.classList.add("open");
     },
@@ -131,10 +127,109 @@ const UIManager = {
     hideInsectPanel() {
         const panel = document.getElementById("right-panel");
         if (panel) panel.classList.remove("open");
+
+        // Arrêter le moteur de preview pour économiser les ressources
+        if (this.previewEngine) {
+            this.previewEngine.stopRenderLoop();
+        }
     },
 
     hideIslandTooltip() {
         const tooltip = document.getElementById("island-tooltip");
         if(tooltip) tooltip.classList.remove("visible");
     },
+
+    // ─────────────────────────────────────────────────────────────────
+    // LOGIQUE DE LA PREVIEW 3D (MINI-SCÈNE)
+    // ─────────────────────────────────────────────────────────────────
+
+    initInsectPreview(insectData) {
+        const container = document.getElementById("insect-preview");
+        if (!container) return;
+
+        // A. Nettoyage du conteneur (retirer le "?" ou l'ancien canvas)
+        container.innerHTML = "";
+
+        // B. Création d'un canvas dédié
+        const canvas = document.createElement("canvas");
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        canvas.style.outline = "none";
+        container.appendChild(canvas);
+
+        // C. Initialisation du moteur SI il n'existe pas encore (Singleton)
+        // On recrée le moteur à chaque fois pour éviter les conflits de contextes GL sur les canvas dynamiques
+        if (this.previewEngine) {
+            this.previewEngine.dispose();
+        }
+
+        this.previewEngine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
+
+        // D. Création de la scène
+        this.previewScene = new BABYLON.Scene(this.previewEngine);
+        this.previewScene.clearColor = new BABYLON.Color4(0, 0, 0, 0); // FOND TRANSPARENT !
+
+        // E. Caméra (Auto-rotation)
+        this.previewCamera = new BABYLON.ArcRotateCamera("previewCam", 0, Math.PI / 2.5, 5, BABYLON.Vector3.Zero(), this.previewScene);
+        this.previewCamera.attachControl(canvas, true);
+        this.previewCamera.wheelPrecision = 50;
+        this.previewCamera.minZ = 0.1;
+
+        // Empêcher de zoomer trop loin ou trop près
+        this.previewCamera.lowerRadiusLimit = 2;
+        this.previewCamera.upperRadiusLimit = 10;
+
+        // F. Lumières (Studio)
+        const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), this.previewScene);
+        light.intensity = 1.2;
+        const dirLight = new BABYLON.DirectionalLight("dir", new BABYLON.Vector3(1, -1, 1), this.previewScene);
+        dirLight.intensity = 1.5;
+
+        // G. Chargement du modèle
+        const filename = insectData.modelFile || "sphere.glb";
+
+        BABYLON.SceneLoader.ImportMeshAsync("", "./assets/insects/", filename, this.previewScene)
+            .then((result) => {
+                const root = result.meshes[0];
+                this.currentPreviewMesh = root;
+
+                // --- NORMALISATION DE LA TAILLE ---
+                // C'est l'étape clé : on force tous les insectes à avoir la même taille visuelle
+                const boundingInfo = root.getHierarchyBoundingVectors();
+                const sizeVec = boundingInfo.max.subtract(boundingInfo.min);
+                const maxDimension = Math.max(sizeVec.x, sizeVec.y, sizeVec.z);
+
+                // Si l'insecte est trop petit ou trop grand, on l'ajuste pour qu'il fasse environ 3 unités
+                const targetSize = 3;
+                const scaleFactor = targetSize / maxDimension;
+
+                root.scaling = new BABYLON.Vector3(scaleFactor, scaleFactor, scaleFactor);
+
+                // Centrage parfait (Le point de pivot est parfois décalé sur les modèles)
+                const center = boundingInfo.max.add(boundingInfo.min).scale(0.5);
+                // On déplace le modèle à l'opposé de son centre pour le ramener à (0,0,0)
+                root.position = center.scale(-1 * scaleFactor);
+                // On remonte un tout petit peu pour qu'il soit bien centré visuellement
+                root.position.y += (sizeVec.y * scaleFactor) / 2 * 0.5;
+
+            })
+            .catch((err) => {
+                console.warn("Erreur preview:", err);
+                // Fallback cube si erreur
+                const box = BABYLON.MeshBuilder.CreateBox("box", {size: 2}, this.previewScene);
+                const mat = new BABYLON.StandardMaterial("m", this.previewScene);
+                mat.diffuseColor = BABYLON.Color3.Red();
+                box.material = mat;
+            });
+
+        // H. Boucle d'animation (Rotation lente)
+        this.previewEngine.runRenderLoop(() => {
+            if (this.previewScene) {
+                if (this.currentPreviewMesh) {
+                    this.currentPreviewMesh.rotation.y += 0.01; // Rotation automatique élégante
+                }
+                this.previewScene.render();
+            }
+        });
+    }
 };

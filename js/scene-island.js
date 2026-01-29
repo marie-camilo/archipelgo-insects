@@ -1,3 +1,5 @@
+/* SCENE ISLAND - Exploration détaillée & Outil de placement */
+
 const IslandScene = {
     scene: null,
     engine: null,
@@ -5,6 +7,7 @@ const IslandScene = {
     currentIsland: null,
     insectsMeshes: [],
     time: 0,
+    initialRadius: 100,
 
     init(islandId) {
         const canvas = document.getElementById("islandCanvas");
@@ -14,41 +17,62 @@ const IslandScene = {
         this.scene = new BABYLON.Scene(this.engine);
         this.currentIsland = ISLANDS_DATA.find(i => i.id === islandId);
 
-        // 1. AMBIANCE & BROUILLARD (CORRIGÉ)
+        // 1. AMBIANCE (Nettoyée)
         const skyColor = new BABYLON.Color3(0.65, 0.85, 0.95);
         this.scene.clearColor = new BABYLON.Color4(skyColor.r, skyColor.g, skyColor.b, 1);
 
+        // On garde le brouillard de fond pour la profondeur, mais on s'assure qu'il est loin
         this.scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR;
-        // On repousse le brouillard très loin car l'île zoomée est géante
-        this.scene.fogStart = 500;
-        this.scene.fogEnd = 2500;
+        this.scene.fogStart = 600;
+        this.scene.fogEnd = 3000;
         this.scene.fogColor = skyColor;
 
         // 2. CAMÉRA
         this.camera = new BABYLON.ArcRotateCamera("islandCam", -Math.PI/2, Math.PI/3, 100, BABYLON.Vector3.Zero(), this.scene);
         this.camera.attachControl(canvas, true);
         this.camera.upperBetaLimit = Math.PI / 2 - 0.1;
+        this.camera.wheelPrecision = 2; // Zoom réactif
 
         // 3. LUMIÈRES
         const hemiLight = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(0, 1, 0), this.scene);
-        hemiLight.intensity = 0.8;
+        hemiLight.intensity = 0.9; // Un peu plus lumineux pour bien voir les modèles
 
         const dirLight = new BABYLON.DirectionalLight("dirLight", new BABYLON.Vector3(-1, -0.8, -1), this.scene);
         dirLight.position = new BABYLON.Vector3(100, 100, 50);
-        dirLight.intensity = 2.5;
+        dirLight.intensity = 2.0;
 
         const shadowGenerator = new BABYLON.ShadowGenerator(2048, dirLight);
+        shadowGenerator.useBlurExponentialShadowMap = true;
 
-        const glow = new BABYLON.GlowLayer("glow", this.scene);
-        glow.intensity = 0.6;
+        // J'ai retiré le GlowLayer global qui pouvait flouter l'insecte
+        // const glow = new BABYLON.GlowLayer("glow", this.scene);
 
         // 4. CHARGEMENT
         this.createOcean();
         this.loadIslandModel(shadowGenerator).then(() => {
-            // On attend que le mesh soit bien là pour le Raycasting
-            setTimeout(() => this.createInsects(), 300);
+            setTimeout(() => this.createInsects(), 200);
         });
 
+        // 5. OUTIL DE PLACEMENT (DEBUG)
+        //
+        this.scene.onPointerObservable.add((pointerInfo) => {
+            if (pointerInfo.type === BABYLON.PointerEventTypes.POINTERDOWN) {
+                if (pointerInfo.pickInfo.hit && pointerInfo.pickInfo.pickedMesh.name !== "ocean") {
+                    // On calcule l'échelle pour te donner la valeur exacte à mettre dans le JSON
+                    const scale = (this.currentIsland.scale || 1) * 15;
+                    const rawPos = pointerInfo.pickInfo.pickedPoint;
+
+                    const jsonX = (rawPos.x / scale).toFixed(2);
+                    const jsonY = (rawPos.y / scale).toFixed(2);
+                    const jsonZ = (rawPos.z / scale).toFixed(2);
+
+                    console.log(`📍 COORDONNÉES POUR JSON (${this.currentIsland.name}):`);
+                    console.log(`position: { x: ${jsonX}, y: ${jsonY}, z: ${jsonZ} },`);
+                }
+            }
+        });
+
+        // 6. RENDU
         this.engine.runRenderLoop(() => {
             if (this.scene) {
                 this.animateScene();
@@ -66,13 +90,11 @@ const IslandScene = {
             updatable: true
         }, this.scene);
 
-        // Appliquer le Flat Shaded pour séparer les sommets
         waterMesh.convertToFlatShadedMesh();
 
         const waterMat = new BABYLON.StandardMaterial("waterMat", this.scene);
         waterMat.diffuseColor = new BABYLON.Color3(0.02, 0.05, 0.15);
         waterMat.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
-        waterMat.specularPower = 32;
         waterMat.alpha = 0.95;
         waterMat.roughness = 0;
 
@@ -91,11 +113,9 @@ const IslandScene = {
                 const scale = (this.currentIsland.scale || 1) * 15;
                 root.scaling = new BABYLON.Vector3(scale, scale, scale);
 
-                // --- SYSTÈME DE POSITIONNEMENT ---
                 const offset = this.currentIsland.modelOffset !== undefined ? this.currentIsland.modelOffset : 0;
                 root.position = new BABYLON.Vector3(0, offset, 0);
 
-                // Adaptation caméra (Inchangé)
                 const boundingInfo = root.getHierarchyBoundingVectors();
                 const size = boundingInfo.max.subtract(boundingInfo.min);
                 const maxDim = Math.max(size.x, size.z);
@@ -109,148 +129,160 @@ const IslandScene = {
                     shadowGenerator.addShadowCaster(m);
                 });
                 return true;
-            });
+            })
+            .catch(err => console.error("Erreur chargement île:", err));
     },
 
     createInsects() {
         if (!this.currentIsland.insects) return;
-        this.insectsMeshes = []; // On vide pour éviter les doublons
+        this.insectsMeshes = [];
 
-        const scale = (this.currentIsland.scale || 1) * 15;
+        const islandScale = (this.currentIsland.scale || 1) * 15;
 
         this.currentIsland.insects.forEach((insectData) => {
-            const posX = insectData.position.x * scale;
-            const posZ = insectData.position.z * scale;
+            const posX = insectData.position.x * islandScale;
+            const posZ = insectData.position.z * islandScale;
 
+            // Raycast pour trouver le sol exact
             const ray = new BABYLON.Ray(new BABYLON.Vector3(posX, 1000, posZ), new BABYLON.Vector3(0, -1, 0), 2000);
+            const hit = this.scene.pickWithRay(ray, (m) => m.name !== "ocean" && m.isVisible && m.isPickable !== false);
 
-            // On cherche n'importe quel mesh sauf l'océan
-            const hit = this.scene.pickWithRay(ray, (m) => {
-                return m.name !== "ocean" && m.isVisible && m.isPickable !== false;
-            });
+            let finalY = hit.hit ? hit.pickedPoint.y + 0.5 : 5; // Un peu plus près du sol
 
-            // Si on rate le sol, on place l'insecte à une hauteur par défaut (y: 5)
-            let finalY = hit.hit ? hit.pickedPoint.y + 2 : 5;
-
-            // Création de la Hitbox (plus grosse pour faciliter le clic)
-            const hitBox = BABYLON.MeshBuilder.CreateSphere("hit_" + insectData.id, {diameter: 6}, this.scene);
+            // 1. HITBOX (Pour cliquer)
+            const hitBox = BABYLON.MeshBuilder.CreateSphere("hit_" + insectData.id, {diameter: 5}, this.scene);
             hitBox.position = new BABYLON.Vector3(posX, finalY, posZ);
             hitBox.visibility = 0;
             hitBox.isPickable = true;
 
-            // Orbe visuelle
-            const orb = BABYLON.MeshBuilder.CreateSphere("orb", {diameter: 1.8}, this.scene);
-            orb.parent = hitBox;
-            const mat = new BABYLON.StandardMaterial("insectMat", this.scene);
-            mat.emissiveColor = new BABYLON.Color3(1, 0.8, 0.2);
-            mat.diffuseColor = new BABYLON.Color3(1, 1, 1);
-            orb.material = mat;
+            // 2. MODÈLE 3D
+            const modelName = insectData.modelFile || "sphere.glb";
+            const scale = insectData.modelScale || 1;
 
-            // Anneau
-            const ring = BABYLON.MeshBuilder.CreateTorus("ring", {diameter: 3, thickness: 0.15}, this.scene);
-            ring.parent = hitBox;
-            ring.rotation.x = Math.PI / 2;
-            ring.material = mat;
+            BABYLON.SceneLoader.ImportMeshAsync("", "./assets/insects/", modelName, this.scene)
+                .then((result) => {
+                    const insectRoot = result.meshes[0];
+                    insectRoot.parent = hitBox;
 
-            // Interaction Clic
+                    insectRoot.scaling = new BABYLON.Vector3(scale, scale, scale);
+                    insectRoot.position = new BABYLON.Vector3(0, -0.5, 0); // Ajustement fin
+
+                    result.meshes.forEach(m => {
+                        m.isPickable = false;
+                        // Suppression de l'emissiveColor pour retirer l'effet "brillant/foggy"
+                    });
+
+                    this.insectsMeshes.push({ visual: insectRoot, hitbox: hitBox, offset: Math.random() * 100 });
+
+                    // J'ai supprimé createSparkles() comme demandé pour retirer le "fog"
+                })
+                .catch(() => {
+                    // Fallback propre
+                    const orb = BABYLON.MeshBuilder.CreateSphere("fallback", {diameter: 2}, this.scene);
+                    orb.parent = hitBox;
+                    this.insectsMeshes.push({ visual: orb, hitbox: hitBox, offset: Math.random() * 100 });
+                });
+
+            // 3. INTERACTION
             hitBox.actionManager = new BABYLON.ActionManager(this.scene);
+
+            hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
+                document.body.style.cursor = "pointer";
+            }));
+            hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
+                document.body.style.cursor = "default";
+            }));
 
             hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
                 BABYLON.ActionManager.OnPickTrigger,
                 () => {
-                    // On désactive le contrôle souris le temps du zoom pour éviter les interférences
                     this.camera.detachControl();
-
                     this.zoomOnInsect(hitBox.position);
 
                     setTimeout(() => {
-                        ArchipelagoApp.selectInsect(insectData);
-                        // On réactive le contrôle une fois arrivé
-                        this.camera.attachControl(document.getElementById("islandCanvas"), true);
-                    }, 1000); // Correspond à la durée de l'animation
+                        if(typeof ArchipelagoApp !== 'undefined') {
+                            ArchipelagoApp.selectInsect(insectData);
+                        }
+                        const canvas = document.getElementById("islandCanvas");
+                        if(canvas) this.camera.attachControl(canvas, true);
+                    }, 500); // Délai réduit pour matcher le zoom rapide
                 }
             ));
-
-            this.insectsMeshes.push({ mesh: hitBox, ring: ring, offset: Math.random() * 10 });
         });
     },
 
     animateScene() {
         this.time += 0.01;
+
         if (this.waterMesh && this.basePositions) {
             const positions = [...this.basePositions];
-
-            // On utilise exactement les mêmes réglages que MapScene
             const waveHeight = 1.2;
             const waveFreq = 0.15;
 
             for (let i = 0; i < positions.length; i += 3) {
                 const x = positions[i];
                 const z = positions[i + 2];
-
-                // Formule identique à MapScene pour le look polygone
                 const y = Math.sin(x * waveFreq + this.time) * Math.cos(z * waveFreq + this.time) * waveHeight;
                 positions[i + 1] = y;
             }
-
             this.waterMesh.updateVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
-            // Crucial pour l'aspect facetté : recalcul des normales sans lissage
             this.waterMesh.createNormals(false);
         }
-        this.insectsMeshes.forEach(item => { item.ring.rotation.y += 0.05; });
+
+        this.insectsMeshes.forEach(item => {
+            if(item.visual) {
+                item.visual.position.y = Math.sin(this.time * 2 + item.offset) * 0.2; // Flottement plus subtil
+                item.visual.rotation.y += 0.005; // Rotation plus lente
+            }
+        });
     },
 
     zoomOnInsect(targetPosition) {
-        // 1. On stoppe immédiatement toute animation en cours sur la caméra pour éviter les conflits
         this.scene.stopAnimation(this.camera);
 
-        const duration = 60; // On rallonge un peu pour plus de douceur (1s)
-        const easing = new BABYLON.CubicEase();
-        easing.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
+        // DUREE REDUITE (25 frames = ~0.4 seconde) pour un effet rapide
+        const duration = 25;
 
-        // 2. Animation du TARGET (On utilise Vector3.Lerp ou l'animation directe)
+        // Easing moins "mou", plus direct
+        const easing = new BABYLON.CubicEase();
+        easing.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEOUT);
+
         BABYLON.Animation.CreateAndStartAnimation(
             "camTarget", this.camera, "target", 60, duration,
             this.camera.target.clone(), targetPosition.clone(),
             BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, easing
         );
 
-        // 3. Animation du RADIUS
-        // On vérifie que la cible n'est pas hors limites
-        const targetRadius = 25; // Un peu moins serré pour éviter de traverser le sol
         BABYLON.Animation.CreateAndStartAnimation(
             "camRadius", this.camera, "radius", 60, duration,
-            this.camera.radius, targetRadius,
+            this.camera.radius, 15,
             BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, easing
         );
 
-        // 4. Animation du BETA
         BABYLON.Animation.CreateAndStartAnimation(
             "camBeta", this.camera, "beta", 60, duration,
-            this.camera.beta, Math.PI / 3, // Angle de vue confortable
+            this.camera.beta, Math.PI / 2.5,
             BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, easing
         );
     },
 
     resetView() {
         if (!this.camera) return;
-
         this.scene.stopAnimation(this.camera);
-        const canvas = document.getElementById("islandCanvas");
-        this.camera.attachControl(canvas, true);
 
-        const duration = 60;
+        const canvas = document.getElementById("islandCanvas");
+        if(canvas) this.camera.attachControl(canvas, true);
+
+        const duration = 30; // Retour un peu plus rapide aussi
         const easing = new BABYLON.CubicEase();
         easing.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
 
-        // 1. Retour du point de mire au centre
         BABYLON.Animation.CreateAndStartAnimation(
             "resetTarget", this.camera, "target", 60, duration,
             this.camera.target.clone(), new BABYLON.Vector3(0, 0, 0),
             BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, easing
         );
 
-        // 2. Retour au zoom de départ (on utilise initialRadius)
         BABYLON.Animation.CreateAndStartAnimation(
             "resetRadius", this.camera, "radius", 60, duration,
             this.camera.radius, this.initialRadius || 100,
@@ -259,28 +291,10 @@ const IslandScene = {
     },
 
     dispose() {
-        console.log("🧹 Nettoyage de la scène d'exploration...");
-
-        // 1. Arrêter la boucle de rendu
-        if (this.engine) {
-            this.engine.stopRenderLoop();
-        }
-
-        // 2. Détruire la scène et libérer la mémoire GPU
-        if (this.scene) {
-            this.scene.dispose();
-            this.scene = null;
-        }
-
-        // 3. Détruire le moteur
-        if (this.engine) {
-            this.engine.dispose();
-            this.engine = null;
-        }
-
-        // 4. Vider les tableaux de données
+        if (this.engine) this.engine.stopRenderLoop();
+        if (this.scene) { this.scene.dispose(); this.scene = null; }
+        if (this.engine) { this.engine.dispose(); this.engine = null; }
         this.insectsMeshes = [];
         this.waterMesh = null;
-        this.basePositions = null;
     }
 };

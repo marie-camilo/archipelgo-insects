@@ -153,49 +153,62 @@ const MapScene = {
         if (!ISLANDS_DATA) return;
 
         ISLANDS_DATA.forEach((islandData, index) => {
-            // 1. PIVOT
+            // 1. LE PIVOT (L'Ancre)
+            // On place le pivot TOUJOURS à Y=0 (niveau de la mer) pour X et Z donnés.
+            // C'est ce qui garantit que la logique de la map reste stable.
             const pivot = new BABYLON.TransformNode("pivot_" + islandData.id, this.scene);
             pivot.position = new BABYLON.Vector3(islandData.position.x, 0, islandData.position.z);
 
-            // 2. HITBOX (Stable)
+            // 2. LA HITBOX (La zone de clic)
+            // Elle est attachée au pivot.
             const hitBox = BABYLON.MeshBuilder.CreateSphere("hit_" + islandData.id, {diameter: 12}, this.scene);
             hitBox.parent = pivot;
-            hitBox.visibility = 0; // Invisible
-            hitBox.position.y = 2;
-            hitBox.isPickable = true;
 
-            // 3. MODÈLE GLB
+            // CONFIGURATION INTELLIGENTE DE LA HITBOX :
+            // Si 'hitboxOffset' existe dans les data, on l'utilise, sinon on la met à 5m de haut par défaut.
+            const yOffset = islandData.hitboxOffset !== undefined ? islandData.hitboxOffset : 5;
+            hitBox.position.y = yOffset;
+
+            // Si 'hitboxScale' existe (pour les très grosses îles), on grossit la zone de clic.
+            if (islandData.hitboxScale) {
+                hitBox.scaling = new BABYLON.Vector3(islandData.hitboxScale, islandData.hitboxScale, islandData.hitboxScale);
+            }
+
+            hitBox.visibility = 0; // Mets à 0.3 si tu veux voir la bulle pour débuguer
+            hitBox.isPickable = true; // C'est ELLE qu'on clique
+
+            // 3. LE MODÈLE VISUEL GLB
             BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", islandData.modelFile, this.scene)
                 .then((result) => {
                     const root = result.meshes[0];
                     root.parent = pivot;
 
-                    // On définit l'échelle de base
+                    // Échelle
                     const rawScale = islandData.scale || 1;
-                    // On crée un Vecteur Fixe qui servira de référence absolue
                     const baseScaleVector = new BABYLON.Vector3(rawScale, rawScale, rawScale);
-
-                    // On applique la taille initiale
                     root.scaling = baseScaleVector.clone();
 
-                    // On rend le modèle non-cliquable (c'est la hitbox qui prend les clics)
+                    // POSITION VERTICALE DU VISUEL :
+                    // C'est ici qu'on applique le -15. Le visuel descend, mais le pivot et la hitbox restent à 0.
+                    if (islandData.position.y) {
+                        root.position.y = islandData.position.y;
+                    }
+
+                    // Désactivation du clic sur le modèle (pour ne pas masquer la hitbox)
                     result.meshes.forEach(m => {
-                        m.isPickable = false;
+                        m.isPickable = false; // Important !
                         m.receiveShadows = true;
                         shadowGenerator.addShadowCaster(m);
-                        if (m.material) {
-                            m.material.fogEnabled = false;
-                        }
+                        if (m.material) m.material.fogEnabled = false;
                     });
 
+                    // Stockage pour les animations
                     this.islands[index].visualMesh = root;
                     this.islands[index].baseScaleVector = baseScaleVector;
                 })
-                .catch((err) => {
-                    console.error("Erreur modèle:", islandData.modelFile, err);
-                });
+                .catch((err) => console.error("Erreur chargement modèle:", islandData.modelFile, err));
 
-            // 4. INTERACTIONS (Sur la Hitbox)
+            // 4. INTERACTION (ActionManager sur la Hitbox)
             hitBox.actionManager = new BABYLON.ActionManager(this.scene);
 
             // --- SURVOL (HOVER) ---
@@ -204,26 +217,16 @@ const MapScene = {
 
                 const item = this.islands[index];
                 if(item && item.visualMesh && item.baseScaleVector) {
-                    // Arrêter toute animation en cours
                     this.scene.stopAnimation(item.visualMesh);
-
-                    // CIBLE : Toujours calculer par rapport à la taille DE BASE (et pas la taille actuelle)
-                    // On veut 1.2 fois la taille originale
-                    const targetScale = item.baseScaleVector.scale(1.2);
+                    // Effet de grossissement sur le visuel
+                    const targetScale = item.baseScaleVector.scale(1.15);
 
                     BABYLON.Animation.CreateAndStartAnimation(
-                        "grow",
-                        item.visualMesh,
-                        "scaling",
-                        60,
-                        20,
-                        item.visualMesh.scaling, // On part de là où on est
-                        targetScale,             // On va vers la cible fixe
-                        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT,
-                        new BABYLON.CubicEase() // CubicEase est plus stable que ElasticEase
+                        "grow", item.visualMesh, "scaling", 60, 15,
+                        item.visualMesh.scaling, targetScale,
+                        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, new BABYLON.CubicEase()
                     );
                 }
-
                 if (typeof UIManager !== 'undefined') UIManager.showIslandTooltip(islandData, hitBox);
             }));
 
@@ -234,30 +237,23 @@ const MapScene = {
                 const item = this.islands[index];
                 if(item && item.visualMesh && item.baseScaleVector) {
                     this.scene.stopAnimation(item.visualMesh);
-
-                    // CIBLE : Retour à la taille de base exacte
+                    // Retour à la taille normale
                     BABYLON.Animation.CreateAndStartAnimation(
-                        "shrink",
-                        item.visualMesh,
-                        "scaling",
-                        60,
-                        20,
-                        item.visualMesh.scaling,
-                        item.baseScaleVector, // Retour à la référence
-                        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT,
-                        new BABYLON.CubicEase()
+                        "shrink", item.visualMesh, "scaling", 60, 15,
+                        item.visualMesh.scaling, item.baseScaleVector,
+                        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, new BABYLON.CubicEase()
                     );
                 }
-
                 if (typeof UIManager !== 'undefined') UIManager.hideIslandTooltip();
             }));
 
-            // CLIC
+            // --- CLIC ---
             hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
+                console.log("Île cliquée :", islandData.name);
                 ArchipelagoApp.selectIsland(islandData.id);
             }));
 
-            // Initialisation de l'objet dans le tableau
+            // Ajout à la liste interne
             this.islands.push({ pivot: pivot, data: islandData, offset: index, visualMesh: null, baseScaleVector: null });
         });
     },
