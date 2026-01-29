@@ -14,6 +14,7 @@
     <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
     <script src="https://cdn.babylonjs.com/materials/babylonjs.materials.min.js"></script>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/main.css" />
 </head>
 <body>
@@ -21,32 +22,49 @@
 <div id="map-view-screen" class="screen active">
     <canvas id="renderCanvas"></canvas>
 
-    <div class="map-ui">
-        <h2 class="map-title">Carte de l'Archipel</h2>
-        <p class="map-subtitle">Sélectionnez une île à explorer</p>
+    <div class="map-top-bar">
+        <div class="map-titles">
+            <h2 class="map-title">Archipel de la Biodiversité</h2>
+            <p class="map-subtitle">Station de Surveillance Entomologique</p>
+        </div>
+        <button class="btn-journal-map" onclick="ArchipelagoApp.openJournalFromMap()">
+            Consulter le Carnet de Bord
+        </button>
+    </div>
 
+    <div class="map-mission-panel">
+        <div class="mission-header">
+            <span class="mission-icon"><i class="fas fa-microscope"></i></span>
+            <h4>Votre Mission</h4>
+        </div>
+        <p>L'équilibre de l'archipel est menacé. Explorez chaque île pour documenter les espèces clés et comprendre leur rôle dans l'écosystème.
+            Chaque espèce découverte sera répertoriée dans votre carnet de bord. Vous pouvez consulter les détails à tout moment.
+        </p>
+        <ul class="mission-steps">
+            <li><i class="fas fa-compass"></i> <strong>Naviguez</strong> vers une île pour l'étudier.</li>
+            <li><i class="fas fa-magnifying-glass"></i> <strong>Identifiez</strong> les insectes cachés.</li>
+            <li><i class="fas fa-book-open"></i> <strong>Complétez</strong> votre base de données.</li>
+        </ul>
+    </div>
+
+    <div class="map-ui-bottom">
         <div class="island-legend">
             <div class="legend-item">
                 <span class="legend-color" style="background: #7cb342"></span>
-                <span>Non explorée</span>
+                <span>Zone saine</span>
             </div>
             <div class="legend-item">
                 <span class="legend-color" style="background: #ffa726"></span>
-                <span>En cours</span>
+                <span>Étude en cours</span>
             </div>
             <div class="legend-item">
                 <span class="legend-color" style="background: #42a5f5"></span>
-                <span>Complétée</span>
+                <span>Inventaire terminé</span>
             </div>
         </div>
     </div>
 
     <div id="island-tooltip" class="island-tooltip">
-        <h3 class="tooltip-title">Nom Île</h3>
-        <p class="tooltip-ecosystem">Écosystème</p>
-        <div class="tooltip-progress-container">
-            <div class="tooltip-progress-bar"></div>
-        </div>
     </div>
 </div>
 
@@ -132,10 +150,6 @@
                 <span>Statut de conservation</span>
             </div>
         </div>
-
-        <button class="btn-primary btn-add-journal" onclick="ArchipelagoApp.addToJournal()">
-            Ajouter au carnet de bord
-        </button>
     </div>
 
     <div class="help-overlay" id="help-overlay">

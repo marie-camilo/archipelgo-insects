@@ -111,16 +111,28 @@ const ArchipelagoApp = {
     }
   },
 
+  lastContext: "map",
+
   openJournal() {
+    this.lastContext = "island";
     this.showScreen("journal");
-    JournalManager.updateJournalGrid();
+    JournalManager.renderJournalGrid(); // Assure-toi que le nom est correct
+    JournalManager.updateJournalStats();
+  },
+
+  openJournalFromMap() {
+    this.lastContext = "map";
+    this.showScreen("journal");
+    JournalManager.renderJournalGrid();
     JournalManager.updateJournalStats();
   },
 
   closeJournal() {
-    // Si on ferme le journal, on revient à l'exploration ou à la carte
-    // Ici on suppose qu'on l'ouvre depuis l'île
-    this.showScreen("island-exploration");
+    if (this.lastContext === "map") {
+      this.showScreen("map-view");
+    } else {
+      this.showScreen("island-exploration");
+    }
   },
 
   returnToMap() {
