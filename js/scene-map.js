@@ -2,9 +2,13 @@ const MapScene = {
     engine: null,
     scene: null,
     camera: null,
-    islands: [], // Contiendra { pivot, mesh, data, offset }
+    islands: [],
+    boatMesh: null,
     time: 0,
     introComplete: false,
+
+    // waterMesh: null,
+    // basePositions: null,
 
     init() {
         console.log("🗺️ MapScene.init() starting...");
@@ -49,6 +53,7 @@ const MapScene = {
 
         // 4. Création
         this.createOcean();
+        this.loadBaseCamp(shadowGenerator);
         this.loadIslands(shadowGenerator);
 
         // 5. Lancer l'animation d'intro
@@ -149,27 +154,56 @@ const MapScene = {
         this.basePositions = waterMesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
     },
 
+    loadBaseCamp(shadowGenerator) {
+        // 1. LE PORT (Fixe)
+        BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", "port.glb", this.scene)
+            .then((result) => {
+                const port = result.meshes[0];
+                port.position = new BABYLON.Vector3(40, 0, 50); // Au centre du monde
+                port.scaling = new BABYLON.Vector3(20, 20, 20); // Ajuste l'échelle si besoin
+
+                // Le port reçoit les ombres
+                result.meshes.forEach(m => {
+                    m.receiveShadows = true;
+                    shadowGenerator.addShadowCaster(m);
+                });
+            })
+            .catch(err => console.error("Erreur Port:", err));
+
+        // 2. LE BATEAU (Animé)
+        BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", "boat.glb", this.scene)
+            .then((result) => {
+                const boat = result.meshes[0];
+
+                boat.position = new BABYLON.Vector3(38, 0.2, 30);
+                boat.rotation.y = -Math.PI / 4; // Oriente le bateau
+                boat.scaling = new BABYLON.Vector3(5, 5, 5);
+
+                // On stocke le bateau pour l'animer plus tard
+                this.boatMesh = boat;
+
+                // Le bateau projette et reçoit des ombres
+                result.meshes.forEach(m => {
+                    m.receiveShadows = true;
+                    shadowGenerator.addShadowCaster(m);
+                });
+            })
+            .catch(err => console.error("Erreur Bateau:", err));
+    },
+
     loadIslands(shadowGenerator) {
         if (!ISLANDS_DATA) return;
 
         ISLANDS_DATA.forEach((islandData, index) => {
-            // 1. LE PIVOT (L'Ancre)
-            // On place le pivot TOUJOURS à Y=0 (niveau de la mer) pour X et Z donnés.
-            // C'est ce qui garantit que la logique de la map reste stable.
             const pivot = new BABYLON.TransformNode("pivot_" + islandData.id, this.scene);
             pivot.position = new BABYLON.Vector3(islandData.position.x, 0, islandData.position.z);
 
             // 2. LA HITBOX (La zone de clic)
-            // Elle est attachée au pivot.
             const hitBox = BABYLON.MeshBuilder.CreateSphere("hit_" + islandData.id, {diameter: 12}, this.scene);
             hitBox.parent = pivot;
-
-            // CONFIGURATION INTELLIGENTE DE LA HITBOX :
-            // Si 'hitboxOffset' existe dans les data, on l'utilise, sinon on la met à 5m de haut par défaut.
             const yOffset = islandData.hitboxOffset !== undefined ? islandData.hitboxOffset : 5;
             hitBox.position.y = yOffset;
 
-            // Si 'hitboxScale' existe (pour les très grosses îles), on grossit la zone de clic.
             if (islandData.hitboxScale) {
                 hitBox.scaling = new BABYLON.Vector3(islandData.hitboxScale, islandData.hitboxScale, islandData.hitboxScale);
             }
@@ -259,49 +293,41 @@ const MapScene = {
     },
 
     animateEnvironment() {
-        this.time += 0.01; // Vitesse du temps
+        this.time += 0.01;
 
-        // --- ANIMATION DE L'OCÉAN LOW POLY ---
+        // --- OCÉAN (Vagues) ---
         if (this.waterMesh && this.basePositions) {
-            // On récupère le tableau actuel des positions (c'est une copie pour travailler dessus)
             const positions = [...this.basePositions];
-
-            // On boucle sur chaque vertex (point) du maillage
-            // Le tableau est une suite de [x, y, z, x, y, z, ...]
             for (let i = 0; i < positions.length; i += 3) {
                 const x = positions[i];
                 const z = positions[i + 2];
-
-                // FORMULE MAGIQUE DES VAGUES
-                // On calcule un nouveau Y basé sur des Sinus et Cosinus mélangés
-                const waveHeight = 1.0; // Hauteur des vagues
-                const waveFreq = 0.15;  // Fréquence (taille des vagues)
-
-                // y = sin(x * freq + temps) + cos(z * freq + temps)
+                const waveHeight = 1.0;
+                const waveFreq = 0.15;
                 const y = Math.sin(x * waveFreq + this.time) * Math.cos(z * waveFreq + this.time) * waveHeight;
-
-                // On applique la hauteur
                 positions[i + 1] = y;
             }
-
-            // On met à jour le maillage avec les nouvelles positions
             this.waterMesh.updateVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
-
-            // IMPORTANT : On recalcule les "normales" pour que la lumière brille sur les nouvelles facettes
             this.waterMesh.createNormals(false);
         }
 
-        // --- ANIMATION DES ÎLES (Flottement) ---
+        // --- ILES (Flottement) ---
         this.islands.forEach((obj) => {
             if (obj.pivot) {
-                // On prend la position Y de base (ex: -500) et on ajoute le petit mouvement de vague
                 const baseY = obj.data.position.y || 0;
                 obj.pivot.position.y = baseY + Math.sin(this.time + obj.offset) * 0.3;
-
-                // Pareil pour la rotation si besoin
                 obj.pivot.rotation.y = Math.sin(this.time * 0.2 + obj.offset) * 0.05;
             }
         });
+
+        // --- AJOUT : ANIMATION DU BATEAU ---
+        if (this.boatMesh) {
+            // Tangage léger (Rocking)
+            this.boatMesh.rotation.x = Math.sin(this.time * 0.8) * 0.05; // Avant/Arrière
+            this.boatMesh.rotation.z = Math.cos(this.time * 0.5) * 0.05; // Gauche/Droite
+
+            // Flottement vertical (doit être synchro avec la "hauteur" moyenne de l'eau à cet endroit)
+            this.boatMesh.position.y = 0.2 + Math.sin(this.time * 1.2) * 0.15;
+        }
     },
 
     dispose() {

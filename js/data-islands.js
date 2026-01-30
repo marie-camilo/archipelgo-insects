@@ -137,7 +137,7 @@ const ISLANDS_DATA = [
         scale: 2,
         ecosystem: "Forêt d'altitude subalpine",
         environmentDesc: "Milieu caractérisé par une raréfaction de l'oxygène et des vents violents. La végétation est naine et les insectes y ont développé des stratégies de résistance thermique.",
-        position: { x: 35, y: -7.5, z: 50 },
+        position: { x: -40, y: -7.5, z: 40 },
         hitboxOffset: 5,
         hitboxScale: 3,
         modelOffset: -5,
