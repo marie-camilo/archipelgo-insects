@@ -75,6 +75,29 @@
     </div>
 </div>
 
+<div id="island-confirmation-modal" class="navigation-modal"> <div class="nav-content" style="max-width: 500px;">
+    <button class="nav-close" onclick="UIManager.closeIslandConfirmation()">×</button>
+
+    <div class="conf-icon" style="font-size: 3rem; color: #1976d2; margin-bottom: 20px;">
+        <i class="fas fa-map-marked-alt"></i>
+    </div>
+
+    <h2 id="conf-island-name">Nom de l'île</h2>
+    <p style="color: #666; margin-bottom: 30px;">
+        Voulez-vous vraiment quitter la carte et lancer une expédition vers cette île ?
+    </p>
+
+    <div style="display: flex; gap: 15px; justify-content: center;">
+        <button class="btn-secondary" onclick="UIManager.closeIslandConfirmation()">
+            Annuler
+        </button>
+        <button class="btn-primary" id="btn-confirm-explore">
+            <i class="fas fa-ship"></i> Oui, mettre le cap !
+        </button>
+    </div>
+</div>
+</div>
+
 <div id="map-view-screen" class="screen active">
     <canvas id="renderCanvas"></canvas>
 

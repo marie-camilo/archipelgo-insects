@@ -5,8 +5,6 @@ const MapScene = {
     islands: [],
     boatMesh: null,
     time: 0,
-
-    // Drapeau pour bloquer les interactions pendant le zoom/navigation
     isNavigating: false,
 
     // Variables océan
@@ -151,30 +149,23 @@ const MapScene = {
 
         hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
             if (this.isNavigating) return;
-            this.zoomToBaseCamp(pivot.absolutePosition.clone());
+            this.zoomToBaseCamp(pivot.absolutePosition.clone(), null);
         }));
     },
 
-    zoomToBaseCamp(targetPos) {
+    zoomToBaseCamp(targetPos, callbackOnArrival) {
         console.log("🎬 Zoom Port en cours...");
-
-        // 1. On cache immédiatement le tooltip pour éviter qu'il reste coincé
         if (typeof UIManager !== 'undefined') UIManager.hideIslandTooltip();
 
-        // 2. Verrouillage
         this.isNavigating = true;
         this.scene.stopAnimation(this.camera);
         this.camera.detachControl();
-
-        // 3. Désactiver les limites pour permettre le zoom proche
         this.camera.lowerRadiusLimit = null;
         this.camera.upperRadiusLimit = null;
 
-        // 4. Animation
         const frameRate = 60;
-        const duration = 100; // Un peu plus rapide (1.6s)
+        const duration = 100;
 
-        // Création des animations vectorielles
         const animRadius = new BABYLON.Animation("zoomRadius", "radius", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
         animRadius.setKeys([{ frame: 0, value: this.camera.radius }, { frame: duration, value: 40 }]);
 
@@ -192,7 +183,15 @@ const MapScene = {
         [animRadius, animBeta, animAlpha, animTarget].forEach(anim => anim.setEasingFunction(ease));
 
         this.scene.beginDirectAnimation(this.camera, [animRadius, animBeta, animAlpha, animTarget], 0, duration, false, 1, () => {
-            UIManager.openNavigation();
+
+            // --- LOGIQUE D'ARRIVÉE ---
+            if (callbackOnArrival) {
+                // Si on a une destination précise (via la modale), on l'exécute
+                callbackOnArrival();
+            } else {
+                // Sinon (clic sur le port), on ouvre le menu général
+                UIManager.openNavigation();
+            }
             document.body.style.cursor = "default";
         });
     },
@@ -204,6 +203,10 @@ const MapScene = {
 
         // On rend la main au joueur
         this.isNavigating = false;
+        this.islands = [];
+
+        const canvas = document.getElementById("renderCanvas");
+        if (!canvas) return;
 
         // On réactive les contrôles
         this.camera.attachControl(document.getElementById("renderCanvas"), true);
@@ -275,11 +278,22 @@ const MapScene = {
 
             hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
                 if (this.isNavigating) return;
-                console.log("Île cliquée :", islandData.name);
-                ArchipelagoApp.selectIsland(islandData.id);
+                UIManager.showIslandConfirmation(islandData);
             }));
+
             this.islands.push({ pivot: pivot, data: islandData, offset: index, visualMesh: null, baseScaleVector: null });
         });
+    },
+
+    resetNavigation() {
+        console.log("🔄 Retour vue carte");
+        this.isNavigating = false;
+        this.camera.attachControl(document.getElementById("renderCanvas"), true);
+        this.camera.lowerRadiusLimit = 25;
+        this.camera.upperRadiusLimit = 150;
+        const animRadius = new BABYLON.Animation("resetRad", "radius", 60, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        animRadius.setKeys([{ frame: 0, value: this.camera.radius }, { frame: 60, value: 75 }]);
+        this.scene.beginDirectAnimation(this.camera, [animRadius], 0, 60, false, 1);
     },
 
     animateEnvironment() {

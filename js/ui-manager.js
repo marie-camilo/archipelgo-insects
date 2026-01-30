@@ -175,6 +175,42 @@ const UIManager = {
         }
     },
 
+    showIslandConfirmation(islandData) {
+        const modal = document.getElementById("island-confirmation-modal");
+        if(!modal) return;
+
+        document.getElementById("conf-island-name").textContent = islandData.name;
+        const confirmBtn = document.getElementById("btn-confirm-explore");
+
+        const newBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+
+        newBtn.onclick = () => {
+            // 1. Fermer la modale visuellement
+            this.closeIslandConfirmation();
+
+            const portPos = new BABYLON.Vector3(40, 0, 50);
+
+            if (MapScene) {
+                MapScene.zoomToBaseCamp(portPos, () => {
+                    // 2. AVANT de partir : on libère le verrou de navigation
+                    // Cela permet au retour sur la map d'être interactif
+                    MapScene.isNavigating = false;
+
+                    // 3. Lancer le voyage
+                    ArchipelagoApp.selectIsland(islandData.id);
+                });
+            }
+        };
+
+        modal.classList.add("visible");
+    },
+
+    closeIslandConfirmation() {
+        const modal = document.getElementById("island-confirmation-modal");
+        if(modal) modal.classList.remove("visible");
+    },
+
     updateIslandInfo(islandData) {
         const title = document.getElementById("island-name");
         if(title) title.textContent = islandData.name;
