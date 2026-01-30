@@ -19,6 +19,17 @@
 </head>
 <body>
 
+<div id="navigation-modal" class="navigation-modal">
+    <div class="nav-content">
+        <button class="nav-close" onclick="UIManager.closeNavigation()">×</button>
+        <h2>Plan de Navigation</h2>
+        <p>Capitaine, quelle est notre prochaine destination ?</p>
+
+        <div class="destinations-grid" id="destinations-grid">
+        </div>
+    </div>
+</div>
+
 <div id="map-view-screen" class="screen active">
     <canvas id="renderCanvas"></canvas>
 

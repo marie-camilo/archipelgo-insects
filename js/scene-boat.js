@@ -85,7 +85,7 @@ const BoatScene = {
         BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", "boat.glb", this.scene)
             .then((result) => {
                 const root = result.meshes[0];
-                root.position.y = 0.2; // Flotte au dessus de l'eau
+                root.position.y = -2;
                 this.boatMesh = root;
                 this.camera.lockedTarget = this.boatMesh;
                 this.playCinematicTravelling();

@@ -155,40 +155,99 @@ const MapScene = {
     },
 
     loadBaseCamp(shadowGenerator) {
-        // 1. LE PORT (Fixe)
+        // 1. CRÉATION DU PIVOT & HITBOX (Pour grouper l'interaction)
+        // Position du port
+        const portPos = new BABYLON.Vector3(40, 0, 50);
+
+        const pivot = new BABYLON.TransformNode("baseCampPivot", this.scene);
+        pivot.position = portPos;
+
+        // Hitbox invisible (Sphère qui englobe bateau + port)
+        const hitBox = BABYLON.MeshBuilder.CreateSphere("baseCampHit", {diameter: 25}, this.scene);
+        hitBox.parent = pivot;
+        hitBox.position.y = 5;
+        hitBox.visibility = 0; // Invisible
+        hitBox.isPickable = true;
+
+        // 2. CHARGEMENT DU PORT
         BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", "port.glb", this.scene)
             .then((result) => {
                 const port = result.meshes[0];
-                port.position = new BABYLON.Vector3(40, 0, 50); // Au centre du monde
-                port.scaling = new BABYLON.Vector3(20, 20, 20); // Ajuste l'échelle si besoin
+                port.parent = pivot; // On attache au pivot
+                port.position = new BABYLON.Vector3(0, 0, 0); // Local 0
+                port.scaling = new BABYLON.Vector3(20, 20, 20);
 
-                // Le port reçoit les ombres
                 result.meshes.forEach(m => {
                     m.receiveShadows = true;
-                    shadowGenerator.addShadowCaster(m);
+                    // --- SUPPRESSION DU FOG ---
+                    if (m.material) m.material.fogEnabled = false;
                 });
-            })
-            .catch(err => console.error("Erreur Port:", err));
+            });
 
-        // 2. LE BATEAU (Animé)
+        // 3. CHARGEMENT DU BATEAU
         BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", "boat.glb", this.scene)
             .then((result) => {
                 const boat = result.meshes[0];
+                // Attention : Le bateau bouge, donc on ne le met pas enfant du pivot statique
+                // si on veut l'animer indépendamment facilement, ou alors on l'anime en local.
+                // Ici, on le garde en global mais on le place visuellement à côté.
 
-                boat.position = new BABYLON.Vector3(38, 0.2, 30);
-                boat.rotation.y = -Math.PI / 4; // Oriente le bateau
+                // Pour l'interaction, le bateau est proche du pivot, donc la Hitbox suffit.
+
+                boat.position = new BABYLON.Vector3(38, 0.2, 30); // Proche du port
+                boat.rotation.y = -Math.PI / 4;
                 boat.scaling = new BABYLON.Vector3(5, 5, 5);
 
-                // On stocke le bateau pour l'animer plus tard
-                this.boatMesh = boat;
+                this.boatMesh = boat; // Stockage pour animation vagues
 
-                // Le bateau projette et reçoit des ombres
                 result.meshes.forEach(m => {
                     m.receiveShadows = true;
                     shadowGenerator.addShadowCaster(m);
+                    // --- SUPPRESSION DU FOG ---
+                    if (m.material) m.material.fogEnabled = false;
                 });
-            })
-            .catch(err => console.error("Erreur Bateau:", err));
+            });
+
+        // 4. GESTION DES INTERACTIONS (Sur la Hitbox)
+        hitBox.actionManager = new BABYLON.ActionManager(this.scene);
+
+        // Hover -> Tooltip
+        hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
+            document.body.style.cursor = "pointer";
+            if (typeof UIManager !== 'undefined') UIManager.showBaseCampTooltip(hitBox);
+        }));
+
+        // Out -> Hide Tooltip
+        hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
+            document.body.style.cursor = "default";
+            if (typeof UIManager !== 'undefined') UIManager.hideIslandTooltip(); // On réutilise le hide générique
+        }));
+
+        // Click -> Zoom & Navigation
+        hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
+            this.zoomToBaseCamp(pivot.position);
+        }));
+    },
+
+    zoomToBaseCamp(targetPos) {
+        // Paramètres de la vue rapprochée
+        const targetRadius = 40; // Très proche
+        const targetBeta = 1.3;  // Vue rasante
+        // Calcul de l'angle Alpha pour regarder le port de face (ajuste selon ton orientation)
+        const targetAlpha = -Math.PI / 1.5;
+
+        // Animation Caméra
+        const animSpeed = 60;
+
+        BABYLON.Animation.CreateAndStartAnimation("zoomRad", this.camera, "radius", 60, animSpeed, this.camera.radius, targetRadius, 0, new BABYLON.CubicEase());
+        BABYLON.Animation.CreateAndStartAnimation("zoomBeta", this.camera, "beta", 60, animSpeed, this.camera.beta, targetBeta, 0, new BABYLON.CubicEase());
+        BABYLON.Animation.CreateAndStartAnimation("zoomAlpha", this.camera, "alpha", 60, animSpeed, this.camera.alpha, targetAlpha, 0, new BABYLON.CubicEase());
+
+        // Déplacer la cible de la caméra (target) vers le port
+        BABYLON.Animation.CreateAndStartAnimation("zoomTarget", this.camera, "target", 60, animSpeed, this.camera.target, targetPos, 0, new BABYLON.CubicEase(), () => {
+            // Callback à la fin de l'animation : Ouvrir la modale
+            UIManager.openNavigation();
+        });
     },
 
     loadIslands(shadowGenerator) {
