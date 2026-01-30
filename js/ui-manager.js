@@ -272,7 +272,17 @@ const UIManager = {
         canvas.style.width = "100%";
         canvas.style.height = "100%";
         canvas.style.outline = "none";
+        canvas.style.cursor = "grab"; // Curseur main ouverte
         container.appendChild(canvas);
+
+        // Ajout de l'indice visuel
+        const hintDiv = document.createElement("div");
+        hintDiv.className = "interaction-hint";
+        hintDiv.innerHTML = `
+            <span class="hint-text">Tournez pour observer</span>
+            <div class="hint-icon"><i class="fas fa-hand-pointer"></i></div>
+        `;
+        container.appendChild(hintDiv);
 
         // C. Moteur (Singleton)
         if (this.previewEngine) {
@@ -282,7 +292,7 @@ const UIManager = {
 
         // D. Scène
         this.previewScene = new BABYLON.Scene(this.previewEngine);
-        this.previewScene.clearColor = new BABYLON.Color4(0, 0, 0, 0); // Fond transparent
+        this.previewScene.clearColor = new BABYLON.Color4(0, 0, 0, 0); // Transparent
 
         // E. Caméra
         this.previewCamera = new BABYLON.ArcRotateCamera("previewCam", 0, Math.PI / 2.5, 5, BABYLON.Vector3.Zero(), this.previewScene);
@@ -291,6 +301,10 @@ const UIManager = {
         this.previewCamera.minZ = 0.1;
         this.previewCamera.lowerRadiusLimit = 2;
         this.previewCamera.upperRadiusLimit = 10;
+
+        // Gestion du curseur "Grabbing" (main fermée)
+        canvas.addEventListener("pointerdown", () => canvas.style.cursor = "grabbing");
+        canvas.addEventListener("pointerup", () => canvas.style.cursor = "grab");
 
         // F. Lumières
         const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), this.previewScene);
@@ -322,19 +336,25 @@ const UIManager = {
             })
             .catch((err) => {
                 console.warn("Erreur preview:", err);
+                // Fallback cube si erreur de chargement
                 const box = BABYLON.MeshBuilder.CreateBox("box", {size: 2}, this.previewScene);
                 const mat = new BABYLON.StandardMaterial("m", this.previewScene);
                 mat.diffuseColor = BABYLON.Color3.Red();
                 box.material = mat;
             });
 
+        // H. Boucle de rendu
         this.previewEngine.runRenderLoop(() => {
             if (this.previewScene) {
-                if (this.currentPreviewMesh) {
-                    this.currentPreviewMesh.rotation.y += 0.01;
-                }
+                // Rotation auto lente si l'utilisateur ne touche pas (optionnel)
+                // if (this.currentPreviewMesh) this.currentPreviewMesh.rotation.y += 0.002;
                 this.previewScene.render();
             }
+        });
+
+        // I. Resize (Important si la fenêtre change de taille)
+        window.addEventListener("resize", () => {
+            if(this.previewEngine) this.previewEngine.resize();
         });
     }
 };
