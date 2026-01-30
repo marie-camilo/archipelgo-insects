@@ -1,7 +1,4 @@
-/* UI MANAGER - Avec Preview 3D */
-
 const UIManager = {
-    // Variables pour la preview 3D
     previewEngine: null,
     previewScene: null,
     previewCamera: null,
@@ -30,22 +27,38 @@ const UIManager = {
         const total = islandData.insects.length;
         const percent = (discovered / total) * 100;
 
-        let ecoIcon = "🌱";
-        if(islandData.id === "aquatic") ecoIcon = "💧";
-        if(islandData.id === "winter") ecoIcon = "❄️";
-        if(islandData.id === "pollinators") ecoIcon = "🌸";
+        let iconClass = "fa-leaf";
+        let iconColor = "#58984a";
+
+        if(islandData.id === "aquatic") {
+            iconClass = "fa-water";
+            iconColor = "#0e6aa1";
+        }
+        else if(islandData.id === "winter") {
+            iconClass = "fa-snowflake";
+            iconColor = "#429dc6";
+        }
+        else if(islandData.id === "pollinators") {
+            iconClass = "fa-spa";
+            iconColor = "#f48fb1";
+        }
 
         tooltip.innerHTML = `
-            <div class="tooltip-title"><span>${ecoIcon}</span> ${islandData.name}</div>
-            <div class="tooltip-ecosystem">${islandData.ecosystem}</div>
-            <div class="tooltip-progress-container">
-                <div class="tooltip-progress-bar" style="width: ${percent}%"></div>
-            </div>
-            <div class="tooltip-footer">
-                <span>Exploration</span>
-                <span>${discovered}/${total}</span>
-            </div>
-        `;
+        <div class="tooltip-title">
+            <span class="eco-icon" style="color: ${iconColor}; background: ${iconColor}20;">
+                <i class="fas ${iconClass}"></i>
+            </span> 
+            ${islandData.name}
+        </div>
+        <div class="tooltip-ecosystem">${islandData.ecosystem}</div>
+        <div class="tooltip-progress-container">
+            <div class="tooltip-progress-bar" style="width: ${percent}%"></div>
+        </div>
+        <div class="tooltip-footer">
+            <span>Exploration</span>
+            <span>${discovered}/${total}</span>
+        </div>
+    `;
 
         tooltip.style.left = screenPos.x + "px";
         tooltip.style.top = screenPos.y + "px";

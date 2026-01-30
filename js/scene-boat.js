@@ -3,10 +3,11 @@ const BoatScene = {
     scene: null,
     camera: null,
     boatMesh: null,
-    oceanMesh: null,
+    waterMesh: null,
+    basePositions: null,
+
     time: 0,
 
-    // On définit les citations ici pour être sûr qu'elles soient trouvées
     quotes: [
         "Les insectes représentent plus de 80% des espèces animales sur Terre.",
         "Une fourmi peut porter jusqu'à 50 fois son propre poids.",
@@ -21,10 +22,11 @@ const BoatScene = {
 
         this.engine = new BABYLON.Engine(canvas, true);
         this.scene = new BABYLON.Scene(this.engine);
-        this.scene.clearColor = new BABYLON.Color4(0.4, 0.7, 0.9, 1);
+        const skyColor = new BABYLON.Color3(0.65, 0.85, 0.95);
+        this.scene.clearColor = new BABYLON.Color4(skyColor.r, skyColor.g, skyColor.b, 1);
         this.scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
-        this.scene.fogDensity = 0.008;
-        this.scene.fogColor = new BABYLON.Color3(0.4, 0.7, 0.9);
+        this.scene.fogDensity = 0.005;
+        this.scene.fogColor = skyColor;
 
         // Caméra
         this.camera = new BABYLON.ArcRotateCamera("boatCam", 0, 0, 0, BABYLON.Vector3.Zero(), this.scene);
@@ -36,8 +38,8 @@ const BoatScene = {
         const dirLight = new BABYLON.DirectionalLight("dirLight", new BABYLON.Vector3(-1, -0.5, 0.5), this.scene);
         dirLight.intensity = 1.5;
 
-        // Océan
-        this.createOcean();
+        // Création de l'Océan Low Poly
+        this.createLowPolyOcean();
 
         // Bateau & Animation Caméra
         this.loadBoatAndAnimate();
@@ -56,28 +58,41 @@ const BoatScene = {
         window.addEventListener("resize", () => { if (this.engine) this.engine.resize(); });
     },
 
-    createOcean() {
-        this.oceanMesh = BABYLON.MeshBuilder.CreateGround("ocean", { width: 1000, height: 1000, subdivisions: 100 }, this.scene);
-        const oceanMat = new BABYLON.StandardMaterial("oceanMat", this.scene);
-        oceanMat.diffuseColor = new BABYLON.Color3(0.1, 0.35, 0.75);
-        oceanMat.specularColor = new BABYLON.Color3(0.6, 0.6, 0.6);
-        oceanMat.alpha = 0.95;
-        this.oceanMesh.material = oceanMat;
+    createLowPolyOcean() {
+        const waterMesh = BABYLON.MeshBuilder.CreateGround("ocean", { width: 1000, height: 1000, subdivisions: 100, updatable: true }, this.scene);
+
+        // Conversion en Low Poly (Flat Shading)
+        waterMesh.convertToFlatShadedMesh();
+
+        // Matériau de l'eau
+        const waterMat = new BABYLON.StandardMaterial("waterMat", this.scene);
+        waterMat.diffuseColor = new BABYLON.Color3(0.02, 0.05, 0.15);
+        waterMat.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+        waterMat.specularPower = 32;
+        waterMat.emissiveColor = new BABYLON.Color3(0, 0, 0.1);
+        waterMat.alpha = 0.95;
+        waterMat.roughness = 0;
+
+        waterMesh.material = waterMat;
+        waterMesh.position.y = -0.5;
+
+        // Stockage pour l'animation
+        this.waterMesh = waterMesh;
+        this.basePositions = waterMesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
     },
 
     loadBoatAndAnimate() {
         BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", "boat.glb", this.scene)
             .then((result) => {
                 const root = result.meshes[0];
-                root.position.y = 0.2;
+                root.position.y = 0.2; // Flotte au dessus de l'eau
                 this.boatMesh = root;
                 this.camera.lockedTarget = this.boatMesh;
-
-                // On lance le travelling une fois le bateau chargé
                 this.playCinematicTravelling();
             })
             .catch((err) => {
                 console.error("Erreur bateau:", err);
+                // Fallback si pas de modèle
                 this.boatMesh = BABYLON.MeshBuilder.CreateBox("fallback", {width: 2}, this.scene);
                 this.camera.lockedTarget = this.boatMesh;
                 this.playCinematicTravelling();
@@ -85,24 +100,17 @@ const BoatScene = {
     },
 
     playCinematicTravelling() {
-        // Durée : 300 frames à 60fps = 5 secondes (Doit correspondre au timeout de app.js)
         const animationFrames = 300;
 
-        // CONFIGURATION DU TRAVELLING (Côté -> Avant)
+        // Configuration du travelling
+        const startAlpha = Math.PI / 2.8;
+        const endAlpha = Math.PI / 1.2;
 
-        // 1. Alpha (Angle horizontal)
-        // Math.PI / 2 = Coté Droit exact
-        // Math.PI / 1.2 = Vers l'avant (environ 3/4 avant)
-        const startAlpha = Math.PI / 2.8; // Départ : Presque de profil
-        const endAlpha = Math.PI / 1.2;   // Fin : Vue vers l'avant (proue)
+        const startBeta = 1.35;
+        const endBeta = 1.45;
 
-        // 2. Beta (Hauteur)
-        const startBeta = 1.35; // Vue rase-motte (proche de l'eau)
-        const endBeta = 1.45;   // Encore plus bas pour l'effet dramatique
-
-        // 3. Radius (Distance)
-        const startRadius = 20; // Assez large
-        const endRadius = 15;   // On se rapproche un peu
+        const startRadius = 20;
+        const endRadius = 15;
 
         const animAlpha = new BABYLON.Animation("camAlpha", "alpha", 60, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
         animAlpha.setKeys([{ frame: 0, value: startAlpha }, { frame: animationFrames, value: endAlpha }]);
@@ -113,7 +121,6 @@ const BoatScene = {
         const animRadius = new BABYLON.Animation("camRadius", "radius", 60, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
         animRadius.setKeys([{ frame: 0, value: startRadius }, { frame: animationFrames, value: endRadius }]);
 
-        // Lissage doux
         const easing = new BABYLON.CubicEase();
         easing.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
         [animAlpha, animBeta, animRadius].forEach(anim => anim.setEasingFunction(easing));
@@ -124,35 +131,44 @@ const BoatScene = {
 
     animateEnvironment() {
         this.time += 0.02;
+
+        // bateau qui tangue
         if (this.boatMesh) {
             this.boatMesh.position.y = 0.2 + Math.sin(this.time) * 0.15;
             this.boatMesh.rotation.x = Math.sin(this.time * 0.5) * 0.05;
             this.boatMesh.rotation.z = Math.cos(this.time * 0.3) * 0.08;
         }
+
+        // ocean
+        if (this.waterMesh && this.basePositions) {
+            const positions = [...this.basePositions];
+
+            for (let i = 0; i < positions.length; i += 3) {
+                const x = positions[i];
+                const z = positions[i + 2];
+
+                // Formule des vagues
+                const waveHeight = 1.5; // beaucoup de vagues
+                const waveFreq = 0.15;
+
+                const y = Math.sin(x * waveFreq + this.time) * Math.cos(z * waveFreq + this.time) * waveHeight;
+                positions[i + 1] = y;
+            }
+
+            this.waterMesh.updateVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
+            this.waterMesh.createNormals(false);
+        }
     },
 
     displayRandomQuote() {
-        let quoteElement = document.getElementById("travel-quote");
-        if (!quoteElement) quoteElement = document.getElementById("loading-quote");
-
+        const quoteElement = document.getElementById("travel-quote");
         if (quoteElement) {
-            // Reset animation
             quoteElement.style.animation = 'none';
-            quoteElement.offsetHeight; /* trigger reflow */
+            quoteElement.offsetHeight;
             quoteElement.style.animation = null;
 
-            // Choix aléatoire
             const randomIndex = Math.floor(Math.random() * this.quotes.length);
-            const text = this.quotes[randomIndex];
-
-            console.log("Affichage citation :", text); // Debug pour vérifier dans la console
-            quoteElement.textContent = `"${text}"`;
-
-            // On force le style visible au cas où
-            quoteElement.style.display = "block";
-            quoteElement.style.opacity = "1";
-        } else {
-            console.warn("Element citation introuvable (travel-quote ou loading-quote)");
+            quoteElement.textContent = this.quotes[randomIndex];
         }
     },
 

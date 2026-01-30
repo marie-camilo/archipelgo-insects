@@ -24,27 +24,29 @@
 
     <div class="map-top-bar">
         <div class="map-titles">
-            <h2 class="map-title">Archipel de la Biodiversité</h2>
-            <p class="map-subtitle">Station de Surveillance Entomologique</p>
+            <h1 class="map-title">Archipel de la Biodiversité</h1>
         </div>
+    </div>
+
+    <div class="map-left-ui-stack">
+
         <button class="btn-journal-map" onclick="ArchipelagoApp.openJournalFromMap()">
             Consulter le Carnet de Bord
         </button>
-    </div>
 
-    <div class="map-mission-panel">
-        <div class="mission-header">
-            <span class="mission-icon"><i class="fas fa-microscope"></i></span>
-            <h4>Votre Mission</h4>
+        <div class="map-mission-panel">
+            <div class="mission-header">
+                <h4>Votre Mission</h4>
+            </div>
+            <p>L'équilibre de l'archipel est menacé. Explorez chaque île pour documenter les espèces clés et comprendre leur rôle dans l'écosystème.
+                Chaque espèce découverte sera répertoriée dans votre carnet de bord.
+            </p>
+            <ul class="mission-steps">
+                <li><i class="fas fa-compass"></i> <strong>Naviguez</strong> vers une île pour l'étudier.</li>
+                <li><i class="fas fa-magnifying-glass"></i> <strong>Identifiez</strong> les insectes cachés.</li>
+                <li><i class="fas fa-book-open"></i> <strong>Complétez</strong> votre base de données.</li>
+            </ul>
         </div>
-        <p>L'équilibre de l'archipel est menacé. Explorez chaque île pour documenter les espèces clés et comprendre leur rôle dans l'écosystème.
-            Chaque espèce découverte sera répertoriée dans votre carnet de bord. Vous pouvez consulter les détails à tout moment.
-        </p>
-        <ul class="mission-steps">
-            <li><i class="fas fa-compass"></i> <strong>Naviguez</strong> vers une île pour l'étudier.</li>
-            <li><i class="fas fa-magnifying-glass"></i> <strong>Identifiez</strong> les insectes cachés.</li>
-            <li><i class="fas fa-book-open"></i> <strong>Complétez</strong> votre base de données.</li>
-        </ul>
     </div>
 
     <div class="map-ui-bottom">
@@ -146,14 +148,13 @@
             </div>
 
             <div class="status-badge" id="insect-status">
-                <span class="status-icon">🛡️</span>
                 <span>Statut de conservation</span>
             </div>
         </div>
     </div>
 
     <div class="help-overlay" id="help-overlay">
-        <p>Explorez l'île et cliquez sur les signaux lumineux</p>
+        <p>Explorez l'île et cliquez sur les insectes pour les découvrir puis les ajouter à votre carnet de bord.</p>
     </div>
 </div>
 

@@ -1,18 +1,11 @@
-/* * GESTION DU CARNET DE BORD (JOURNAL)
- * Inclut la grille des découvertes et la visualisation 3D détaillée
- */
-
 const JournalManager = {
-    // Variables pour le moteur 3D de la modale
     previewEngine: null,
     previewScene: null,
     previewCamera: null,
 
-    /**
-     * Initialisation au lancement de l'application
-     */
+    // Initialisation au lancement de l'application
     init() {
-        console.log("📘 Journal Manager initialized");
+        console.log("Journal Manager initialized");
         this.renderJournalGrid();
         this.updateJournalStats();
 
@@ -22,9 +15,7 @@ const JournalManager = {
         });
     },
 
-    /**
-     * Génère la grille des insectes (Découverts vs Verrouillés)
-     */
+    // Génère la grille des insectes (Découverts vs Verrouillés)
     renderJournalGrid() {
         const grid = document.getElementById("journal-grid");
         if (!grid) return;
@@ -47,7 +38,7 @@ const JournalManager = {
             card.className = `journal-item ${isDiscovered ? '' : 'locked'}`;
 
             if (isDiscovered) {
-                // CARTE DÉVERROUILLÉE
+                // Carte verrouillée
                 card.innerHTML = `
                     <div class="journal-item-icon">${insect.icon}</div>
                     <div class="journal-item-name">${insect.name}</div>
@@ -56,7 +47,7 @@ const JournalManager = {
                 // Au clic : Ouvre la modale 3D
                 card.onclick = () => this.showInsectDetails(insect);
             } else {
-                // CARTE VERROUILLÉE
+                // Carte verrouillée
                 card.innerHTML = `
                     <div class="journal-item-icon" style="filter:grayscale(1); opacity:0.3">❓</div>
                     <div class="journal-item-name">???</div>
@@ -95,9 +86,7 @@ const JournalManager = {
         if(finalIslands) finalIslands.textContent = exploredIslandsCount;
     },
 
-    /**
-     * Ajoute un insecte découvert et sauvegarde
-     */
+    //Ajoute un insecte découvert et sauvegarde
     addInsect(insectId) {
         if (!JOURNAL_STATE.discoveredInsects.includes(insectId)) {
             JOURNAL_STATE.discoveredInsects.push(insectId);
@@ -107,13 +96,11 @@ const JournalManager = {
 
             // Sauvegarde dans le navigateur
             localStorage.setItem('archipelago_save', JSON.stringify(JOURNAL_STATE));
-            console.log(`✨ Insecte découvert sauvegardé : ${insectId}`);
+            console.log(`Insecte découvert sauvegardé : ${insectId}`);
         }
     },
 
-    // ─────────────────────────────────────────────────────────────────
     // GESTION DE LA MODALE & PRÉVISUALISATION 3D
-    // ─────────────────────────────────────────────────────────────────
 
     /**
      * Ouvre la modale et lance le moteur 3D
@@ -122,25 +109,20 @@ const JournalManager = {
         const modal = document.getElementById("journal-modal");
         if(!modal) return;
 
-        // 1. MISE À JOUR DU TEXTE (COLONNE DROITE)
         const nameTitle = document.getElementById("modal-name");
         const taxoTitle = document.getElementById("modal-taxonomy");
 
         if(nameTitle) nameTitle.textContent = insectData.name;
         if(taxoTitle) taxoTitle.textContent = insectData.taxonomy || "";
 
-        // On cible la div qui contient les données dynamiques
-        // (On suppose que le titre et la taxonomie sont au début de .modal-data, on injecte la suite)
         const detailsContainer = modal.querySelector(".modal-data");
 
-        // On prépare la couleur du badge selon le statut
+        // couleur du badge selon le statut
         let statusColor = "#2ecc71"; // Vert
         const statusLower = insectData.status.toLowerCase();
         if(statusLower.includes("danger") || statusLower.includes("menacé") || statusLower.includes("disparition")) statusColor = "#e74c3c"; // Rouge
         if(statusLower.includes("vulnérable") || statusLower.includes("surveillance")) statusColor = "#f39c12"; // Orange
 
-        // On injecte le contenu riche après les titres
-        // Note: On reconstruit le contenu pour être sûr que c'est propre, en gardant les titres existants
         const existingH2 = detailsContainer.querySelector("h2").outerHTML;
         const existingP = detailsContainer.querySelector(".modal-taxonomy").outerHTML;
 
@@ -166,19 +148,16 @@ const JournalManager = {
             </div>
         `;
 
-        // 2. AFFICHER LA MODALE
+        // AFFICHER LA MODALE
         modal.classList.add("active");
 
-        // 3. INITIALISER LA 3D (COLONNE GAUCHE)
-        // Petit délai pour laisser le temps au CSS flexbox de calculer la taille de la div
+        // INITIALISER LA 3D (COLONNE GAUCHE)
         setTimeout(() => {
             this.init3DPreview(insectData);
         }, 50);
     },
 
-    /**
-     * Ferme la modale et détruit le moteur 3D pour libérer la mémoire
-     */
+    // Ferme la modale
     closeModal() {
         const modal = document.getElementById("journal-modal");
         if(modal) modal.classList.remove("active");
@@ -276,9 +255,7 @@ const JournalManager = {
     }
 };
 
-// ─────────────────────────────────────────────────────────────────
 // CHARGEMENT INITIAL DE LA SAUVEGARDE
-// ─────────────────────────────────────────────────────────────────
 (function loadSaveGame() {
     const savedData = localStorage.getItem('archipelago_save');
     if (savedData) {
