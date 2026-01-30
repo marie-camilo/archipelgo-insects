@@ -5,21 +5,23 @@ const MapScene = {
     islands: [],
     boatMesh: null,
     time: 0,
-    introComplete: false,
 
-    // waterMesh: null,
-    // basePositions: null,
+    // Drapeau pour bloquer les interactions pendant le zoom/navigation
+    isNavigating: false,
+
+    // Variables océan
+    waterMesh: null,
+    basePositions: null,
 
     init() {
         console.log("🗺️ MapScene.init() starting...");
         const canvas = document.getElementById("renderCanvas");
         if (!canvas) return;
 
-        // 1. Setup Moteur
         this.engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
         this.scene = new BABYLON.Scene(this.engine);
 
-        // Ambiance
+        // --- AMBIANCE ---
         const skyColor = new BABYLON.Color3(0.65, 0.85, 0.95);
         this.scene.clearColor = new BABYLON.Color4(skyColor.r, skyColor.g, skyColor.b, 1);
         this.scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR;
@@ -27,20 +29,22 @@ const MapScene = {
         this.scene.fogEnd = 300.0;
         this.scene.fogColor = skyColor;
 
-        // 2. Caméra (Position initiale pour l'intro)
-        this.camera = new BABYLON.ArcRotateCamera("camera", -Math.PI/2, Math.PI/3, 150, BABYLON.Vector3.Zero(), this.scene);
-        this.camera.attachControl(canvas, false); // Désactivé pendant l'intro
-        this.camera.lowerRadiusLimit = 20;
-        this.camera.upperRadiusLimit = 100;
+        // --- CAMÉRA (Position Finale Directe - Plus de traveling) ---
+        // On met directement les valeurs de fin : Radius 75, Beta 1.2, Alpha Sud
+        this.camera = new BABYLON.ArcRotateCamera("camera", -Math.PI/2, 1.2, 75, BABYLON.Vector3.Zero(), this.scene);
+        this.camera.attachControl(canvas, true); // Contrôles actifs tout de suite
+
+        // Limites de navigation
+        this.camera.lowerRadiusLimit = 25;
+        this.camera.upperRadiusLimit = 150;
         this.camera.upperBetaLimit = Math.PI / 2 - 0.1;
         this.camera.wheelPrecision = 10;
         this.camera.panningSensibility = 30;
 
-        // 3. Lumières
+        // --- LUMIÈRES ---
         const hemiLight = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(0, 1, 0), this.scene);
         hemiLight.intensity = 0.8;
 
-        // Soleil rasant
         const dirLight = new BABYLON.DirectionalLight("dirLight", new BABYLON.Vector3(-1, -0.5, -1), this.scene);
         dirLight.position = new BABYLON.Vector3(50, 20, 10);
         dirLight.diffuse = new BABYLON.Color3(1, 0.9, 0.7);
@@ -51,15 +55,16 @@ const MapScene = {
         const shadowGenerator = new BABYLON.ShadowGenerator(2048, dirLight);
         shadowGenerator.useBlurExponentialShadowMap = true;
 
-        // 4. Création
+        // --- CRÉATION DU MONDE ---
         this.createOcean();
         this.loadBaseCamp(shadowGenerator);
         this.loadIslands(shadowGenerator);
 
-        // 5. Lancer l'animation d'intro
-        this.playIntroAnimation();
+        // Afficher l'interface de légende tout de suite
+        const mapUI = document.querySelector('.map-ui-bottom');
+        if(mapUI) mapUI.style.opacity = "1";
 
-        // 6. Boucle
+        // --- BOUCLE DE RENDU ---
         this.engine.runRenderLoop(() => {
             if (this.scene) {
                 this.animateEnvironment();
@@ -68,293 +73,217 @@ const MapScene = {
         });
 
         window.addEventListener("resize", () => { if (this.engine) this.engine.resize(); });
-        setTimeout(() => this.engine.resize(), 50);
-    },
-
-    playIntroAnimation() {
-        // CONFIG DU TRAVELLING
-        const startRadius = 130;
-        const startBeta = 1.1;
-        const startAlpha = Math.PI / 2; // Position Nord / Arrière
-
-        // FINAL : Ta vue globale habituelle
-        const endRadius = 75;
-        const endBeta = 1.2;
-        const endAlpha = -Math.PI / 2; // Retour au Sud / Avant
-
-        const animationDuration = 300; // 5 secondes pour un vol fluide
-
-        // Initialisation de la caméra au point de départ
-        this.camera.radius = startRadius;
-        this.camera.beta = startBeta;
-        this.camera.alpha = startAlpha;
-
-        // CRÉATION DES ANIMATIONS
-        const radiusAnim = new BABYLON.Animation("camRad", "radius", 60,
-            BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-
-        const betaAnim = new BABYLON.Animation("camBeta", "beta", 60,
-            BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-
-        const alphaAnim = new BABYLON.Animation("camAlpha", "alpha", 60,
-            BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-
-        // Clés d'animation
-        radiusAnim.setKeys([{ frame: 0, value: startRadius }, { frame: animationDuration, value: endRadius }]);
-        betaAnim.setKeys([{ frame: 0, value: startBeta }, { frame: animationDuration, value: endBeta }]);
-        alphaAnim.setKeys([{ frame: 0, value: startAlpha }, { frame: animationDuration, value: endAlpha }]);
-
-        // LISSAGE
-        const easingFunction = new BABYLON.CubicEase();
-        easingFunction.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
-
-        [radiusAnim, betaAnim, alphaAnim].forEach(anim => anim.setEasingFunction(easingFunction));
-
-        this.camera.animations = [radiusAnim, betaAnim, alphaAnim];
-        this.camera.detachControl();
-
-        this.scene.beginAnimation(this.camera, 0, animationDuration, false, 1, () => {
-            this.introComplete = true;
-            const canvas = document.getElementById("renderCanvas");
-            this.camera.attachControl(canvas, true);
-
-            // Verrouillage des limites pour la navigation libre
-            this.camera.lowerRadiusLimit = 25;
-            this.camera.upperRadiusLimit = 150;
-
-            // Affichage de l'UI
-            const mapUI = document.querySelector('.map-ui');
-            if(mapUI) mapUI.style.opacity = "1";
-            console.log("Survol terminé.");
-        });
     },
 
     createOcean() {
         const waterMesh = BABYLON.MeshBuilder.CreateGround("ocean", {width: 400, height: 400, subdivisions: 40, updatable: true}, this.scene);
         waterMesh.convertToFlatShadedMesh();
-
-        // 3. Matériau de l'eau
         const waterMat = new BABYLON.StandardMaterial("waterMat", this.scene);
         waterMat.diffuseColor = new BABYLON.Color3(0.02, 0.05, 0.15);
         waterMat.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
         waterMat.specularPower = 32;
         waterMat.emissiveColor = new BABYLON.Color3(0, 0, 0);
         waterMat.alpha = 0.95;
-        waterMat.roughness = 0; // Très lisse
-
+        waterMat.roughness = 0;
         waterMesh.material = waterMat;
-        waterMesh.position.y = -1; // Un peu sous les îles
-
-        // On permet au maillage de recevoir les ombres des îles
+        waterMesh.position.y = -1;
         waterMesh.receiveShadows = true;
-
-        // On stocke les données initiales pour les calculs de vagues
         this.waterMesh = waterMesh;
-        // On sauvegarde la position originale des sommets (X, Y, Z)
         this.basePositions = waterMesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
     },
 
     loadBaseCamp(shadowGenerator) {
-        // 1. CRÉATION DU PIVOT & HITBOX (Pour grouper l'interaction)
-        // Position du port
+        // PIVOT
         const portPos = new BABYLON.Vector3(40, 0, 50);
-
         const pivot = new BABYLON.TransformNode("baseCampPivot", this.scene);
         pivot.position = portPos;
 
-        // Hitbox invisible (Sphère qui englobe bateau + port)
+        // HITBOX
         const hitBox = BABYLON.MeshBuilder.CreateSphere("baseCampHit", {diameter: 25}, this.scene);
         hitBox.parent = pivot;
         hitBox.position.y = 5;
-        hitBox.visibility = 0; // Invisible
+        hitBox.visibility = 0;
         hitBox.isPickable = true;
 
-        // 2. CHARGEMENT DU PORT
+        // PORT
         BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", "port.glb", this.scene)
             .then((result) => {
                 const port = result.meshes[0];
-                port.parent = pivot; // On attache au pivot
-                port.position = new BABYLON.Vector3(0, 0, 0); // Local 0
+                port.parent = pivot;
+                port.position = new BABYLON.Vector3(0, 0, 0);
                 port.scaling = new BABYLON.Vector3(20, 20, 20);
-
                 result.meshes.forEach(m => {
                     m.receiveShadows = true;
-                    // --- SUPPRESSION DU FOG ---
                     if (m.material) m.material.fogEnabled = false;
                 });
             });
 
-        // 3. CHARGEMENT DU BATEAU
+        // BATEAU
         BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", "boat.glb", this.scene)
             .then((result) => {
                 const boat = result.meshes[0];
-                // Attention : Le bateau bouge, donc on ne le met pas enfant du pivot statique
-                // si on veut l'animer indépendamment facilement, ou alors on l'anime en local.
-                // Ici, on le garde en global mais on le place visuellement à côté.
-
-                // Pour l'interaction, le bateau est proche du pivot, donc la Hitbox suffit.
-
-                boat.position = new BABYLON.Vector3(38, 0.2, 30); // Proche du port
+                boat.position = new BABYLON.Vector3(38, 0.2, 30);
                 boat.rotation.y = -Math.PI / 4;
                 boat.scaling = new BABYLON.Vector3(5, 5, 5);
-
-                this.boatMesh = boat; // Stockage pour animation vagues
-
+                this.boatMesh = boat;
                 result.meshes.forEach(m => {
                     m.receiveShadows = true;
                     shadowGenerator.addShadowCaster(m);
-                    // --- SUPPRESSION DU FOG ---
                     if (m.material) m.material.fogEnabled = false;
                 });
             });
 
-        // 4. GESTION DES INTERACTIONS (Sur la Hitbox)
+        // INTERACTIONS
         hitBox.actionManager = new BABYLON.ActionManager(this.scene);
 
-        // Hover -> Tooltip
         hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
+            // Si on est déjà en train de zoomer ou de choisir, on n'affiche pas le tooltip
+            if (this.isNavigating) return;
+
             document.body.style.cursor = "pointer";
             if (typeof UIManager !== 'undefined') UIManager.showBaseCampTooltip(hitBox);
         }));
 
-        // Out -> Hide Tooltip
         hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
             document.body.style.cursor = "default";
-            if (typeof UIManager !== 'undefined') UIManager.hideIslandTooltip(); // On réutilise le hide générique
+            if (typeof UIManager !== 'undefined') UIManager.hideIslandTooltip();
         }));
 
-        // Click -> Zoom & Navigation
         hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
-            this.zoomToBaseCamp(pivot.position);
+            if (this.isNavigating) return;
+            this.zoomToBaseCamp(pivot.absolutePosition.clone());
         }));
     },
 
     zoomToBaseCamp(targetPos) {
-        // Paramètres de la vue rapprochée
-        const targetRadius = 40; // Très proche
-        const targetBeta = 1.3;  // Vue rasante
-        // Calcul de l'angle Alpha pour regarder le port de face (ajuste selon ton orientation)
-        const targetAlpha = -Math.PI / 1.5;
+        console.log("🎬 Zoom Port en cours...");
 
-        // Animation Caméra
-        const animSpeed = 60;
+        // 1. On cache immédiatement le tooltip pour éviter qu'il reste coincé
+        if (typeof UIManager !== 'undefined') UIManager.hideIslandTooltip();
 
-        BABYLON.Animation.CreateAndStartAnimation("zoomRad", this.camera, "radius", 60, animSpeed, this.camera.radius, targetRadius, 0, new BABYLON.CubicEase());
-        BABYLON.Animation.CreateAndStartAnimation("zoomBeta", this.camera, "beta", 60, animSpeed, this.camera.beta, targetBeta, 0, new BABYLON.CubicEase());
-        BABYLON.Animation.CreateAndStartAnimation("zoomAlpha", this.camera, "alpha", 60, animSpeed, this.camera.alpha, targetAlpha, 0, new BABYLON.CubicEase());
+        // 2. Verrouillage
+        this.isNavigating = true;
+        this.scene.stopAnimation(this.camera);
+        this.camera.detachControl();
 
-        // Déplacer la cible de la caméra (target) vers le port
-        BABYLON.Animation.CreateAndStartAnimation("zoomTarget", this.camera, "target", 60, animSpeed, this.camera.target, targetPos, 0, new BABYLON.CubicEase(), () => {
-            // Callback à la fin de l'animation : Ouvrir la modale
+        // 3. Désactiver les limites pour permettre le zoom proche
+        this.camera.lowerRadiusLimit = null;
+        this.camera.upperRadiusLimit = null;
+
+        // 4. Animation
+        const frameRate = 60;
+        const duration = 100; // Un peu plus rapide (1.6s)
+
+        // Création des animations vectorielles
+        const animRadius = new BABYLON.Animation("zoomRadius", "radius", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        animRadius.setKeys([{ frame: 0, value: this.camera.radius }, { frame: duration, value: 40 }]);
+
+        const animBeta = new BABYLON.Animation("zoomBeta", "beta", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        animBeta.setKeys([{ frame: 0, value: this.camera.beta }, { frame: duration, value: 1.3 }]);
+
+        const animAlpha = new BABYLON.Animation("zoomAlpha", "alpha", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        animAlpha.setKeys([{ frame: 0, value: this.camera.alpha }, { frame: duration, value: -Math.PI / 1.5 }]);
+
+        const animTarget = new BABYLON.Animation("zoomTarget", "target", frameRate, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        animTarget.setKeys([{ frame: 0, value: this.camera.target.clone() }, { frame: duration, value: targetPos }]);
+
+        const ease = new BABYLON.CubicEase();
+        ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT);
+        [animRadius, animBeta, animAlpha, animTarget].forEach(anim => anim.setEasingFunction(ease));
+
+        this.scene.beginDirectAnimation(this.camera, [animRadius, animBeta, animAlpha, animTarget], 0, duration, false, 1, () => {
             UIManager.openNavigation();
+            document.body.style.cursor = "default";
         });
+    },
+
+    // --- NOUVELLE FONCTION IMPORTANTE ---
+    // Appeler ceci quand on ferme la modale pour rendre la map interactive à nouveau
+    resetNavigation() {
+        console.log("🔄 Retour vue carte");
+
+        // On rend la main au joueur
+        this.isNavigating = false;
+
+        // On réactive les contrôles
+        this.camera.attachControl(document.getElementById("renderCanvas"), true);
+
+        // On remet les limites pour ne pas passer sous le sol
+        this.camera.lowerRadiusLimit = 25;
+        this.camera.upperRadiusLimit = 150;
+
+        // Optionnel : Petit dézoom automatique pour revenir à une vue confortable
+        const animRadius = new BABYLON.Animation("resetRad", "radius", 60, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+        animRadius.setKeys([{ frame: 0, value: this.camera.radius }, { frame: 60, value: 75 }]);
+        this.scene.beginDirectAnimation(this.camera, [animRadius], 0, 60, false, 1);
     },
 
     loadIslands(shadowGenerator) {
         if (!ISLANDS_DATA) return;
-
         ISLANDS_DATA.forEach((islandData, index) => {
             const pivot = new BABYLON.TransformNode("pivot_" + islandData.id, this.scene);
             pivot.position = new BABYLON.Vector3(islandData.position.x, 0, islandData.position.z);
-
-            // 2. LA HITBOX (La zone de clic)
             const hitBox = BABYLON.MeshBuilder.CreateSphere("hit_" + islandData.id, {diameter: 12}, this.scene);
             hitBox.parent = pivot;
             const yOffset = islandData.hitboxOffset !== undefined ? islandData.hitboxOffset : 5;
             hitBox.position.y = yOffset;
+            if (islandData.hitboxScale) hitBox.scaling = new BABYLON.Vector3(islandData.hitboxScale, islandData.hitboxScale, islandData.hitboxScale);
+            hitBox.visibility = 0;
+            hitBox.isPickable = true;
 
-            if (islandData.hitboxScale) {
-                hitBox.scaling = new BABYLON.Vector3(islandData.hitboxScale, islandData.hitboxScale, islandData.hitboxScale);
-            }
-
-            hitBox.visibility = 0; // Mets à 0.3 si tu veux voir la bulle pour débuguer
-            hitBox.isPickable = true; // C'est ELLE qu'on clique
-
-            // 3. LE MODÈLE VISUEL GLB
             BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", islandData.modelFile, this.scene)
                 .then((result) => {
                     const root = result.meshes[0];
                     root.parent = pivot;
-
-                    // Échelle
                     const rawScale = islandData.scale || 1;
                     const baseScaleVector = new BABYLON.Vector3(rawScale, rawScale, rawScale);
                     root.scaling = baseScaleVector.clone();
-
-                    // POSITION VERTICALE DU VISUEL :
-                    // C'est ici qu'on applique le -15. Le visuel descend, mais le pivot et la hitbox restent à 0.
-                    if (islandData.position.y) {
-                        root.position.y = islandData.position.y;
-                    }
-
-                    // Désactivation du clic sur le modèle (pour ne pas masquer la hitbox)
+                    if (islandData.position.y) root.position.y = islandData.position.y;
                     result.meshes.forEach(m => {
-                        m.isPickable = false; // Important !
+                        m.isPickable = false;
                         m.receiveShadows = true;
                         shadowGenerator.addShadowCaster(m);
                         if (m.material) m.material.fogEnabled = false;
                     });
-
-                    // Stockage pour les animations
                     this.islands[index].visualMesh = root;
                     this.islands[index].baseScaleVector = baseScaleVector;
                 })
                 .catch((err) => console.error("Erreur chargement modèle:", islandData.modelFile, err));
 
-            // 4. INTERACTION (ActionManager sur la Hitbox)
             hitBox.actionManager = new BABYLON.ActionManager(this.scene);
-
-            // --- SURVOL (HOVER) ---
             hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
+                if (this.isNavigating) return;
                 document.body.style.cursor = "pointer";
-
                 const item = this.islands[index];
                 if(item && item.visualMesh && item.baseScaleVector) {
                     this.scene.stopAnimation(item.visualMesh);
-                    // Effet de grossissement sur le visuel
                     const targetScale = item.baseScaleVector.scale(1.15);
-
-                    BABYLON.Animation.CreateAndStartAnimation(
-                        "grow", item.visualMesh, "scaling", 60, 15,
-                        item.visualMesh.scaling, targetScale,
-                        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, new BABYLON.CubicEase()
-                    );
+                    BABYLON.Animation.CreateAndStartAnimation("grow", item.visualMesh, "scaling", 60, 15, item.visualMesh.scaling, targetScale, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, new BABYLON.CubicEase());
                 }
                 if (typeof UIManager !== 'undefined') UIManager.showIslandTooltip(islandData, hitBox);
             }));
 
-            // --- SORTIE (OUT) ---
             hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
                 document.body.style.cursor = "default";
-
                 const item = this.islands[index];
                 if(item && item.visualMesh && item.baseScaleVector) {
                     this.scene.stopAnimation(item.visualMesh);
-                    // Retour à la taille normale
-                    BABYLON.Animation.CreateAndStartAnimation(
-                        "shrink", item.visualMesh, "scaling", 60, 15,
-                        item.visualMesh.scaling, item.baseScaleVector,
-                        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, new BABYLON.CubicEase()
-                    );
+                    BABYLON.Animation.CreateAndStartAnimation("shrink", item.visualMesh, "scaling", 60, 15, item.visualMesh.scaling, item.baseScaleVector, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, new BABYLON.CubicEase());
                 }
                 if (typeof UIManager !== 'undefined') UIManager.hideIslandTooltip();
             }));
 
-            // --- CLIC ---
             hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
+                if (this.isNavigating) return;
                 console.log("Île cliquée :", islandData.name);
                 ArchipelagoApp.selectIsland(islandData.id);
             }));
-
-            // Ajout à la liste interne
             this.islands.push({ pivot: pivot, data: islandData, offset: index, visualMesh: null, baseScaleVector: null });
         });
     },
 
     animateEnvironment() {
         this.time += 0.01;
-
-        // --- OCÉAN (Vagues) ---
         if (this.waterMesh && this.basePositions) {
             const positions = [...this.basePositions];
             for (let i = 0; i < positions.length; i += 3) {
@@ -368,8 +297,6 @@ const MapScene = {
             this.waterMesh.updateVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
             this.waterMesh.createNormals(false);
         }
-
-        // --- ILES (Flottement) ---
         this.islands.forEach((obj) => {
             if (obj.pivot) {
                 const baseY = obj.data.position.y || 0;
@@ -377,14 +304,9 @@ const MapScene = {
                 obj.pivot.rotation.y = Math.sin(this.time * 0.2 + obj.offset) * 0.05;
             }
         });
-
-        // --- AJOUT : ANIMATION DU BATEAU ---
         if (this.boatMesh) {
-            // Tangage léger (Rocking)
-            this.boatMesh.rotation.x = Math.sin(this.time * 0.8) * 0.05; // Avant/Arrière
-            this.boatMesh.rotation.z = Math.cos(this.time * 0.5) * 0.05; // Gauche/Droite
-
-            // Flottement vertical (doit être synchro avec la "hauteur" moyenne de l'eau à cet endroit)
+            this.boatMesh.rotation.x = Math.sin(this.time * 0.8) * 0.05;
+            this.boatMesh.rotation.z = Math.cos(this.time * 0.5) * 0.05;
             this.boatMesh.position.y = 0.2 + Math.sin(this.time * 1.2) * 0.15;
         }
     },
@@ -394,5 +316,6 @@ const MapScene = {
         if (this.scene) { this.scene.dispose(); this.scene = null; }
         if (this.engine) { this.engine.dispose(); this.engine = null; }
         this.islands = [];
+        this.boatMesh = null;
     },
 };

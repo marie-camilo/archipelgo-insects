@@ -95,7 +95,7 @@ const UIManager = {
                 Port d'Attache
             </div>
             <div class="tooltip-ecosystem">Zone de départ</div>
-            <div class="tooltip-footer" style="justify-content:center; margin-top:10px; color:#1976d2; font-weight:bold;">
+            <div class="tooltip-footer" style="margin-top:10px; color:#1976d2; font-weight:bold;">
                 Cliquez pour naviguer
             </div>
         `;
@@ -117,12 +117,21 @@ const UIManager = {
 
         grid.innerHTML = ""; // Reset
 
-        // Générer les cartes pour chaque île
+        const introText = document.createElement("p");
+        introText.className = "nav-intro-text";
+        introText.style.color = "#666";
+        introText.style.marginBottom = "20px";
+        introText.style.fontSize = "0.95rem";
+        introText.innerHTML = `
+            <strong>Port d'Attache :</strong> Ce port est votre base d'opérations. 
+            Sélectionnez une île ci-dessous pour lancer une expédition scientifique.
+        `;
+        grid.parentNode.insertBefore(introText, grid);
+
         ISLANDS_DATA.forEach(island => {
             const card = document.createElement("div");
             card.className = "dest-card";
 
-            // Icône Font Awesome
             let iconClass = "fa-leaf";
             if(island.id === 'aquatic') iconClass = "fa-water";
             if(island.id === 'winter') iconClass = "fa-snowflake";
@@ -136,7 +145,7 @@ const UIManager = {
 
             card.onclick = () => {
                 this.closeNavigation();
-                ArchipelagoApp.selectIsland(island.id); // Lance la navigation existante
+                ArchipelagoApp.selectIsland(island.id);
             };
 
             grid.appendChild(card);
@@ -148,6 +157,11 @@ const UIManager = {
     closeNavigation() {
         const modal = document.getElementById("navigation-modal");
         if(modal) modal.classList.remove("visible");
+        const texts = document.querySelectorAll(".nav-intro-text");
+        texts.forEach(t => t.remove());
+        if (typeof MapScene !== 'undefined') {
+            MapScene.resetNavigation();
+        }
     },
 
     updateIslandInfo(islandData) {
