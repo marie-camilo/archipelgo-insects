@@ -1,16 +1,23 @@
-/* MAIN APPLICATION */
-
 const ArchipelagoApp = {
-  currentScreen: "map-view", // On démarre direct sur la carte
+  currentScreen: "map-view",
   currentIsland: null,
   selectedInsect: null,
 
   init() {
     console.log("🏝️ L'Archipel des Insectes - Initialisation");
     JournalManager.init();
-
-    // MODIFICATION ICI : On lance directement la carte !
     this.showMap();
+
+    const hasSeenHelp = localStorage.getItem("archipelago_help_seen");
+
+    if (!hasSeenHelp) {
+      setTimeout(() => {
+        if (typeof UIManager !== 'undefined') {
+          UIManager.toggleGlobalHelp();
+          localStorage.setItem("archipelago_help_seen", "true");
+        }
+      }, 1500);
+    }
   },
 
   showScreen(screenId) {
@@ -20,10 +27,6 @@ const ArchipelagoApp = {
       screen.classList.add("active");
       this.currentScreen = screenId;
     }
-  },
-
-  showIntro() {
-    this.showScreen("intro");
   },
 
   showMap() {
@@ -107,7 +110,7 @@ const ArchipelagoApp = {
   addToJournal() {
     if (this.selectedInsect) {
       JournalManager.addInsect(this.selectedInsect.id);
-      alert("✅ Ajouté au carnet de bord !");
+      alert("Ajouté au carnet de bord !");
     }
   },
 
@@ -116,7 +119,7 @@ const ArchipelagoApp = {
   openJournal() {
     this.lastContext = "island";
     this.showScreen("journal");
-    JournalManager.renderJournalGrid(); // Assure-toi que le nom est correct
+    JournalManager.renderJournalGrid();
     JournalManager.updateJournalStats();
   },
 

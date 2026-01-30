@@ -19,6 +19,51 @@
 </head>
 <body>
 
+<button class="btn-help-floating" onclick="UIManager.toggleGlobalHelp()" aria-label="Aide">
+    <i class="fas fa-question"></i>
+</button>
+
+<div id="global-help-modal" class="global-help-modal">
+    <div class="help-content">
+        <button class="nav-close" onclick="UIManager.toggleGlobalHelp()">×</button>
+
+        <div class="help-header">
+            <h2>Guide de l'Explorateur</h2>
+            <p>Bienvenue dans l'Archipel. Voici comment mener votre mission à bien.</p>
+        </div>
+
+        <div class="help-grid">
+            <div class="help-card">
+                <div class="help-icon"><i class="fas fa-mouse-pointer"></i></div>
+                <h3>Navigation 3D</h3>
+                <p><strong>Maintenez le clic gauche</strong> pour tourner autour de l'archipel. Utilisez la <strong>molette</strong> pour zoomer/dézoomer.</p>
+            </div>
+
+            <div class="help-card">
+                <div class="help-icon"><i class="fas fa-anchor"></i></div>
+                <h3>Le Port d'Attache</h3>
+                <p>C'est votre hub central. Cliquez sur le <strong>Port ou le Bateau</strong> pour choisir une île et lancer une expédition.</p>
+            </div>
+
+            <div class="help-card">
+                <div class="help-icon"><i class="fas fa-chart-pie"></i></div>
+                <h3>Exploration</h3>
+                <p>Survolez les îles pour voir votre progression. Chaque île possède un écosystème unique et des espèces à découvrir.</p>
+            </div>
+
+            <div class="help-card">
+                <div class="help-icon"><i class="fas fa-book-journal-whills"></i></div>
+                <h3>Carnet de Bord</h3>
+                <p>Toutes vos découvertes sont enregistrées. Consultez-le via le bouton en bas à gauche pour revoir vos fiches.</p>
+            </div>
+        </div>
+
+        <button class="btn-primary" style="margin-top: 30px;" onclick="UIManager.toggleGlobalHelp()">
+            J'ai compris, à l'aventure !
+        </button>
+    </div>
+</div>
+
 <div id="navigation-modal" class="navigation-modal">
     <div class="nav-content">
         <button class="nav-close" onclick="UIManager.closeNavigation()">×</button>

@@ -71,6 +71,17 @@ const UIManager = {
         tooltip.classList.add("visible");
     },
 
+    toggleGlobalHelp() {
+        const modal = document.getElementById("global-help-modal");
+        if (!modal) return;
+
+        if (modal.classList.contains("visible")) {
+            modal.classList.remove("visible");
+        } else {
+            modal.classList.add("visible");
+        }
+    },
+
     showBaseCampTooltip(mesh) {
         const tooltip = document.getElementById("island-tooltip");
         if(!tooltip) return;
