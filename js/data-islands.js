@@ -2,6 +2,7 @@ const ISLANDS_DATA = [
     {
         id: "pollinators",
         name: "Vallée des Nectarivores",
+        ambiance: "wind",
         modelFile: "warm-island.glb",
         scale: 0.2,
         boatConfig: { position: { x: 50, z: 210 }, rotationY: Math.PI / 4 }, // Bord de plage
@@ -76,6 +77,7 @@ const ISLANDS_DATA = [
     {
         id: "forest_green",
         name: "Forêt des Coléoptères",
+        ambiance: "pollen",
         modelFile: "forest-island.glb",
         scale: 1.5,
         boatConfig: {
@@ -139,6 +141,7 @@ const ISLANDS_DATA = [
     {
         id: "floating_forest",
         name: "Archipel des Cimes",
+        ambiance: "wind",
         modelFile: "floating-island.glb",
         scale: 2,
         boatConfig: { position: { x: 40, z: -40 }, rotationY: Math.PI }, // Près des piliers
@@ -200,6 +203,7 @@ const ISLANDS_DATA = [
     {
         id: "winter",
         name: "Toundra des Neiges",
+        ambiance: "snow",
         modelFile: "winter-island.glb",
         scale: 1,
         boatConfig: {
@@ -282,9 +286,14 @@ const ISLANDS_DATA = [
     {
         id: "aquatic",
         name: "Lagon des Odonates",
+        ambiance: "rain",
         modelFile: "phare-island.glb",
         scale: 0.5,
-        boatConfig: { position: { x: -40, z: -220n }, rotationY: 0 }, // Côté Phare
+        boatConfig: {
+            position: { x: -40, z: -220 },
+            rotationY: 0,
+            boatScale: 20,
+        },
         ecosystem: "Zone humide lentique",
         environmentDesc: "Milieu aquatique à renouvellement lent. Les zones humides filtrent l'eau et abritent des espèces au cycle de vie double (larve aquatique / adulte aérien).",
         position: { x: -15, y: 0, z: -25 },
@@ -325,6 +334,7 @@ const ISLANDS_DATA = [
     {
         id: "extinct",
         name: "Pic des Hautes-Alpes",
+        ambiance: "rain",
         modelFile: "mountain-island.glb",
         scale: 0.7,
         boatConfig: { position: { x: 100, z: 100 }, rotationY: Math.PI / 2 },
@@ -353,6 +363,7 @@ const ISLANDS_DATA = [
     {
         id: "flower",
         name: "Atoll Florissant",
+        ambiance: "pollen",
         modelFile: "flower-island.glb",
         scale: 4.5,
         boatConfig: { position: { x: -120, z: 230 }, rotationY: -Math.PI / 4 },
