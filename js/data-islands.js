@@ -147,7 +147,7 @@ const ISLANDS_DATA = [
         boatConfig: { position: { x: 40, z: -40 }, rotationY: Math.PI }, // Près des piliers
         ecosystem: "Forêt d'altitude subalpine",
         environmentDesc: "Milieu caractérisé par une raréfaction de l'oxygène et des vents violents. La végétation est naine et les insectes y ont développé des stratégies de résistance thermique.",
-        position: { x: -40, y: -15g, z: 40 },
+        position: { x: -40, y: -15, z: 40 },
         hitboxOffset: 5,
         hitboxScale: 3,
         modelOffset: -5,
