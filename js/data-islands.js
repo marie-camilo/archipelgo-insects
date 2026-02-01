@@ -4,6 +4,7 @@ const ISLANDS_DATA = [
         name: "Vallée des Nectarivores",
         modelFile: "warm-island.glb",
         scale: 0.2,
+        boatConfig: { position: { x: 50, z: 210 }, rotationY: Math.PI / 4 }, // Bord de plage
         ecosystem: "Prairie tempérée méliphage",
         environmentDesc: "Une zone ouverte caractérisée par une diversité florale élevée. Ce milieu est essentiel pour le cycle de vie des angiospermes et subit de fortes pressions dues à l'agriculture intensive.",
         position: { x: -20, y: 0, z: 5 },
@@ -77,6 +78,11 @@ const ISLANDS_DATA = [
         name: "Forêt des Coléoptères",
         modelFile: "forest-island.glb",
         scale: 1.5,
+        boatConfig: {
+            position: { x: -30, z: 150 },
+            rotationY: -Math.PI / -3,
+            boatScale: 20
+        },
         ecosystem: "Forêt primaire à canopée dense",
         environmentDesc: "Un écosystème complexe dominé par les feuillus séculaires. L'humidité y est constante, favorisant la dégradation du bois mort, pilier de la biodiversité entomologique.",
         position: { x: 20, y: -2.2, z: -15 },
@@ -135,6 +141,7 @@ const ISLANDS_DATA = [
         name: "Archipel des Cimes",
         modelFile: "floating-island.glb",
         scale: 2,
+        boatConfig: { position: { x: 40, z: -40 }, rotationY: Math.PI }, // Près des piliers
         ecosystem: "Forêt d'altitude subalpine",
         environmentDesc: "Milieu caractérisé par une raréfaction de l'oxygène et des vents violents. La végétation est naine et les insectes y ont développé des stratégies de résistance thermique.",
         position: { x: -40, y: -7.5, z: 40 },
@@ -195,6 +202,11 @@ const ISLANDS_DATA = [
         name: "Toundra des Neiges",
         modelFile: "winter-island.glb",
         scale: 1,
+        boatConfig: {
+            position: { x: 60, z: 130 },
+            rotationY: Math.PI / 2,
+            boatScale: 25
+        },
         ecosystem: "Écotone boréal arctique",
         environmentDesc: "Un désert froid où le sol reste gelé en profondeur (permafrost). La faune entomologique y est restreinte à quelques espèces possédant des molécules antigel.",
         position: { x: 25, y: -1.5, z: 2 },
@@ -225,6 +237,11 @@ const ISLANDS_DATA = [
         name: "Sanctuaire des Recycleurs",
         modelFile: "small-island.glb",
         scale: 0.01,
+        boatConfig: {
+            position: { x: 80, z: 130 },
+            rotationY: Math.PI / -2,
+            boatScale: 25
+        },
         ecosystem: "Humus et litière forestière",
         environmentDesc: "Le laboratoire de recyclage de la nature. Ici, les détritivores transforment la matière organique morte en nutriments minéraux assimilables par les plantes.",
         position: { x: 5, y: 0, z: -30 },
@@ -267,6 +284,7 @@ const ISLANDS_DATA = [
         name: "Lagon des Odonates",
         modelFile: "phare-island.glb",
         scale: 0.5,
+        boatConfig: { position: { x: -40, z: -220n }, rotationY: 0 }, // Côté Phare
         ecosystem: "Zone humide lentique",
         environmentDesc: "Milieu aquatique à renouvellement lent. Les zones humides filtrent l'eau et abritent des espèces au cycle de vie double (larve aquatique / adulte aérien).",
         position: { x: -15, y: 0, z: -25 },
@@ -309,6 +327,7 @@ const ISLANDS_DATA = [
         name: "Pic des Hautes-Alpes",
         modelFile: "mountain-island.glb",
         scale: 0.7,
+        boatConfig: { position: { x: 100, z: 100 }, rotationY: Math.PI / 2 },
         ecosystem: "Pelouses alpines rocailleuses",
         environmentDesc: "Prairies d'altitude au-dessus de la limite des arbres. Les cycles de reproduction y sont très courts à cause de la brièveté de la saison estivale.",
         position: { x: 10, y: 0, z: 5 },
@@ -336,6 +355,7 @@ const ISLANDS_DATA = [
         name: "Atoll Florissant",
         modelFile: "flower-island.glb",
         scale: 4.5,
+        boatConfig: { position: { x: -120, z: 230 }, rotationY: -Math.PI / 4 },
         ecosystem: "Jardin botanique insulaire",
         environmentDesc: "Micro-climat favorisant une floraison continue. Ce milieu sert de refuge aux insectes généralistes dans un paysage souvent fragmenté.",
         position: { x: 0, y: 0, z: 25 },

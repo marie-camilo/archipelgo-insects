@@ -6,6 +6,7 @@ const IslandScene = {
     camera: null,
     currentIsland: null,
     insectsMeshes: [],
+    arrivalBoat: null,
     time: 0,
     initialRadius: 100,
 
@@ -44,12 +45,10 @@ const IslandScene = {
         const shadowGenerator = new BABYLON.ShadowGenerator(2048, dirLight);
         shadowGenerator.useBlurExponentialShadowMap = true;
 
-        // J'ai retiré le GlowLayer global qui pouvait flouter l'insecte
-        // const glow = new BABYLON.GlowLayer("glow", this.scene);
-
         // 4. CHARGEMENT
         this.createOcean();
         this.loadIslandModel(shadowGenerator).then(() => {
+            this.loadArrivalBoat(shadowGenerator);
             setTimeout(() => this.createInsects(), 200);
         });
 
@@ -104,6 +103,38 @@ const IslandScene = {
 
         this.waterMesh = waterMesh;
         this.basePositions = waterMesh.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+    },
+
+    loadArrivalBoat(shadowGenerator) {
+        BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", "boat.glb", this.scene)
+            .then((result) => {
+                // On récupère le nœud racine (__root__)
+                const boatRoot = result.meshes[0];
+                this.arrivalBoat = boatRoot;
+
+                const config = this.currentIsland.boatConfig || { position: { x: 50, z: 50 }, rotationY: 0 };
+                const waterY = this.currentIsland.waterLevel !== undefined ? this.currentIsland.waterLevel : 0;
+
+                // 1. Position
+                boatRoot.position = new BABYLON.Vector3(config.position.x, waterY + 0.5, config.position.z);
+
+                // 2. Rotation - LA CORRECTION :
+                // On réinitialise d'abord pour éviter les conflits d'axes
+                boatRoot.rotationQuaternion = null;
+                // On applique la rotation sur l'axe Y
+                boatRoot.rotation.y = config.rotationY;
+
+                // 3. Échelle
+                const bScale = config.boatScale !== undefined ? config.boatScale : 15;
+                boatRoot.scaling = new BABYLON.Vector3(bScale, bScale, bScale);
+
+                result.meshes.forEach(m => {
+                    m.receiveShadows = true;
+                    shadowGenerator.addShadowCaster(m);
+                    if (m.material) m.material.fogEnabled = false;
+                });
+            })
+            .catch(err => console.error("Erreur chargement bateau:", err));
     },
 
     loadIslandModel(shadowGenerator) {
@@ -209,6 +240,7 @@ const IslandScene = {
     animateScene() {
         this.time += 0.01;
 
+        // --- OCÉAN ---
         if (this.waterMesh && this.basePositions) {
             const positions = [...this.basePositions];
             const waveHeight = 1.2;
@@ -224,10 +256,19 @@ const IslandScene = {
             this.waterMesh.createNormals(false);
         }
 
+        // --- ANIMATION DU BATEAU D'ARRIVÉE ---
+        if (this.arrivalBoat) {
+            // Flottement synchronisé avec l'eau
+            this.arrivalBoat.position.y = (this.currentIsland.waterLevel || 0) + Math.sin(this.time * 1.5) * 0.4;
+            this.arrivalBoat.rotation.z = Math.sin(this.time) * 0.05; // Tangage
+            this.arrivalBoat.rotation.x = Math.cos(this.time * 0.7) * 0.03;
+        }
+
+        // --- INSECTES ---
         this.insectsMeshes.forEach(item => {
             if(item.visual) {
-                item.visual.position.y = Math.sin(this.time * 2 + item.offset) * 0.2; // Flottement plus subtil
-                item.visual.rotation.y += 0.005; // Rotation plus lente
+                item.visual.position.y = Math.sin(this.time * 2 + item.offset) * 0.2;
+                item.visual.rotation.y += 0.005;
             }
         });
     },
