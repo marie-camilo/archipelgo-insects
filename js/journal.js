@@ -59,14 +59,10 @@ const JournalManager = {
         });
     },
 
-    /**
-     * Met à jour les compteurs (Ex: 5/20 insectes)
-     */
     updateJournalStats() {
         const allInsectsCount = ISLANDS_DATA.reduce((acc, island) => acc + island.insects.length, 0);
         const discoveredCount = JOURNAL_STATE.discoveredInsects.length;
         const exploredIslandsCount = JOURNAL_STATE.exploredIslands.length;
-        const totalIslands = ISLANDS_DATA.length;
 
         // Mise à jour UI Journal
         const elements = {
@@ -77,9 +73,8 @@ const JournalManager = {
 
         if(elements.total) elements.total.textContent = allInsectsCount;
         if(elements.disc) elements.disc.textContent = discoveredCount;
-        if(elements.islExp) elements.islExp.textContent = `${exploredIslandsCount} / ${totalIslands}`;
+        if(elements.islExp) elements.islExp.textContent = exploredIslandsCount;
 
-        // Mise à jour UI Écran de fin
         const finalInsects = document.getElementById("final-insects");
         const finalIslands = document.getElementById("final-islands");
         if(finalInsects) finalInsects.textContent = discoveredCount;
