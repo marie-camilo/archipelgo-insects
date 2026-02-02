@@ -528,7 +528,7 @@ const ISLANDS_DATA = [
                 modelFile: "colibri2.glb",
                 modelScale: 12,
                 taxonomy: "Ordre : Apodiformes | Famille : Trochilidae",
-                position: { x: 31.73, y: 29.16, z: -22.02 },
+                position: { x: -1.35, y: 0, z: -0.24 },
                 altitude: 2,
                 icon: "🐦",
                 role: "Pollinisateur spécialisé",
