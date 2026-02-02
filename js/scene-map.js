@@ -136,18 +136,26 @@ const MapScene = {
     loadBaseCamp(shadowGenerator) {
         const pivot = new BABYLON.TransformNode("baseCampPivot", this.scene);
         pivot.position = new BABYLON.Vector3(40, 0, 50);
-        const hitBox = BABYLON.MeshBuilder.CreateSphere("baseCampHit", {diameter: 25}, this.scene);
-        hitBox.parent = pivot; hitBox.position.y = 5; hitBox.visibility = 0; hitBox.isPickable = true;
+
+        // agrandit la zone de clic du port
+        const hitBoxPort = BABYLON.MeshBuilder.CreateSphere("baseCampHit", {diameter: 35}, this.scene);
+        hitBoxPort.parent = pivot;
+        hitBoxPort.position.y = 5;
+        hitBoxPort.visibility = 0;
+        hitBoxPort.isPickable = true;
 
         BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", "port.glb", this.scene).then((r) => {
             r.meshes[0].parent = pivot;
             r.meshes[0].scaling = new BABYLON.Vector3(20, 20, 20);
-
-            // CORRECTION FOG : On désactive le brouillard sur le port pour qu'il soit bien visible
-            r.meshes.forEach(m => {
-                if(m.material) m.material.fogEnabled = false;
-            });
+            r.meshes.forEach(m => { if(m.material) m.material.fogEnabled = false; });
         });
+
+        // boîte de clic spécifique pour le bateau
+        const hitBoxBoat = BABYLON.MeshBuilder.CreateBox("boatHit", {width: 15, height: 10, depth: 25}, this.scene);
+        hitBoxBoat.position = new BABYLON.Vector3(38, 2, 30);
+        hitBoxBoat.rotation.y = -Math.PI / 4;
+        hitBoxBoat.visibility = 0;
+        hitBoxBoat.isPickable = true;
 
         BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", "boat.glb", this.scene).then((r) => {
             const boat = r.meshes[0];
@@ -156,23 +164,36 @@ const MapScene = {
             boat.scaling = new BABYLON.Vector3(5, 5, 5);
             this.boatMesh = boat;
             shadowGenerator.addShadowCaster(boat);
-
-            // CORRECTION FOG : On désactive le brouillard sur le bateau
-            r.meshes.forEach(m => {
-                if(m.material) m.material.fogEnabled = false;
-            });
+            r.meshes.forEach(m => { if(m.material) m.material.fogEnabled = false; });
         });
 
-        hitBox.actionManager = new BABYLON.ActionManager(this.scene);
-        hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
-            if (this.isNavigating) return; document.body.style.cursor = "pointer"; if (typeof UIManager !== 'undefined') UIManager.showBaseCampTooltip(hitBox);
-        }));
-        hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
-            document.body.style.cursor = "default"; if (typeof UIManager !== 'undefined') UIManager.hideIslandTooltip();
-        }));
-        hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
-            if (this.isNavigating) return; this.zoomToBaseCamp(pivot.absolutePosition.clone(), null);
-        }));
+        const setupInteraction = (mesh) => {
+            mesh.actionManager = new BABYLON.ActionManager(this.scene);
+
+            // Curseur Main au survol
+            mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
+                if (this.isNavigating) return;
+                document.body.style.cursor = "pointer";
+                if (typeof UIManager !== 'undefined') UIManager.showBaseCampTooltip(mesh);
+            }));
+
+            // Curseur normal en sortant
+            mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
+                document.body.style.cursor = "default";
+                if (typeof UIManager !== 'undefined') UIManager.hideIslandTooltip();
+            }));
+
+            // Clic -> Zoom
+            mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
+                if (this.isNavigating) return;
+                // On zoome vers le centre du port (pivot) même si on clique sur le bateau
+                this.zoomToBaseCamp(pivot.absolutePosition.clone(), null);
+            }));
+        };
+
+        // On applique la logique aux deux hitboxes
+        setupInteraction(hitBoxPort);
+        setupInteraction(hitBoxBoat);
     },
 
     loadDecor(shadowGenerator) {
@@ -379,7 +400,7 @@ const MapScene = {
     },
 
     resetNavigation() {
-        console.log("🔄 Retour vue carte");
+        console.log("Retour vue carte");
         this.isNavigating = false; this.islands = [];
         this.camera.attachControl(document.getElementById("renderCanvas"), true);
         this.camera.lowerRadiusLimit = 25; this.camera.upperRadiusLimit = 150;
