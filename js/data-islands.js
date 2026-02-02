@@ -80,9 +80,9 @@ const ISLANDS_DATA = [
         interactiveElements: [
             {
                 id: "palm_tree",
-                position: { x: -49.33, y: 113.04, z: -49.50 },
+                position: { x: 55.55, y: 0, z: 8.74 },
                 radius: 3,
-                // uiOffset: -120, // Très haut pour le palmier
+                uiOffset: 0,
                 title: "Parasol naturel",
                 icon: "🌴",
                 text: "Enfin un peu d'ombre dans cette prairie écrasée de soleil ! Attention aux chutes de noix de coco. Ces arbres offrent peu de nectar, mais servent de repère visuel lointain pour les insectes volants."
@@ -396,7 +396,7 @@ const ISLANDS_DATA = [
                 modelFile: "grasshopper.glb",
                 modelScale: 1.5,
                 taxonomy: "Ordre : Orthoptera | Famille : Acrididae",
-                position: { x: 2.55, y: 4.18, z: 9.65 },
+                position: { x: 20.10, y: 0, z: -7.15 },
                 icon: "🦗",
                 role: "Herbivore des zones humides",
                 habitat: "Prairies inondables et roselières",

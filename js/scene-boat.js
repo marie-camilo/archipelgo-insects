@@ -132,31 +132,39 @@ const BoatScene = {
     animateEnvironment() {
         this.time += 0.02;
 
-        // bateau qui tangue
-        if (this.boatMesh) {
-            this.boatMesh.position.y = 0.2 + Math.sin(this.time) * 0.15;
-            this.boatMesh.rotation.x = Math.sin(this.time * 0.5) * 0.05;
-            this.boatMesh.rotation.z = Math.cos(this.time * 0.3) * 0.08;
-        }
+        const waveHeight = 1.5;
+        const waveFreq = 0.15;
 
-        // ocean
+        // 1. ANIMATION DE L'OCÉAN
         if (this.waterMesh && this.basePositions) {
             const positions = [...this.basePositions];
-
             for (let i = 0; i < positions.length; i += 3) {
                 const x = positions[i];
                 const z = positions[i + 2];
-
-                // Formule des vagues
-                const waveHeight = 1.5; // beaucoup de vagues
-                const waveFreq = 0.15;
-
+                // On applique la formule de l'onde
                 const y = Math.sin(x * waveFreq + this.time) * Math.cos(z * waveFreq + this.time) * waveHeight;
                 positions[i + 1] = y;
             }
-
             this.waterMesh.updateVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
             this.waterMesh.createNormals(false);
+        }
+
+        // Animation bateau en fonction des mesh
+        if (this.boatMesh) {
+            const bx = this.boatMesh.position.x;
+            const bz = this.boatMesh.position.z;
+            const currentWaveY = Math.sin(bx * waveFreq + this.time) * Math.cos(bz * waveFreq + this.time) * waveHeight;
+
+            this.boatMesh.position.y = currentWaveY + 0.3;
+
+            const lookAhead = 1.0;
+            const waveNextX = Math.sin((bx + lookAhead) * waveFreq + this.time) * Math.cos(bz * waveFreq + this.time) * waveHeight;
+            const waveNextZ = Math.sin(bx * waveFreq + this.time) * Math.cos((bz + lookAhead) * waveFreq + this.time) * waveHeight;
+            const pitch = (waveNextX - currentWaveY) * 0.5;
+            const roll = (waveNextZ - currentWaveY) * 0.5;
+            this.boatMesh.rotation.z = BABYLON.Scalar.Lerp(this.boatMesh.rotation.z, -pitch, 0.1);
+            this.boatMesh.rotation.x = BABYLON.Scalar.Lerp(this.boatMesh.rotation.x, roll, 0.1);
+            this.boatMesh.rotation.y += Math.sin(this.time * 0.5) * 0.002;
         }
     },
 
