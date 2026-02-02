@@ -51,7 +51,9 @@ const IslandScene = {
         // 2. CAMÉRA
         this.camera = new BABYLON.ArcRotateCamera("islandCam", -Math.PI/2, Math.PI/3, 100, BABYLON.Vector3.Zero(), this.scene);
         this.camera.attachControl(canvas, true);
-        this.camera.upperBetaLimit = Math.PI / 2 - 0.1;
+        this.camera.panningSensibility = 25;
+        this.camera.upperBetaLimit = Math.PI / 2.2;
+        this.camera.lowerRadiusLimit = 10;
         this.camera.wheelPrecision = 2;
 
         // 3. LUMIÈRES
@@ -410,15 +412,23 @@ const IslandScene = {
                 const root = result.meshes[0];
                 const scale = (this.currentIsland.scale || 1) * 15;
                 root.scaling = new BABYLON.Vector3(scale, scale, scale);
+
                 const offset = this.currentIsland.modelOffset !== undefined ? this.currentIsland.modelOffset : 0;
                 root.position = new BABYLON.Vector3(0, offset, 0);
 
-                // Calcul de la caméra auto
-                const boundingInfo = root.getHierarchyBoundingVectors();
-                const size = boundingInfo.max.subtract(boundingInfo.min);
-                const maxDim = Math.max(size.x, size.z);
+                // --- RECENTRAGE AUTOMATIQUE ---
+                // On récupère la boîte englobante réelle de l'île
+                const hierarchy = root.getHierarchyBoundingVectors();
+                const center = hierarchy.max.add(hierarchy.min).scale(0.5);
+
+                // On force la caméra à regarder le CENTRE du modèle, pas le 0,0,0 de la scène
+                this.camera.setTarget(center);
+                this.camera.target = center; // On fixe le point de rotation ici
+
+                // On ajuste le rayon de la caméra en fonction de la taille réelle
+                const size = hierarchy.max.subtract(hierarchy.min);
+                const maxDim = Math.max(size.x, size.y, size.z);
                 this.camera.radius = maxDim * 1.5;
-                this.camera.upperRadiusLimit = maxDim * 4;
                 this.initialRadius = maxDim * 1.5;
 
                 result.meshes.forEach(m => {
@@ -427,8 +437,7 @@ const IslandScene = {
                     shadowGenerator.addShadowCaster(m);
                 });
                 return true;
-            })
-            .catch(err => console.error("Erreur chargement île:", err));
+            });
     },
 
     createInsects() {

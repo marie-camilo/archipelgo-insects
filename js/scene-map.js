@@ -64,6 +64,7 @@ const MapScene = {
         // --- CAMÉRA ---
         this.camera = new BABYLON.ArcRotateCamera("camera", -Math.PI/2, 1.2, 90, BABYLON.Vector3.Zero(), this.scene);
         this.camera.attachControl(canvas, true);
+        this.camera.panningSensibility = 150;
         this.camera.lowerRadiusLimit = 25;
         this.camera.upperRadiusLimit = 150;
         this.camera.upperBetaLimit = Math.PI / 2 - 0.1;
@@ -108,7 +109,7 @@ const MapScene = {
             if (pointerInfo.type === BABYLON.PointerEventTypes.POINTERDOWN) {
                 if (pointerInfo.pickInfo.hit && pointerInfo.pickInfo.pickedMesh.name === "ocean") {
                     const p = pointerInfo.pickInfo.pickedPoint;
-                    console.log(`📍 Position: { x: ${p.x.toFixed(2)}, z: ${p.z.toFixed(2)} },`);
+                    console.log(`Position: { x: ${p.x.toFixed(2)}, z: ${p.z.toFixed(2)} },`);
                 }
             }
         });
