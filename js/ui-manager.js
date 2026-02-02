@@ -213,6 +213,29 @@ const UIManager = {
         if(modal) modal.classList.remove("visible");
     },
 
+    showReturnMapConfirmation() {
+        const modal = document.getElementById("return-map-confirmation-modal");
+        if(!modal) return;
+
+        const confirmBtn = document.getElementById("btn-confirm-return-map");
+
+        // On clone pour éviter de cumuler les event listeners
+        const newBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+
+        newBtn.onclick = () => {
+            this.closeReturnMapConfirmation();
+            ArchipelagoApp.returnToMap(); // Appelle la fonction de retour globale
+        };
+
+        modal.classList.add("visible");
+    },
+
+    closeReturnMapConfirmation() {
+        const modal = document.getElementById("return-map-confirmation-modal");
+        if(modal) modal.classList.remove("visible");
+    },
+
     updateIslandInfo(islandData) {
         const title = document.getElementById("island-name");
         if(title) title.textContent = islandData.name;

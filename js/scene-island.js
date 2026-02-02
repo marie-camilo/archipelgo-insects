@@ -1,5 +1,3 @@
-/* SCENE ISLAND - Exploration détaillée & Outil de placement */
-
 const IslandScene = {
     scene: null,
     engine: null,
@@ -7,8 +5,7 @@ const IslandScene = {
     currentIsland: null,
     insectsMeshes: [],
     arrivalBoat: null,
-
-    // Gestionnaire de particules multiples
+    guiTexture: null,
     activeSystems: [],
 
     time: 0,
@@ -220,9 +217,6 @@ const IslandScene = {
 
             birds.minSize = 1;
             birds.maxSize = 2;
-
-            // On utilise isBillboardBased = false pour les aplatir comme des ailes
-            // C'est une astuce visuelle pour simuler des oiseaux de loin
             birds.isBillboardBased = true;
 
             birds.minLifeTime = 10;
@@ -246,7 +240,6 @@ const IslandScene = {
                     if (particle.age >= particle.lifeTime) {
                         this.recycleParticle(particle);
                         index--;
-                        continue;
                     }
                 }
             };
@@ -288,25 +281,96 @@ const IslandScene = {
             .then((result) => {
                 const boatRoot = result.meshes[0];
                 this.arrivalBoat = boatRoot;
+
                 const config = this.currentIsland.boatConfig || { position: { x: 50, z: 50 }, rotationY: 0 };
                 const waterY = this.currentIsland.waterLevel !== undefined ? this.currentIsland.waterLevel : 0;
-
-                // CORRECTION BigInt : On s'assure que Z est un nombre
-                let posZ = config.position.z;
-                if (typeof posZ === 'bigint') posZ = Number(posZ); // Conversion de sécurité
+                let posZ = Number(config.position.z);
 
                 boatRoot.position = new BABYLON.Vector3(config.position.x, waterY + 0.5, posZ);
                 boatRoot.rotationQuaternion = null;
                 boatRoot.rotation.y = config.rotationY;
-
                 const bScale = config.boatScale !== undefined ? config.boatScale : 15;
                 boatRoot.scaling = new BABYLON.Vector3(bScale, bScale, bScale);
+
+                // --- 1. GESTION DU CLIC SUR LE MESH ---
+                const boatActionManager = new BABYLON.ActionManager(this.scene);
+
+                // Animation curseur et bouton
+                boatActionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
+                    document.body.style.cursor = "pointer";
+                    if (this.btnCircle) {
+                        this.btnCircle.scaleX = 1.15;
+                        this.btnCircle.scaleY = 1.15;
+                        this.btnCircle.background = "white";
+                    }
+                }));
+                boatActionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
+                    document.body.style.cursor = "default";
+                    if (this.btnCircle) {
+                        this.btnCircle.scaleX = 1.0;
+                        this.btnCircle.scaleY = 1.0;
+                        this.btnCircle.background = "rgba(255, 255, 255, 0.9)";
+                    }
+                }));
+                // Clic
+                boatActionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
+                    UIManager.showReturnMapConfirmation();
+                }));
 
                 result.meshes.forEach(m => {
                     m.receiveShadows = true;
                     shadowGenerator.addShadowCaster(m);
                     if (m.material) m.material.fogEnabled = false;
+                    m.isPickable = true;
+                    m.actionManager = boatActionManager;
                 });
+
+                // --- 2. CRÉATION DE L'UI MODERNE ---
+                this.guiTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+                // A. Le bouton rond (Floating Action Button style)
+                const circle = new BABYLON.GUI.Ellipse();
+                circle.width = "45px";
+                circle.height = "45px";
+                circle.color = "#ccc"; // Bordure très fine et discrète
+                circle.thickness = 1;
+                circle.background = "rgba(255, 255, 255, 0.9)"; // Blanc propre
+
+                // On attache
+                this.guiTexture.addControl(circle);
+                circle.linkWithMesh(boatRoot);
+                circle.linkOffsetY = -70; // Position juste au dessus
+
+                this.btnCircle = circle;
+
+                // B. L'icône FontAwesome
+                const icon = new BABYLON.GUI.TextBlock();
+                icon.text = "⚓";
+                icon.fontFamily = "Font Awesome 6 Free";
+                icon.fontWeight = 900;
+                icon.fontSize = 20;
+                circle.addControl(icon);
+
+                // C. Interactivité du bouton UI
+                circle.isPointerBlocker = true;
+                circle.onPointerUpObservable.add(() => {
+                    UIManager.showReturnMapConfirmation();
+                });
+
+                // Animations Hover sur l'UI directement
+                circle.onPointerEnterObservable.add(() => {
+                    document.body.style.cursor = "pointer";
+                    circle.scaleX = 1.15;
+                    circle.scaleY = 1.15;
+                    circle.background = "white";
+                });
+                circle.onPointerOutObservable.add(() => {
+                    document.body.style.cursor = "default";
+                    circle.scaleX = 1.0;
+                    circle.scaleY = 1.0;
+                    circle.background = "rgba(255, 255, 255, 0.9)";
+                });
+
             })
             .catch(err => console.error("Erreur chargement bateau:", err));
     },
@@ -444,6 +508,12 @@ const IslandScene = {
     dispose() {
         if (this.engine) this.engine.stopRenderLoop();
         this.disposeAtmosphere();
+
+        if (this.guiTexture) {
+            this.guiTexture.dispose();
+            this.guiTexture = null;
+        }
+
         if (this.scene) { this.scene.dispose(); this.scene = null; }
         if (this.engine) { this.engine.dispose(); this.engine = null; }
         this.insectsMeshes = [];
