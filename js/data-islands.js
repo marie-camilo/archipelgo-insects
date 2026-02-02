@@ -77,6 +77,17 @@ const ISLANDS_DATA = [
                 status: "Quasi menacé"
             }
         ],
+        interactiveElements: [
+            {
+                id: "palm_tree",
+                position: { x: -49.33, y: 113.04, z: -49.50 },
+                radius: 3,
+                // uiOffset: -120, // Très haut pour le palmier
+                title: "Parasol naturel",
+                icon: "🌴",
+                text: "Enfin un peu d'ombre dans cette prairie écrasée de soleil ! Attention aux chutes de noix de coco. Ces arbres offrent peu de nectar, mais servent de repère visuel lointain pour les insectes volants."
+            }
+        ],
     },
     {
         id: "forest_green",
@@ -141,6 +152,17 @@ const ISLANDS_DATA = [
                 status: "Commune"
             }
         ],
+        interactiveElements: [
+            {
+                id: "deer_zone",
+                position: { x: -63.49, y: 0, z: 50.27 },
+                uiOffset: 0,
+                radius: 4,
+                title: "Pas vu, pas pris !",
+                icon: "🦌",
+                text: "Hé ! Bas les pattes ! \n\nJe sais ce que vous pensez : \"Il est bien gros pour un coléoptère celui-là\". \n\nEn effet, je suis un Cerf Élaphe. Je ne suis pas un insecte, mais sans moi, cette forêt serait une jungle impénétrable. En broutant, j'ouvre des clairières qui permettent au soleil de passer... et à vos amis les insectes de se dorer la pilule !",
+            }
+        ]
     },
     {
         id: "floating_forest",
@@ -239,6 +261,35 @@ const ISLANDS_DATA = [
                 status: "Sous surveillance climatique"
             }
         ],
+        interactiveElements: [
+            {
+                id: "igloo",
+                position: { x: -2.01, y: 0, z: -1.54 },
+                radius: 5,
+                uiOffset: 0,
+                title: "Studio à louer",
+                icon: "🥶",
+                text: "Vue imprenable sur le néant blanc. Chauffage non inclus. Idéal pour ours polaire, mais catastrophe pour la plupart des insectes qui finiraient en glaçon instantané ! Heureusement, certains ont de l'antigel naturel dans le sang."
+            },
+            {
+                id: "winter_tree",
+                position: { x: 1.38, y: 0, z: -0.42 },
+                radius: 4,
+                uiOffset: 0,
+                title: "Manteau blanc",
+                icon: "🌲",
+                text: "Ces conifères gardent leurs aiguilles pour faire de la photosynthèse dès le moindre rayon de soleil. C'est aussi un refuge : sous les branches basses, la température est plus clémente que dehors."
+            },
+            {
+                id: "frozen_pond",
+                position: { x: 2.42, y: 0, z: -3.40 },
+                radius: 5,
+                uiOffset: 0,
+                title: "Patinoire interdite",
+                icon: "❄️",
+                text: "En surface, c'est du béton. Mais dessous, la vie continue au ralenti. De nombreuses larves aquatiques hibernent dans la vase en attendant le dégel printanier."
+            }
+        ],
     },
     {
         id: "decomposers",
@@ -270,7 +321,6 @@ const ISLANDS_DATA = [
                 anecdote: "C'est un crustacé terrestre ! Il possède des branchies et doit rester en milieu humide pour respirer.",
                 status: "Indispensable au cycle du carbone"
             },
-            // NOUVEAU
             {
                 id: "ant",
                 name: "Fourmi Rousse",
@@ -284,6 +334,26 @@ const ISLANDS_DATA = [
                 habitat: "Dômes d'aiguilles de pin",
                 anecdote: "Elle projette de l'acide formique pour se défendre. Une colonie peut consommer des millions d'insectes par an.",
                 status: "Protégée dans certains pays"
+            }
+        ],
+        interactiveElements: [
+            {
+                id: "dead_tree",
+                position: { x: -251.90, y: 0, z: 187.79 },
+                radius: 3,
+                uiOffset: 0,
+                title: "Hôtel 5 étoiles",
+                icon: "🪵",
+                text: "Ne jugez pas ce vieux tronc ! Pour un coléoptère, c'est un palace. Le bois mort abrite près de 20% de la biodiversité forestière. C'est ici que le grand recyclage commence."
+            },
+            {
+                id: "stream_rocks",
+                position: { x: -187.24, y: 0, z: -230.83 },
+                radius: 4,
+                uiOffset: 0,
+                title: "L'oasis de fraîcheur",
+                icon: "💧",
+                text: "Les cloportes et mille-pattes adorent ce coin sombre et humide. L'humidité est vitale pour eux car ils respirent par des branchies, exactement comme leurs cousins les crabes !"
             }
         ],
     },
@@ -334,6 +404,35 @@ const ISLANDS_DATA = [
                 status: "Vulnérable"
             }
         ],
+        interactiveElements: [
+            {
+                id: "lighthouse",
+                position: { x: 11.48, y: 0, z: -4.20 },
+                radius: 6,
+                uiOffset: 0,
+                title: "Le Géant de Lumière",
+                icon: "💡",
+                text: "Joli pour nous, mais terrible pour les papillons de nuit ! La lumière artificielle perturbe leur navigation. Heureusement, ici, il guide surtout les bateaux des explorateurs scientifiques."
+            },
+            {
+                id: "stagnant_water",
+                position: { x: 3.53, y: 0, z: -13.43 },
+                radius: 5,
+                uiOffset: 0,
+                title: "Nurserie géante",
+                icon: "🐸",
+                text: "L'eau ne bouge pas ? Parfait ! C'est le berceau des libellules. Leurs larves sont de redoutables prédatrices sous-marines avant de sortir pour leur métamorphose."
+            },
+            {
+                id: "small_forest",
+                position: { x: -0.22, y: 0, z: -5.61 },
+                radius: 5,
+                uiOffset: 0,
+                title: "Zone de repos",
+                icon: "🌳",
+                text: "Après une chasse effrénée au-dessus de l'eau, les libellules viennent se percher ici. C'est l'endroit idéal pour se chauffer les ailes au soleil ou digérer un moustique à l'abri du vent."
+            }
+        ],
     },
     {
         id: "extinct",
@@ -365,6 +464,26 @@ const ISLANDS_DATA = [
                 habitat: "Versants ensoleillés riches en sédums",
                 anecdote: "Ses ailes parsemées d'ocelles rouges effrayent les oiseaux. C'est l'un des premiers insectes protégés au monde.",
                 status: "Rare - Strictement protégé"
+            }
+        ],
+        interactiveElements: [
+            {
+                id: "snowy_mountain",
+                position: { x: -0.05, y: 0, z: 6.37 },
+                radius: 8,
+                uiOffset: 0,
+                title: "Le Toit du Monde",
+                icon: "🏔️",
+                text: "Là-haut, l'oxygène se fait rare et le vent souffle fort. Seuls les spécialistes comme le papillon Apollon osent s'aventurer si près des neiges éternelles."
+            },
+            {
+                id: "alpine_tree",
+                position: { x: -5.06, y: 0, z: -5.68 },
+                radius: 3,
+                uiOffset: 0,
+                title: "Les Résistants",
+                icon: "🌲",
+                text: "Remarquez leur forme : ils sont plus petits et robustes pour résister au poids de la neige l'hiver. C'est la limite supérieure de la forêt, au-delà, c'est le domaine minéral des rochers."
             }
         ],
     },
@@ -416,6 +535,44 @@ const ISLANDS_DATA = [
                 habitat: "Jardins et lisières",
                 anecdote: "Il est capable de se souvenir de chaque fleur visitée pour ne pas y retourner tant que le nectar ne s'est pas renouvelé.",
                 status: "Préoccupation mineure"
+            }
+        ],
+        interactiveElements: [
+            {
+                id: "pink_flowers",
+                position: { x: 1.03, y: 0, z: 1.19 },
+                radius: 4,
+                uiOffset: 0,
+                title: "Buffet à volonté",
+                icon: "🌸",
+                text: "Ces fleurs ne sont pas roses juste pour faire joli sur vos photos ! C'est un signal lumineux qui crie 'Nectar gratuit ici !'. Un vrai parking pour syrphes et abeilles pressées."
+            },
+            {
+                id: "cherry_trees",
+                position: { x: -0.26, y: 0, z: 0.79 },
+                radius: 6,
+                uiOffset: 0,
+                title: "La vie en rose",
+                icon: "🌸",
+                text: "Ces cerisiers sont les gratte-ciels de l'atoll. Leurs fleurs attirent les insectes par milliers, mais attention : la floraison est courte ! C'est une course contre la montre pour les pollinisateurs."
+            },
+            {
+                id: "flower_mini_forest",
+                position: { x: -0.25, y: 0, z: -0.58 },
+                radius: 5,
+                uiOffset: 0,
+                title: "Le labyrinthe vert",
+                icon: "🌳",
+                text: "Sous ces feuillages denses, l'humidité reste prisonnière. C'est l'endroit parfait pour une petite sieste à l'abri des prédateurs, ou pour pondre ses œufs en toute discrétion."
+            },
+            {
+                id: "flower_bushes",
+                position: { x: -1.39, y: 0, z: -1.52 },
+                radius: 4,
+                uiOffset: 0,
+                title: "Cache-cache buisson",
+                icon: "🌿",
+                text: "Ces buissons sont les forteresses de l'atoll. Leurs branches emmêlées protègent les chenilles des oiseaux un peu trop gourmands. Un vrai bunker végétal !"
             }
         ],
     },

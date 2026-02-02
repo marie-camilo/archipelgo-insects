@@ -71,6 +71,7 @@ const IslandScene = {
             this.loadArrivalBoat(shadowGenerator);
             setTimeout(() => {
                 this.createInsects();
+                this.createInteractiveElements();
                 this.createAtmosphere(); // Lancement de la météo
             }, 200);
         });
@@ -82,13 +83,41 @@ const IslandScene = {
                 this.scene.render();
             }
         });
+
+        // this.scene.onPointerObservable.add((pointerInfo) => {
+        //     if (pointerInfo.type === BABYLON.PointerEventTypes.POINTERDOWN) {
+        //         const pick = pointerInfo.pickInfo;
+        //
+        //         // On ignore l'océan et le ciel
+        //         if (pick.hit && pick.pickedMesh.name !== "ocean" && pick.pickedMesh.name !== "skyBox") {
+        //
+        //             // On récupère le point exact dans le monde (World Coordinates)
+        //             const p = pick.pickedPoint;
+        //
+        //             let islandScale = (this.currentIsland.scale || 1) * 15;
+        //             // Exception pour la forêt verte qui n'utilise pas le scale dans ton code actuel
+        //             if (this.currentIsland.id === 'forest_green') islandScale = 1;
+        //
+        //             const rawX = p.x / islandScale;
+        //             const rawZ = p.z / islandScale;
+        //
+        //             console.log(`Mesh touché: "${pick.pickedMesh.name}"`);
+        //             console.log(`position: { x: ${rawX.toFixed(2)}, y: 0, z: ${rawZ.toFixed(2)} },`);
+        //
+        //             // Marqueur visuel (Sphère Rouge)
+        //             const marker = BABYLON.MeshBuilder.CreateSphere("debugMarker", {diameter: 2}, this.scene);
+        //             marker.position = p;
+        //             const mat = new BABYLON.StandardMaterial("debugMat", this.scene);
+        //             mat.emissiveColor = new BABYLON.Color3(1, 0, 0);
+        //             marker.material = mat;
+        //         }
+        //     }
+        // });
+
         window.addEventListener("resize", () => this.engine.resize());
     },
 
-    // ─────────────────────────────────────────────────────────────────
     // GESTION DES AMBIANCES (MÉTÉO)
-    // ─────────────────────────────────────────────────────────────────
-
     createAtmosphere() {
         const type = this.currentIsland.ambiance;
         if (!type) return;
@@ -452,6 +481,132 @@ const IslandScene = {
                     if(canvas) this.camera.attachControl(canvas, true);
                 }, 500);
             }));
+        });
+    },
+
+    createInteractiveElements() {
+        if (!this.currentIsland.interactiveElements) return;
+
+        // On s'assure que la texture GUI existe et est au premier plan
+        if (!this.guiTexture) {
+            this.guiTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI_INTERACTIVE");
+        }
+        this.guiTexture.rootContainer.zIndex = 1000;
+
+        this.currentIsland.interactiveElements.forEach(data => {
+            const islandScale = (this.currentIsland.scale || 1) * 15;
+            const posX = data.position.x * (this.currentIsland.id === 'forest_green' ? 1 : islandScale);
+            const posZ = data.position.z * (this.currentIsland.id === 'forest_green' ? 1 : islandScale);
+
+            const ray = new BABYLON.Ray(new BABYLON.Vector3(posX, 500, posZ), new BABYLON.Vector3(0, -1, 0), 1000);
+            const hit = this.scene.pickWithRay(ray, (m) => m.name !== "ocean" && m.isVisible);
+
+            const groundY = hit.hit ? hit.pickedPoint.y : 0;
+            const altitude = data.position.y || 0;
+            const finalY = groundY + altitude;
+
+            const finalPosition = new BABYLON.Vector3(posX, finalY, posZ);
+            const size = data.radius || 3;
+
+            const setupInteraction = (parentMesh) => {
+                // Hitbox (inchangée)
+                const hitBox = BABYLON.MeshBuilder.CreateBox("hit_" + data.id, { width: size, height: size, depth: size }, this.scene);
+                hitBox.position = parentMesh ? parentMesh.position.clone() : finalPosition;
+                hitBox.position.y += size / 2;
+                hitBox.visibility = 0;
+                hitBox.isPickable = true;
+                if(parentMesh) parentMesh.parent = hitBox;
+
+                if (this.guiTexture) {
+                    const pulseCircle = new BABYLON.GUI.Ellipse();
+                    pulseCircle.width = "16px";
+                    pulseCircle.height = "16px";
+                    pulseCircle.color = "white";
+                    pulseCircle.thickness = 1;
+                    pulseCircle.alpha = 0.8;
+                    this.guiTexture.addControl(pulseCircle);
+                    pulseCircle.linkWithMesh(hitBox);
+                    pulseCircle.linkOffsetY = data.uiOffset !== undefined ? data.uiOffset : -60;
+
+                    // Animation du pouls (Boucle infinie)
+                    let pulseAnim = 0;
+                    const pulseObserver = this.scene.onBeforeRenderObservable.add(() => {
+                        pulseAnim += 0.03;
+                        const scale = 1 + Math.sin(pulseAnim) * 0.5;
+                        pulseCircle.scaleX = scale;
+                        pulseCircle.scaleY = scale;
+                        pulseCircle.alpha = 0.8 - (scale - 1) * 1.5;
+
+                        if (pulseCircle.alpha <= 0) {
+                            pulseAnim = 0; // reset pour la boucle
+                        }
+                    });
+
+                    // point central fixe
+                    const dot = new BABYLON.GUI.Ellipse();
+                    dot.width = "10px";
+                    dot.height = "10px";
+                    dot.color = "white";
+                    dot.thickness = 1;
+                    dot.background = "white";
+                    dot.shadowBlur = 10; // halo
+                    dot.shadowColor = "rgba(255,255,255,0.5)";
+
+                    this.guiTexture.addControl(dot);
+                    dot.linkWithMesh(hitBox);
+                    dot.linkOffsetY = data.uiOffset !== undefined ? data.uiOffset : -60;
+
+                    dot.isPointerBlocker = true;
+                    dot.onPointerUpObservable.add(() => UIManager.showInteractiveModal(data));
+
+                    dot.onPointerEnterObservable.add(() => {
+                        document.body.style.cursor = "pointer";
+                        dot.scaleX = 1.5;
+                        dot.scaleY = 1.5;
+                        dot.thickness = 3;
+                        dot.shadowBlur = 20; // lueur
+                        pulseCircle.isVisible = false;
+                    });
+
+                    dot.onPointerOutObservable.add(() => {
+                        document.body.style.cursor = "default";
+                        dot.scaleX = 1;
+                        dot.scaleY = 1;
+                        dot.thickness = 1;
+                        dot.shadowBlur = 10;
+                        pulseCircle.isVisible = true;
+                    });
+                }
+
+                // Interaction 3D (Hitbox)
+                const actionManager = new BABYLON.ActionManager(this.scene);
+                actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
+                    UIManager.showInteractiveModal(data);
+                }));
+                hitBox.actionManager = actionManager;
+                // Hover sur le cube rouge pour le curseur
+                actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
+                    document.body.style.cursor = "pointer";
+                }));
+                actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
+                    document.body.style.cursor = "default";
+                }));
+
+                hitBox.actionManager = actionManager;
+            };
+
+            if (data.modelFile) {
+                BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", data.modelFile, this.scene).then((result) => {
+                    const root = result.meshes[0];
+                    root.position = finalPosition;
+                    if (data.rotationY) root.rotation.y = data.rotationY;
+                    const scale = data.scale || 1;
+                    root.scaling = new BABYLON.Vector3(scale, scale, scale);
+                    setupInteraction(root);
+                });
+            } else {
+                setupInteraction(null);
+            }
         });
     },
 

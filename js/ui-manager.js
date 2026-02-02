@@ -243,6 +243,22 @@ const UIManager = {
         if(modal) modal.classList.remove("visible");
     },
 
+    showInteractiveModal(data) {
+        const modal = document.getElementById("interactive-modal");
+        if(!modal) return;
+
+        document.getElementById("inter-title").textContent = data.title;
+        document.getElementById("inter-text").textContent = data.text;
+        document.getElementById("inter-icon").textContent = data.icon || "✨";
+
+        modal.classList.add("visible");
+    },
+
+    closeInteractiveModal() {
+        const modal = document.getElementById("interactive-modal");
+        if(modal) modal.classList.remove("visible");
+    },
+
     updateIslandInfo(islandData) {
         const title = document.getElementById("island-name");
         if(title) title.textContent = islandData.name;
