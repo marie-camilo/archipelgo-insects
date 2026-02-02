@@ -73,7 +73,14 @@ const UIManager = {
 
     toggleGlobalHelp() {
         const modal = document.getElementById("global-help-modal");
+        const mapScreen = document.getElementById("map-view-screen");
+
         if (!modal) return;
+
+        if (mapScreen && !mapScreen.classList.contains("active")) {
+            modal.classList.remove("visible");
+            return;
+        }
 
         if (modal.classList.contains("visible")) {
             modal.classList.remove("visible");

@@ -19,10 +19,6 @@
 </head>
 <body>
 
-<button class="btn-help-floating" onclick="UIManager.toggleGlobalHelp()" aria-label="Aide">
-    <i class="fas fa-question"></i>
-</button>
-
 <div id="global-help-modal" class="global-help-modal">
     <div class="help-content">
         <button class="nav-close" onclick="UIManager.toggleGlobalHelp()">×</button>
@@ -123,6 +119,10 @@
 
 <div id="map-view-screen" class="screen active">
     <canvas id="renderCanvas"></canvas>
+
+    <button class="btn-help-floating" onclick="UIManager.toggleGlobalHelp()" aria-label="Aide">
+        <i class="fas fa-question"></i>
+    </button>
 
     <div class="map-top-bar">
         <div class="map-titles">
