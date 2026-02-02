@@ -5,7 +5,11 @@ const ISLANDS_DATA = [
         ambiance: "wind",
         modelFile: "warm-island.glb",
         scale: 0.2,
-        boatConfig: { position: { x: 50, z: 210 }, rotationY: Math.PI / 4 }, // Bord de plage
+        boatConfig: {
+            position: { x: 10, z: 180 },
+            rotationY: Math.PI / 3,
+            boatScale: 30,
+        },
         ecosystem: "Prairie tempérée méliphage",
         environmentDesc: "Une zone ouverte caractérisée par une diversité florale élevée. Ce milieu est essentiel pour le cycle de vie des angiospermes et subit de fortes pressions dues à l'agriculture intensive.",
         position: { x: -20, y: 0, z: 5 },
@@ -83,7 +87,7 @@ const ISLANDS_DATA = [
         boatConfig: {
             position: { x: -30, z: 150 },
             rotationY: -Math.PI / -3,
-            boatScale: 20
+            boatScale: 30
         },
         ecosystem: "Forêt primaire à canopée dense",
         environmentDesc: "Un écosystème complexe dominé par les feuillus séculaires. L'humidité y est constante, favorisant la dégradation du bois mort, pilier de la biodiversité entomologique.",
@@ -244,7 +248,7 @@ const ISLANDS_DATA = [
         boatConfig: {
             position: { x: 80, z: 130 },
             rotationY: Math.PI / -2,
-            boatScale: 25
+            boatScale: 35
         },
         ecosystem: "Humus et litière forestière",
         environmentDesc: "Le laboratoire de recyclage de la nature. Ici, les détritivores transforment la matière organique morte en nutriments minéraux assimilables par les plantes.",
@@ -291,8 +295,8 @@ const ISLANDS_DATA = [
         scale: 0.5,
         boatConfig: {
             position: { x: -40, z: -220 },
-            rotationY: 0,
-            boatScale: 20,
+            rotationY: 30,
+            boatScale: 35,
         },
         ecosystem: "Zone humide lentique",
         environmentDesc: "Milieu aquatique à renouvellement lent. Les zones humides filtrent l'eau et abritent des espèces au cycle de vie double (larve aquatique / adulte aérien).",
@@ -337,7 +341,11 @@ const ISLANDS_DATA = [
         ambiance: "rain",
         modelFile: "mountain-island.glb",
         scale: 0.7,
-        boatConfig: { position: { x: 100, z: 100 }, rotationY: Math.PI / 2 },
+        boatConfig: {
+            position: { x: 50, z: 150 },
+            rotationY: Math.PI / 2,
+            boatScale: 25,
+        },
         ecosystem: "Pelouses alpines rocailleuses",
         environmentDesc: "Prairies d'altitude au-dessus de la limite des arbres. Les cycles de reproduction y sont très courts à cause de la brièveté de la saison estivale.",
         position: { x: 10, y: 0, z: 5 },
@@ -366,7 +374,11 @@ const ISLANDS_DATA = [
         ambiance: "pollen",
         modelFile: "flower-island.glb",
         scale: 4.5,
-        boatConfig: { position: { x: -120, z: 230 }, rotationY: -Math.PI / 4 },
+        boatConfig: {
+            position: { x: -120, z: 230 },
+            rotationY: -Math.PI / -2,
+            boatScale: 35,
+        },
         ecosystem: "Jardin botanique insulaire",
         environmentDesc: "Micro-climat favorisant une floraison continue. Ce milieu sert de refuge aux insectes généralistes dans un paysage souvent fragmenté.",
         position: { x: 0, y: -1.8, z: 25 },

@@ -99,14 +99,14 @@ const UIManager = {
         );
 
         tooltip.innerHTML = `
-            <div class="tooltip-title">
-                <span class="eco-icon" style="background:rgba(25, 118, 210, 0.1); color:#1976d2">
+            <div class="tooltip-title" style="text-align: left; display: flex; align-items: center; justify-content: flex-start; gap: 10px;">
+                <span class="eco-icon" style="background:rgba(25, 118, 210, 0.1); color:#1976d2; margin: 0;">
                     <i class="fas fa-anchor"></i>
                 </span>
                 Port d'Attache
             </div>
-            <div class="tooltip-ecosystem">Zone de départ</div>
-            <div class="tooltip-footer" style="margin-top:10px; color:#1976d2; font-weight:bold;">
+            <div class="tooltip-ecosystem" style="text-align: left; padding-left: 2px;">Zone de départ</div>
+            <div class="tooltip-footer" style="margin-top:10px; color:#1976d2; font-weight:bold; text-align: left;">
                 Cliquez pour naviguer
             </div>
         `;
@@ -133,6 +133,8 @@ const UIManager = {
         introText.style.color = "#666";
         introText.style.marginBottom = "20px";
         introText.style.fontSize = "0.95rem";
+        introText.style.textAlign = "left";
+
         introText.innerHTML = `
             <strong>Port d'Attache :</strong> Ce port est votre base d'opérations. 
             Sélectionnez une île ci-dessous pour lancer une expédition scientifique.
