@@ -146,18 +146,29 @@ const ArchipelagoApp = {
     }, 100);
   },
 
+  // restart() {
+  //   JOURNAL_STATE.discoveredInsects = [];
+  //   JOURNAL_STATE.exploredIslands = [];
+  //   ISLANDS_DATA.forEach(island => island.status = "unexplored");
+  //
+  //   if (MapScene.scene) MapScene.dispose();
+  //   if (BoatScene.scene) BoatScene.dispose();
+  //   if (IslandScene.scene) IslandScene.dispose();
+  //
+  //   JournalManager.init();
+  //
+  //   this.showMap();
+  // },
+
   restart() {
-    JOURNAL_STATE.discoveredInsects = [];
-    JOURNAL_STATE.exploredIslands = [];
-    ISLANDS_DATA.forEach(island => island.status = "unexplored");
-
-    if (MapScene.scene) MapScene.dispose();
-    if (BoatScene.scene) BoatScene.dispose();
-    if (IslandScene.scene) IslandScene.dispose();
-
-    JournalManager.init();
-
-    this.showMap();
+    const victoryScreen = document.getElementById("conclusion-screen");
+    if (victoryScreen) {
+      victoryScreen.classList.remove("active");
+    }
+    localStorage.removeItem('archipelago_save');
+    setTimeout(() => {
+      window.location.reload();
+    }, 300);
   },
 };
 

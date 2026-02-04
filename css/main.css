@@ -930,13 +930,8 @@ canvas {
     align-items: center;
     gap: 10px;
     padding: 6px 14px;
-
-    /* On force le blanc pur */
     background-color: #ffffff !important;
-
-    /* On utilise une bordure en soustraction (transparente) plutôt qu'un gris fixe */
     border: 1px solid rgba(0, 0, 0, 0.05);
-
     border-radius: 100px;
     font-family: var(--font-body, 'Montserrat'), sans-serif;
     font-size: 0.75rem;
@@ -944,10 +939,7 @@ canvas {
     color: #4a5568;
     letter-spacing: 0.02em;
     text-transform: uppercase;
-
-    /* On simplifie l'ombre pour éviter l'effet "sale" */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-
     transition: all 0.3s ease;
 }
 
@@ -958,7 +950,6 @@ canvas {
     background-color: #7cb342;
     border-radius: 50%;
     display: inline-block;
-    /* Le halo aide à faire ressortir le blanc autour */
     box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.1);
 }
 
@@ -1268,61 +1259,6 @@ canvas {
     }
 }
 
-/* CONCLUSION */
-
-#conclusion-screen {
-  background: linear-gradient(135deg, #1b5e20 0%, #388e3c 100%);
-  justify-content: center;
-  align-items: center;
-}
-
-.conclusion-content {
-  max-width: 800px;
-  padding: var(--spacing-xl);
-  text-align: center;
-}
-
-.conclusion-title {
-  font-family: var(--font-title);
-  font-size: clamp(2rem, 6vw, 3.5rem);
-  color: var(--ui-accent);
-  margin-bottom: var(--spacing-md);
-}
-
-.conclusion-message {
-  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
-  line-height: 1.8;
-  margin-bottom: var(--spacing-xl);
-  color: var(--ui-text);
-}
-
-.conclusion-stats {
-  display: flex;
-  justify-content: center;
-  gap: var(--spacing-xl);
-  margin-bottom: var(--spacing-xl);
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.stat-number {
-  font-size: 3rem;
-  font-weight: 700;
-  color: var(--ui-accent);
-  font-family: var(--font-title);
-}
-
-.stat-label {
-  font-size: 0.9rem;
-  color: rgba(236, 239, 241, 0.8);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
 /* ─────────────────────────────────────────────────────────────────────
    ANIMATIONS
    ───────────────────────────────────────────────────────────────────── */
@@ -1468,4 +1404,99 @@ canvas {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* L'arrière-plan qui floute tout le jeu */
+.victory-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3); /* Sombre léger */
+    backdrop-filter: blur(10px); /* LE FLOU MAGIQUE */
+    z-index: 3000;
+    display: none; /* Caché par défaut */
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.victory-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+/* La carte en verre (Glassmorphism) */
+.victory-modal {
+    background: rgba(255, 255, 255, 0.85); /* Blanc semi-transparent */
+    backdrop-filter: blur(16px); /* Flou interne */
+    border: 1px solid rgba(255, 255, 255, 0.6); /* Bordure subtile */
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2); /* Belle ombre portée */
+    border-radius: 24px;
+    padding: 40px;
+    max-width: 550px;
+    width: 90%;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Effet rebond */
+}
+
+.victory-overlay.active .victory-modal {
+    transform: scale(1);
+}
+
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.conclusion-title {
+    font-family: 'Sniglet', sans-serif;
+    font-size: 2rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.conclusion-message {
+    font-size: 1rem;
+    color: #546e7a;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.conclusion-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #78909c;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-victory {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1rem;
+    box-shadow: 0 10px 20px rgba(25, 118, 210, 0.3);
 }

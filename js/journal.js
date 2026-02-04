@@ -92,14 +92,99 @@ const JournalManager = {
             // Sauvegarde dans le navigateur
             localStorage.setItem('archipelago_save', JSON.stringify(JOURNAL_STATE));
             console.log(`Insecte découvert sauvegardé : ${insectId}`);
+
+            this.checkVictoryCondition();
         }
     },
 
-    // GESTION DE LA MODALE & PRÉVISUALISATION 3D
+    checkVictoryCondition() {
+        // 1. Calculer le total
+        const allInsectsCount = ISLANDS_DATA.reduce((acc, island) => acc + island.insects.length, 0);
+        const discoveredCount = JOURNAL_STATE.discoveredInsects.length;
 
-    /**
-     * Ouvre la modale et lance le moteur 3D
-     */
+        // 2. Si on a tout trouvé
+        if (discoveredCount >= allInsectsCount) {
+            // Petit délai pour laisser le temps de voir l'animation de découverte
+            setTimeout(() => {
+                this.triggerVictoryScreen();
+            }, 1500);
+        }
+    },
+
+    triggerVictoryScreen() {
+        const screen = document.getElementById("conclusion-screen");
+        if (!screen) return;
+
+        // 1. Textes
+        const title = screen.querySelector(".conclusion-title");
+        const msg = screen.querySelector(".conclusion-message");
+
+        if (title) title.textContent = "Félicitations !!";
+        if (msg) {
+            msg.innerHTML = `
+                Super ! Vous avez répertorié <strong>100% des espèces</strong>.<br><br>
+                Grâce à votre persévérance, la base de données scientifique est complète. 
+                Nous comprenons mieux comment chaque maillon, du plus petit puceron au grand prédateur, soutient cet écosystème fragile.<br><br>
+                <span style="font-size: 0.9em; font-style: italic; color: #888;">
+                (Les insectes vous remercient pour votre intérêt, mais demandent poliment à pouvoir retourner se cacher sous leurs feuilles maintenant.)
+                </span>
+            `;
+        }
+
+        // 2. Affichage avec classe Active (pour l'anim CSS)
+        screen.classList.add("active");
+
+        // 3. CONFETTIS !! (La partie fun)
+        this.fireConfetti();
+    },
+
+    fireConfetti() {
+        // Un tir central explosif continu
+        if (typeof confetti === 'function') {
+            const duration = 3000;
+            const end = Date.now() + duration;
+
+            // Couleurs de l'archipel
+            const colors = ['#1976d2', '#81c784', '#ffd54f'];
+
+            // ON DÉFINIT UN Z-INDEX TRÈS HAUT (supérieur à 3000 de l'overlay)
+            const confettiZIndex = 4000;
+
+            (function frame() {
+                // Canon de gauche
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: colors,
+                    zIndex: confettiZIndex // <--- AJOUT ICI
+                });
+
+                // Canon de droite
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: colors,
+                    zIndex: confettiZIndex // <--- ET ICI
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+    },
+
+    // Appelle cette fonction depuis la console F12 pour tester : JournalManager.debugVictory()
+    debugVictory() {
+        console.log("DEBUG: Lancement forcé de la victoire");
+        this.triggerVictoryScreen();
+    },
+
+    // GESTION DE LA MODALE & PRÉVISUALISATION 3D
     showInsectDetails(insectData) {
         const modal = document.getElementById("journal-modal");
         if(!modal) return;
