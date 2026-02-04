@@ -19,16 +19,16 @@ const IslandScene = {
         this.scene = new BABYLON.Scene(this.engine);
         this.currentIsland = ISLANDS_DATA.find(i => i.id === islandId);
 
-        // 1. AMBIANCE COULEUR & BROUILLARD
-        let skyColor = new BABYLON.Color3(0.65, 0.85, 0.95); // Ciel bleu par défaut
+        // Ambiance & Brouillard
+        let skyColor = new BABYLON.Color3(0.65, 0.85, 0.95);
         let fogColor = skyColor;
-        let fogStart = 600; // Par défaut : loin pour bien voir l'île
+        let fogStart = 600;
 
-        // Configuration spécifique par ambiance
+        // Config spécifique par ambiance
         if (this.currentIsland.ambiance === "snow") {
-            skyColor = new BABYLON.Color3(0.75, 0.80, 0.85); // Gris froid
+            skyColor = new BABYLON.Color3(0.75, 0.80, 0.85);
             fogColor = new BABYLON.Color3(0.7, 0.75, 0.8);
-            fogStart = 400; // Brouillard un peu plus près pour la neige
+            fogStart = 400;
         }
         else if (this.currentIsland.ambiance === "rain") {
             skyColor = new BABYLON.Color3(0.4, 0.45, 0.5); // Ciel gris orageux
@@ -37,18 +37,16 @@ const IslandScene = {
         }
         else if (this.currentIsland.ambiance === "wind") {
             skyColor = new BABYLON.Color3(0.6, 0.7, 0.8); // Ciel venteux clair
-            fogStart = 1000; // Très dégagé, on est en altitude
+            fogStart = 1000;
         }
 
         this.scene.clearColor = new BABYLON.Color4(skyColor.r, skyColor.g, skyColor.b, 1);
-
-        // Brouillard : dense au loin, clair près de l'île
         this.scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR;
         this.scene.fogStart = fogStart;
         this.scene.fogEnd = 3000;
         this.scene.fogColor = fogColor;
 
-        // 2. CAMÉRA
+        // Réglages caméra
         this.camera = new BABYLON.ArcRotateCamera("islandCam", -Math.PI/2, Math.PI/3, 100, BABYLON.Vector3.Zero(), this.scene);
         this.camera.attachControl(canvas, true);
         this.camera.panningSensibility = 25;
@@ -56,7 +54,7 @@ const IslandScene = {
         this.camera.lowerRadiusLimit = 10;
         this.camera.wheelPrecision = 2;
 
-        // 3. LUMIÈRES
+        // Lumières
         const hemiLight = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(0, 1, 0), this.scene);
         hemiLight.intensity = (this.currentIsland.ambiance === "rain") ? 0.6 : 0.9; // Plus sombre s'il pleut
 
@@ -67,18 +65,17 @@ const IslandScene = {
         const shadowGenerator = new BABYLON.ShadowGenerator(2048, dirLight);
         shadowGenerator.useBlurExponentialShadowMap = true;
 
-        // 4. CHARGEMENT
         this.createOcean();
         this.loadIslandModel(shadowGenerator).then(() => {
             this.loadArrivalBoat(shadowGenerator);
             setTimeout(() => {
                 this.createInsects();
                 this.createInteractiveElements();
-                this.createAtmosphere(); // Lancement de la météo
+                this.createAtmosphere(); // lancer la météo
             }, 200);
         });
 
-        // 5. RENDU
+        // Render
         this.engine.runRenderLoop(() => {
             if (this.scene) {
                 this.animateScene();
@@ -119,14 +116,12 @@ const IslandScene = {
         window.addEventListener("resize", () => this.engine.resize());
     },
 
-    // GESTION DES AMBIANCES (MÉTÉO)
+    // Gestion des ambiances et météo
     createAtmosphere() {
         const type = this.currentIsland.ambiance;
         if (!type) return;
 
         this.disposeAtmosphere();
-
-        // Texture "Flare" générique
         const particleTexture = new BABYLON.Texture("https://www.babylonjs-playground.com/textures/flare.png", this.scene);
         if (!GameSettings.particles) return;
 
@@ -139,7 +134,7 @@ const IslandScene = {
 
         if (type === "snow") {
 
-            // --- NEIGE ---
+            // neige
             const snow = createSystem("snow", 5000);
             snow.emitter = new BABYLON.Vector3(0, 150, 0);
             snow.minEmitBox = new BABYLON.Vector3(-300, 0, -300);
@@ -155,7 +150,7 @@ const IslandScene = {
             snow.start();
         }
         else if (type === "pollen") {
-            // --- POLLEN & LUCIOLES ---
+            // pollen et lucioles
             const pollen = createSystem("pollen", 1000);
             pollen.emitter = new BABYLON.Vector3(0, 30, 0);
             pollen.minEmitBox = new BABYLON.Vector3(-100, 0, -100);
@@ -182,7 +177,7 @@ const IslandScene = {
         }
         else if (type === "rain") {
 
-            // --- PLUIE INTENSE ---
+            // Pluie
             const rain = createSystem("rain", 4000);
             rain.emitter = new BABYLON.Vector3(0, 100, 0);
             rain.minEmitBox = new BABYLON.Vector3(-150, 0, -150);
@@ -196,7 +191,6 @@ const IslandScene = {
             rain.minSize = 0.4;
             rain.maxSize = 0.8;
 
-            // Étirement pour faire des traits
             rain.isBillboardBased = false;
 
             rain.minLifeTime = 0.5;
@@ -211,9 +205,7 @@ const IslandScene = {
             rain.start();
         }
         else if (type === "wind") {
-            // --- OISEAUX & VENT (ARCHIPEL DES CIMES) ---
-
-            // 1. Feuilles / Poussière portées par le vent
+            // Feuilles / Poussière portées par le vent
             const wind = createSystem("windParticles", 500);
             wind.emitter = new BABYLON.Vector3(-200, 50, -50); // Vient de côté
             wind.minEmitBox = new BABYLON.Vector3(0, -50, -100);
@@ -237,7 +229,7 @@ const IslandScene = {
 
             wind.start();
 
-            // 2. Oiseaux au loin (Particules déformées)
+            // Oiseaux au loin (Particules déformées)
             const birds = createSystem("birds", 40);
             birds.emitter = new BABYLON.Vector3(0, 60, 0);
             birds.minEmitBox = new BABYLON.Vector3(-200, 0, -200);
@@ -266,7 +258,7 @@ const IslandScene = {
                     // Mouvement circulaire
                     particle.position.x += Math.cos(particle.age) * 0.5;
                     particle.position.z += Math.sin(particle.age) * 0.5;
-                    particle.position.y += Math.sin(particle.age * 3) * 0.1; // Battement léger
+                    particle.position.y += Math.sin(particle.age * 3) * 0.1; // Battement ailes
 
                     if (particle.age >= particle.lifeTime) {
                         this.recycleParticle(particle);
@@ -288,10 +280,6 @@ const IslandScene = {
             this.activeSystems = [];
         }
     },
-
-    // ─────────────────────────────────────────────────────────────────
-    // RESTE DU CODE STANDARD
-    // ─────────────────────────────────────────────────────────────────
 
     createOcean() {
         const waterMesh = BABYLON.MeshBuilder.CreateGround("ocean", { width: 2000, height: 2000, subdivisions: 120, updatable: true }, this.scene);
@@ -323,10 +311,8 @@ const IslandScene = {
                 const bScale = config.boatScale !== undefined ? config.boatScale : 15;
                 boatRoot.scaling = new BABYLON.Vector3(bScale, bScale, bScale);
 
-                // --- 1. GESTION DU CLIC SUR LE MESH ---
                 const boatActionManager = new BABYLON.ActionManager(this.scene);
 
-                // Animation curseur et bouton
                 boatActionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
                     document.body.style.cursor = "pointer";
                     if (this.btnCircle) {
@@ -343,7 +329,7 @@ const IslandScene = {
                         this.btnCircle.background = "rgba(255, 255, 255, 0.9)";
                     }
                 }));
-                // Clic
+
                 boatActionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
                     UIManager.showReturnMapConfirmation();
                 }));
@@ -356,25 +342,23 @@ const IslandScene = {
                     m.actionManager = boatActionManager;
                 });
 
-                // --- 2. CRÉATION DE L'UI MODERNE ---
                 this.guiTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-                // A. Le bouton rond (Floating Action Button style)
+                // Bouton bateau ancre
                 const circle = new BABYLON.GUI.Ellipse();
                 circle.width = "45px";
                 circle.height = "45px";
-                circle.color = "#ccc"; // Bordure très fine et discrète
+                circle.color = "#ccc";
                 circle.thickness = 1;
-                circle.background = "rgba(255, 255, 255, 0.9)"; // Blanc propre
+                circle.background = "rgba(255, 255, 255, 0.9)";
 
-                // On attache
+                // attacher les controles
                 this.guiTexture.addControl(circle);
                 circle.linkWithMesh(boatRoot);
-                circle.linkOffsetY = -70; // Position juste au dessus
+                circle.linkOffsetY = -70;
 
                 this.btnCircle = circle;
 
-                // B. L'icône FontAwesome
                 const icon = new BABYLON.GUI.TextBlock();
                 icon.text = "⚓";
                 icon.fontFamily = "Font Awesome 6 Free";
@@ -382,7 +366,7 @@ const IslandScene = {
                 icon.fontSize = 20;
                 circle.addControl(icon);
 
-                // C. Interactivité du bouton UI
+                // Interactivité du bouton UI
                 circle.isPointerBlocker = true;
                 circle.onPointerUpObservable.add(() => {
                     UIManager.showReturnMapConfirmation();
@@ -416,16 +400,12 @@ const IslandScene = {
                 const offset = this.currentIsland.modelOffset !== undefined ? this.currentIsland.modelOffset : 0;
                 root.position = new BABYLON.Vector3(0, offset, 0);
 
-                // --- RECENTRAGE AUTOMATIQUE ---
-                // On récupère la boîte englobante réelle de l'île
                 const hierarchy = root.getHierarchyBoundingVectors();
                 const center = hierarchy.max.add(hierarchy.min).scale(0.5);
 
-                // On force la caméra à regarder le CENTRE du modèle, pas le 0,0,0 de la scène
                 this.camera.setTarget(center);
-                this.camera.target = center; // On fixe le point de rotation ici
+                this.camera.target = center;
 
-                // On ajuste le rayon de la caméra en fonction de la taille réelle
                 const size = hierarchy.max.subtract(hierarchy.min);
                 const maxDim = Math.max(size.x, size.y, size.z);
                 this.camera.radius = maxDim * 1.5;
@@ -496,7 +476,6 @@ const IslandScene = {
     createInteractiveElements() {
         if (!this.currentIsland.interactiveElements) return;
 
-        // On s'assure que la texture GUI existe et est au premier plan
         if (!this.guiTexture) {
             this.guiTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI_INTERACTIVE");
         }
@@ -518,7 +497,6 @@ const IslandScene = {
             const size = data.radius || 3;
 
             const setupInteraction = (parentMesh) => {
-                // Hitbox (inchangée)
                 const hitBox = BABYLON.MeshBuilder.CreateBox("hit_" + data.id, { width: size, height: size, depth: size }, this.scene);
                 hitBox.position = parentMesh ? parentMesh.position.clone() : finalPosition;
                 hitBox.position.y += size / 2;
@@ -533,11 +511,12 @@ const IslandScene = {
                     pulseCircle.color = "white";
                     pulseCircle.thickness = 1;
                     pulseCircle.alpha = 0.8;
+
                     this.guiTexture.addControl(pulseCircle);
+
                     pulseCircle.linkWithMesh(hitBox);
                     pulseCircle.linkOffsetY = data.uiOffset !== undefined ? data.uiOffset : -60;
 
-                    // Animation du pouls (Boucle infinie)
                     let pulseAnim = 0;
                     const pulseObserver = this.scene.onBeforeRenderObservable.add(() => {
                         pulseAnim += 0.03;
@@ -547,7 +526,7 @@ const IslandScene = {
                         pulseCircle.alpha = 0.8 - (scale - 1) * 1.5;
 
                         if (pulseCircle.alpha <= 0) {
-                            pulseAnim = 0; // reset pour la boucle
+                            pulseAnim = 0;
                         }
                     });
 
@@ -593,7 +572,6 @@ const IslandScene = {
                     UIManager.showInteractiveModal(data);
                 }));
                 hitBox.actionManager = actionManager;
-                // Hover sur le cube rouge pour le curseur
                 actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
                     document.body.style.cursor = "pointer";
                 }));

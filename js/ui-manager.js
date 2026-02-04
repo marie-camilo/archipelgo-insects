@@ -8,7 +8,7 @@ const UIManager = {
         const tooltip = document.getElementById("island-tooltip");
         if(!tooltip) return;
 
-        // Récupération du moteur actif (Map ou Island)
+        // récupération du moteur actif (Map ou Island)
         const engine = MapScene.engine || IslandScene.engine;
         const scene = MapScene.scene || IslandScene.scene;
         const camera = MapScene.camera || IslandScene.camera;
@@ -23,31 +23,29 @@ const UIManager = {
             camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
         );
 
-        // Calcul Progression
+        // calcul Progression
         const discovered = JOURNAL_STATE.discoveredInsects.filter(
             id => islandData.insects.some(i => i.id === id)
         ).length;
         const total = islandData.insects.length;
         const percent = (discovered / total) * 100;
 
-        // Configuration Icone Font Awesome & Couleur
         let iconClass = "fa-leaf";
-        let iconColor = "#81c784"; // Vert défaut
+        let iconColor = "#81c784";
 
         if(islandData.id === "aquatic") {
             iconClass = "fa-water";
-            iconColor = "#4fc3f7"; // Bleu clair
+            iconColor = "#4fc3f7";
         }
         else if(islandData.id === "winter") {
             iconClass = "fa-snowflake";
-            iconColor = "#90caf9"; // Bleu glace
+            iconColor = "#90caf9";
         }
         else if(islandData.id === "pollinators") {
             iconClass = "fa-spa";
-            iconColor = "#f48fb1"; // Rose
+            iconColor = "#f48fb1";
         }
 
-        // Injection HTML
         tooltip.innerHTML = `
             <div class="tooltip-title">
                 <span class="eco-icon" style="color: ${iconColor}; background: ${iconColor}20;">
@@ -65,7 +63,6 @@ const UIManager = {
             </div>
         `;
 
-        // Positionnement
         tooltip.style.left = screenPos.x + "px";
         tooltip.style.top = screenPos.y + "px";
         tooltip.classList.add("visible");
@@ -96,7 +93,7 @@ const UIManager = {
         if (modal.classList.contains("visible")) {
             modal.classList.remove("visible");
         } else {
-            // On ferme l'aide si elle est ouverte pour éviter la superposition
+            // ferme l'aide si elle est ouverte : éviter la superposition
             const helpModal = document.getElementById("global-help-modal");
             if(helpModal) helpModal.classList.remove("visible");
 
@@ -210,18 +207,13 @@ const UIManager = {
         confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
 
         newBtn.onclick = () => {
-            // 1. Fermer la modale visuellement
             this.closeIslandConfirmation();
 
             const portPos = new BABYLON.Vector3(40, 0, 50);
 
             if (MapScene) {
                 MapScene.zoomToBaseCamp(portPos, () => {
-                    // 2. AVANT de partir : on libère le verrou de navigation
-                    // Cela permet au retour sur la map d'être interactif
                     MapScene.isNavigating = false;
-
-                    // 3. Lancer le voyage
                     ArchipelagoApp.selectIsland(islandData.id);
                 });
             }
@@ -240,14 +232,12 @@ const UIManager = {
         if(!modal) return;
 
         const confirmBtn = document.getElementById("btn-confirm-return-map");
-
-        // On clone pour éviter de cumuler les event listeners
         const newBtn = confirmBtn.cloneNode(true);
         confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
 
         newBtn.onclick = () => {
             this.closeReturnMapConfirmation();
-            ArchipelagoApp.returnToMap(); // Appelle la fonction de retour globale
+            ArchipelagoApp.returnToMap();
         };
 
         modal.classList.add("visible");
@@ -321,7 +311,6 @@ const UIManager = {
         const panel = document.getElementById("right-panel");
         if (!panel) return;
 
-        // A. Remplissage texte
         document.getElementById("insect-name").textContent = insectData.name;
         document.getElementById("insect-scientific").textContent = insectData.scientific;
         document.getElementById("insect-taxonomy").textContent = insectData.taxonomy || "";
@@ -329,7 +318,7 @@ const UIManager = {
         document.getElementById("insect-habitat").textContent = insectData.habitat;
         document.getElementById("insect-anecdote").textContent = insectData.anecdote;
 
-        // B. Gestion du badge de statut
+        // Gestion du badge de statut
         const statusBadge = document.getElementById("insect-status");
         const statusText = insectData.status.toLowerCase();
         statusBadge.classList.remove('status-safe', 'status-warning', 'status-danger');
@@ -343,7 +332,7 @@ const UIManager = {
         }
         statusBadge.querySelector('span:last-child').textContent = insectData.status;
 
-        // C. LANCEMENT DE LA PREVIEW 3D
+        // preview 3D
         this.initInsectPreview(insectData);
 
         panel.classList.add("open");
@@ -353,7 +342,7 @@ const UIManager = {
         const panel = document.getElementById("right-panel");
         if (panel) panel.classList.remove("open");
 
-        // Arrêter le moteur de preview pour économiser les ressources
+        // arreter moteur de preview pour économiser les ressources
         if (this.previewEngine) {
             this.previewEngine.stopRenderLoop();
         }
@@ -363,10 +352,8 @@ const UIManager = {
         const container = document.getElementById("insect-preview");
         if (!container) return;
 
-        // A. Nettoyage
         container.innerHTML = "";
 
-        // B. Création Canvas
         const canvas = document.createElement("canvas");
         canvas.style.width = "100%";
         canvas.style.height = "100%";
@@ -383,17 +370,17 @@ const UIManager = {
         `;
         container.appendChild(hintDiv);
 
-        // C. Moteur (Singleton)
+        // Moteur (Singleton)
         if (this.previewEngine) {
             this.previewEngine.dispose();
         }
         this.previewEngine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
 
-        // D. Scène
+        // Scène
         this.previewScene = new BABYLON.Scene(this.previewEngine);
         this.previewScene.clearColor = new BABYLON.Color4(0, 0, 0, 0); // Transparent
 
-        // E. Caméra
+        // Caméra
         this.previewCamera = new BABYLON.ArcRotateCamera("previewCam", 0, Math.PI / 2.5, 5, BABYLON.Vector3.Zero(), this.previewScene);
         this.previewCamera.attachControl(canvas, true);
         this.previewCamera.wheelPrecision = 50;
@@ -405,13 +392,13 @@ const UIManager = {
         canvas.addEventListener("pointerdown", () => canvas.style.cursor = "grabbing");
         canvas.addEventListener("pointerup", () => canvas.style.cursor = "grab");
 
-        // F. Lumières
+        // Lumières
         const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), this.previewScene);
         light.intensity = 1.2;
         const dirLight = new BABYLON.DirectionalLight("dir", new BABYLON.Vector3(1, -1, 1), this.previewScene);
         dirLight.intensity = 1.5;
 
-        // G. Chargement Modèle
+        // Chargement Modèle
         const filename = insectData.modelFile || "sphere.glb";
 
         BABYLON.SceneLoader.ImportMeshAsync("", "./assets/insects/", filename, this.previewScene)
@@ -419,7 +406,6 @@ const UIManager = {
                 const root = result.meshes[0];
                 this.currentPreviewMesh = root;
 
-                // Normalisation Taille
                 const boundingInfo = root.getHierarchyBoundingVectors();
                 const sizeVec = boundingInfo.max.subtract(boundingInfo.min);
                 const maxDimension = Math.max(sizeVec.x, sizeVec.y, sizeVec.z);
@@ -435,23 +421,19 @@ const UIManager = {
             })
             .catch((err) => {
                 console.warn("Erreur preview:", err);
-                // Fallback cube si erreur de chargement
                 const box = BABYLON.MeshBuilder.CreateBox("box", {size: 2}, this.previewScene);
                 const mat = new BABYLON.StandardMaterial("m", this.previewScene);
                 mat.diffuseColor = BABYLON.Color3.Red();
                 box.material = mat;
             });
 
-        // H. Boucle de rendu
+        // Boucle de rendu
         this.previewEngine.runRenderLoop(() => {
             if (this.previewScene) {
-                // Rotation auto lente si l'utilisateur ne touche pas (optionnel)
-                // if (this.currentPreviewMesh) this.currentPreviewMesh.rotation.y += 0.002;
                 this.previewScene.render();
             }
         });
 
-        // I. Resize (Important si la fenêtre change de taille)
         window.addEventListener("resize", () => {
             if(this.previewEngine) this.previewEngine.resize();
         });

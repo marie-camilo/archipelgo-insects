@@ -4,7 +4,6 @@ const ArchipelagoApp = {
   selectedInsect: null,
 
   init() {
-    console.log("🏝️ L'Archipel des Insectes - Initialisation");
     JournalManager.init();
     this.showMap();
 
@@ -30,7 +29,6 @@ const ArchipelagoApp = {
   },
 
   showMap() {
-    console.log("📍 Activation de l'écran Carte...");
     this.showScreen("map-view");
 
     setTimeout(() => {
@@ -45,34 +43,29 @@ const ArchipelagoApp = {
   selectIsland(islandId) {
     this.currentIsland = islandId;
 
-    // --- LOGIQUE VOYAGE RAPIDE (Si animation désactivée) ---
+    // Voyage et scène du bateau avec settings de désactivation
     if (typeof GameSettings !== 'undefined' && !GameSettings.boatAnim) {
-      console.log("⚡ Voyage rapide activé : saut de la scène du bateau.");
 
-      // On lance directement l'exploration
-      // On met un tout petit délai (100ms) juste pour laisser le temps au navigateur de respirer
       setTimeout(() => {
         this.exploreIsland(islandId);
       }, 100);
 
-      return; // On arrête la fonction ici, on ne joue pas la suite
+      return;
     }
 
-    // --- LOGIQUE CINÉMATIQUE (Si animation activée) ---
     this.showScreen("boat-travel");
 
     const island = ISLANDS_DATA.find(i => i.id === islandId);
-    // Petit check de sécurité
     if(document.getElementById("travel-text")) {
       document.getElementById("travel-text").textContent = `Cap vers ${island.name}...`;
     }
 
-    // On lance la scène du bateau
+    // lancement de la scène du bateau
     setTimeout(() => {
       if (typeof BoatScene !== 'undefined') BoatScene.init();
     }, 100);
 
-    // On attend 5 secondes avant d'arriver
+    // la scène dure 5sec
     setTimeout(() => {
       this.exploreIsland(islandId);
     }, 5000);
@@ -165,20 +158,6 @@ const ArchipelagoApp = {
       MapScene.init();
     }, 100);
   },
-
-  // restart() {
-  //   JOURNAL_STATE.discoveredInsects = [];
-  //   JOURNAL_STATE.exploredIslands = [];
-  //   ISLANDS_DATA.forEach(island => island.status = "unexplored");
-  //
-  //   if (MapScene.scene) MapScene.dispose();
-  //   if (BoatScene.scene) BoatScene.dispose();
-  //   if (IslandScene.scene) IslandScene.dispose();
-  //
-  //   JournalManager.init();
-  //
-  //   this.showMap();
-  // },
 
   restart() {
     const victoryScreen = document.getElementById("conclusion-screen");

@@ -35,24 +35,21 @@ const MapScene = {
     realBirds: [],
     time: 0,
     isNavigating: false,
-
-    // Variables océan
     waterMesh: null,
     basePositions: null,
 
     init() {
-        console.log("🗺️ MapScene.init() starting...");
         const canvas = document.getElementById("renderCanvas");
         if (!canvas) return;
 
         this.engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
         this.scene = new BABYLON.Scene(this.engine);
 
-        // --- AMBIANCE ---
+        // Ambiance
         const skyColor = new BABYLON.Color3(0.65, 0.85, 0.95);
         this.scene.clearColor = new BABYLON.Color4(skyColor.r, skyColor.g, skyColor.b, 1);
 
-        // Brouillard Linéaire
+        // Brouillard
         this.scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR;
         this.scene.fogStart = 60.0;
         this.scene.fogEnd = 300.0;
@@ -61,7 +58,7 @@ const MapScene = {
         const gl = new BABYLON.GlowLayer("glow", this.scene);
         gl.intensity = 0.3;
 
-        // --- CAMÉRA ---
+        // Caméra réglages
         this.camera = new BABYLON.ArcRotateCamera("camera", -Math.PI/2, 1.2, 90, BABYLON.Vector3.Zero(), this.scene);
         this.camera.attachControl(canvas, true);
         this.camera.panningSensibility = 150;
@@ -72,7 +69,7 @@ const MapScene = {
         this.camera.useAutoRotationBehavior = true;
         this.camera.autoRotationBehavior.idleRotationSpeed = 0.05;
 
-        // --- LUMIÈRES ---
+        // Lumières
         const hemiLight = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(0, 1, 0), this.scene);
         hemiLight.intensity = 0.8;
 
@@ -85,19 +82,18 @@ const MapScene = {
         const shadowGenerator = new BABYLON.ShadowGenerator(2048, dirLight);
         shadowGenerator.useBlurExponentialShadowMap = true;
 
-        // --- CRÉATION DU MONDE ---
+        // Création monde
         this.createOcean();
         this.loadBaseCamp(shadowGenerator);
         this.loadIslands(shadowGenerator);
         this.loadDecor(shadowGenerator);
-        this.createBirds(); // Particules (ambiance)
-        this.loadRealBirds(); // Vrais modèles 3D (modifié)
+        this.createBirds();
+        this.loadRealBirds();
 
         // UI
         const mapUI = document.querySelector('.map-ui-bottom');
         if(mapUI) mapUI.style.opacity = "1";
 
-        // --- BOUCLE ---
         this.engine.runRenderLoop(() => {
             if (this.scene) {
                 this.animateEnvironment();
@@ -187,12 +183,10 @@ const MapScene = {
             // Clic -> Zoom
             mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
                 if (this.isNavigating) return;
-                // On zoome vers le centre du port (pivot) même si on clique sur le bateau
                 this.zoomToBaseCamp(pivot.absolutePosition.clone(), null);
             }));
         };
 
-        // On applique la logique aux deux hitboxes
         setupInteraction(hitBoxPort);
         setupInteraction(hitBoxBoat);
     },
@@ -201,7 +195,7 @@ const MapScene = {
         DECOR_DATA.forEach((item, i) => {
             const pivot = new BABYLON.TransformNode("decor_" + i, this.scene);
 
-            // On récupère la position Y définie dans les données, sinon -1 par défaut
+            //  récupère la position Y définie dans les données, sinon -1 par défaut
             const baseY = item.pos.y !== undefined ? item.pos.y : -1;
 
             pivot.position = new BABYLON.Vector3(item.pos.x, baseY, item.pos.z);
@@ -218,7 +212,7 @@ const MapScene = {
                     if(m.material) m.material.fogEnabled = false;
                 });
 
-                // On stocke le baseY pour l'animation
+                // stocke le baseY pour l'animation
                 this.decorMeshes.push({ pivot: pivot, offset: Math.random() * 100, baseY: baseY });
             });
         });
@@ -255,53 +249,53 @@ const MapScene = {
                 this.islands[index].baseScaleVector = baseScaleVector;
             }).catch((err) => console.error("Erreur chargement modèle:", islandData.modelFile, err));
 
-            // Gestion Events (Tooltip, Click...) identique
             hitBox.actionManager = new BABYLON.ActionManager(this.scene);
             hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
                 if (this.isNavigating) return; document.body.style.cursor = "pointer";
                 const item = this.islands[index];
+
                 if(item && item.visualMesh) {
                     this.scene.stopAnimation(item.visualMesh);
                     const targetScale = item.baseScaleVector.scale(1.15);
                     BABYLON.Animation.CreateAndStartAnimation("grow", item.visualMesh, "scaling", 60, 15, item.visualMesh.scaling, targetScale, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, new BABYLON.CubicEase());
                 }
+
                 if (typeof UIManager !== 'undefined') UIManager.showIslandTooltip(islandData, hitBox);
+
             }));
             hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
                 document.body.style.cursor = "default";
+
                 const item = this.islands[index];
+
                 if(item && item.visualMesh) {
                     this.scene.stopAnimation(item.visualMesh);
                     BABYLON.Animation.CreateAndStartAnimation("shrink", item.visualMesh, "scaling", 60, 15, item.visualMesh.scaling, item.baseScaleVector, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, new BABYLON.CubicEase());
                 }
+
                 if (typeof UIManager !== 'undefined') UIManager.hideIslandTooltip();
             }));
             hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
                 if (this.isNavigating) return; UIManager.showIslandConfirmation(islandData);
             }));
 
-            // Ajout du baseY dans l'objet stocké
             this.islands.push({ pivot: pivot, data: islandData, offset: index, visualMesh: null, baseScaleVector: null, baseY: baseY });
         });
     },
 
-    // --- FAUX OISEAUX (PARTICULES) ---
-    // --- FAUX OISEAUX (PARTICULES) : Plus petits et discrets ---
+    // création oiseaux
     createBirds() {
         const birdSystem = new BABYLON.ParticleSystem("birds", 200, this.scene);
         birdSystem.particleTexture = new BABYLON.Texture("https://www.babylonjs-playground.com/textures/flare.png", this.scene);
 
-        birdSystem.emitter = new BABYLON.Vector3(0, 20, 0); // Un peu plus haut pour la discrétion
+        birdSystem.emitter = new BABYLON.Vector3(0, 20, 0);
         birdSystem.minEmitBox = new BABYLON.Vector3(-150, 0, -150);
         birdSystem.maxEmitBox = new BABYLON.Vector3(150, 10, 150);
-
-        // MODIFICATION : Taille réduite (0.2 à 0.5 au lieu de 0.6 à 1.2)
         birdSystem.minSize = 0.2;
         birdSystem.maxSize = 0.5;
 
         birdSystem.isBillboardBased = true;
 
-        // MODIFICATION : Couleur légèrement plus transparente pour être discret
         birdSystem.color1 = new BABYLON.Color4(1, 1, 1, 0.6);
         birdSystem.color2 = new BABYLON.Color4(0.8, 0.8, 0.8, 0.6);
         birdSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0.0);
@@ -328,34 +322,21 @@ const MapScene = {
         birdSystem.start();
     },
 
-    // --- VRAIS OISEAUX (VOL LINÉAIRE CORRIGÉ) ---
+    // Animation et chargement des models 3D oiseaux
     loadRealBirds() {
         const lanes = [-20, 10, 40]; // Profondeur de vol
 
         for(let i=0; i<3; i++) {
             BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", "flying-bird.glb", this.scene).then((result) => {
                 const birdMesh = result.meshes[0];
-
-                // 1. CRÉATION D'UN CONTENEUR (C'est lui qui va voler)
                 const birdRoot = new BABYLON.TransformNode("birdRoot" + i, this.scene);
 
-                // 2. PLACEMENT DE L'OISEAU DANS LE CONTENEUR
                 birdMesh.parent = birdRoot;
-
-                // 3. CORRECTION DE LA ROTATION (LA CLÉ EST ICI)
-                // On vide le Quaternion pour pouvoir utiliser la rotation normale
                 birdMesh.rotationQuaternion = null;
-
-                // On tourne l'oiseau de 90° dans son conteneur pour qu'il regarde vers la droite
                 birdMesh.rotation.y = Math.PI / 2;
-
-                // 4. TAILLE ET POSITIONS
                 birdMesh.scaling = new BABYLON.Vector3(6, 6, 6);
-
-                // On positionne le CONTENEUR au départ (à gauche de l'écran)
                 birdRoot.position = new BABYLON.Vector3(-250 - (i * 50), 2 + (i * 3), lanes[i]);
 
-                // Correction Fog
                 result.meshes.forEach(m => {
                     if(m.material) m.material.fogEnabled = false;
                 });
@@ -366,7 +347,6 @@ const MapScene = {
                     result.animationGroups[0].play(true);
                 }
 
-                // On stocke le CONTENEUR (birdRoot) pour le déplacer, pas le mesh
                 this.realBirds.push({
                     root: birdRoot,
                     speed: 0.4 + (Math.random() * 0.2)
@@ -401,7 +381,6 @@ const MapScene = {
     },
 
     resetNavigation() {
-        console.log("Retour vue carte");
         this.isNavigating = false;
         this.camera.attachControl(document.getElementById("renderCanvas"), true);
         this.camera.lowerRadiusLimit = 25;
@@ -415,7 +394,7 @@ const MapScene = {
     animateEnvironment() {
         this.time += 0.005;
 
-        // ANIMATION OCÉAN
+        // Aniamtion océan
         if (this.waterMesh && this.basePositions) {
             const positions = [...this.basePositions];
             for (let i = 0; i < positions.length; i += 3) {
@@ -430,10 +409,9 @@ const MapScene = {
             this.waterMesh.createNormals(false);
         }
 
-        // ÎLES (PRINCIPALES)
+        // iles
         this.islands.forEach((obj) => {
             if (obj.pivot) {
-                // On vérifie si GameSettings existe, sinon on force à true par défaut
                 const animEnabled = (typeof GameSettings !== 'undefined') ? GameSettings.islandAnim : true;
 
                 if (animEnabled) {
@@ -447,7 +425,7 @@ const MapScene = {
             }
         });
 
-        // DÉCOR (BACKGROUND)
+        // Décor et background
         this.decorMeshes.forEach((obj) => {
             if (obj.pivot) {
                 const currentBaseY = obj.baseY !== undefined ? obj.baseY : -1;
@@ -455,9 +433,8 @@ const MapScene = {
             }
         });
 
-        // VRAIS OISEAUX
+        // Oiseaux animés avec models 3D
         this.realBirds.forEach(bird => {
-            // On déplace le birdRoot (le conteneur)
             if(bird.root) {
                 bird.root.position.x += bird.speed;
 
@@ -469,7 +446,7 @@ const MapScene = {
             }
         });
 
-        // BATEAU
+        // bateau
         if (this.boatMesh) {
             this.boatMesh.rotation.x = Math.sin(this.time * 0.5) * 0.03;
             this.boatMesh.rotation.z = Math.cos(this.time * 0.3) * 0.03;

@@ -1,11 +1,10 @@
 const GameSettings = {
-    // État par défaut
+    // etat par défaut
     boatAnim: true,
     particles: true,
     islandAnim: true,
 
     init() {
-        // Charger depuis le localStorage si dispo
         const saved = localStorage.getItem('archipelago_settings');
         if (saved) {
             const parsed = JSON.parse(saved);
@@ -21,11 +20,11 @@ const GameSettings = {
             this[key] = !this[key];
             this.save();
 
-            // Effet immédiat : Si on désactive les particules, on nettoie l'atmosphère
+            // settings de désactivation des particules
             if (key === 'particles' && !this.particles && typeof IslandScene !== 'undefined') {
                 IslandScene.disposeAtmosphere();
             }
-            // Si on réactive, on relance
+            // settings réactivés
             if (key === 'particles' && this.particles && typeof IslandScene !== 'undefined') {
                 IslandScene.createAtmosphere();
             }
@@ -41,7 +40,7 @@ const GameSettings = {
     },
 
     updateUI() {
-        // Met à jour les checkbox HTML au démarrage
+        // mise à jour des checkbox HTML au démarrage
         const elBoat = document.getElementById('toggle-boat-anim');
         const elPart = document.getElementById('toggle-particles');
         const elIsland = document.getElementById('toggle-island-anim');
@@ -52,7 +51,7 @@ const GameSettings = {
     }
 };
 
-// Initialisation au chargement
+// init
 document.addEventListener('DOMContentLoaded', () => {
     GameSettings.init();
 });

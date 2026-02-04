@@ -3,30 +3,27 @@ const JournalManager = {
     previewScene: null,
     previewCamera: null,
 
-    // Initialisation au lancement de l'application
     init() {
-        console.log("Journal Manager initialized");
         this.renderJournalGrid();
         this.updateJournalStats();
 
-        // Gestionnaire de redimensionnement pour la modale 3D
+        // redimensionner la modale
         window.addEventListener("resize", () => {
             if (this.previewEngine) this.previewEngine.resize();
         });
     },
 
-    // Génère la grille des insectes (Découverts vs Verrouillés)
+    // génréer la grille des insectes découverts
     renderJournalGrid() {
         const grid = document.getElementById("journal-grid");
         if (!grid) return;
 
         grid.innerHTML = "";
 
-        // On aplatit la structure pour avoir une liste simple de tous les insectes
         const allInsects = [];
         ISLANDS_DATA.forEach(island => {
             island.insects.forEach(insect => {
-                insect.islandId = island.id; // On garde une référence à l'île
+                insect.islandId = island.id; // ref à l'ile
                 allInsects.push(insect);
             });
         });
@@ -38,16 +35,16 @@ const JournalManager = {
             card.className = `journal-item ${isDiscovered ? '' : 'locked'}`;
 
             if (isDiscovered) {
-                // Carte verrouillée
+                // carte verrouillée
                 card.innerHTML = `
                     <div class="journal-item-icon">${insect.icon}</div>
                     <div class="journal-item-name">${insect.name}</div>
                     <div class="journal-item-scientific">${insect.scientific}</div>
                 `;
-                // Au clic : Ouvre la modale 3D
+                // ouverture de la modale 3D au click
                 card.onclick = () => this.showInsectDetails(insect);
             } else {
-                // Carte verrouillée
+                // carte verrouillée
                 card.innerHTML = `
                     <div class="journal-item-icon" style="filter:grayscale(1); opacity:0.3">❓</div>
                     <div class="journal-item-name">???</div>
@@ -64,7 +61,6 @@ const JournalManager = {
         const discoveredCount = JOURNAL_STATE.discoveredInsects.length;
         const exploredIslandsCount = JOURNAL_STATE.exploredIslands.length;
 
-        // Mise à jour UI Journal
         const elements = {
             total: document.getElementById("total-insects"),
             disc: document.getElementById("total-discovered"),
@@ -81,7 +77,7 @@ const JournalManager = {
         if(finalIslands) finalIslands.textContent = exploredIslandsCount;
     },
 
-    //Ajoute un insecte découvert et sauvegarde
+    // ajout d'un insecte découvert et sauvegarde
     addInsect(insectId) {
         if (!JOURNAL_STATE.discoveredInsects.includes(insectId)) {
             JOURNAL_STATE.discoveredInsects.push(insectId);
@@ -89,7 +85,7 @@ const JournalManager = {
             this.renderJournalGrid();
             this.updateJournalStats();
 
-            // Sauvegarde dans le navigateur
+            // sauvegarde dans le navigateur
             localStorage.setItem('archipelago_save', JSON.stringify(JOURNAL_STATE));
             console.log(`Insecte découvert sauvegardé : ${insectId}`);
 
@@ -97,14 +93,12 @@ const JournalManager = {
         }
     },
 
+    // modale de victoire si tous les insectes sont découverts
     checkVictoryCondition() {
-        // 1. Calculer le total
         const allInsectsCount = ISLANDS_DATA.reduce((acc, island) => acc + island.insects.length, 0);
         const discoveredCount = JOURNAL_STATE.discoveredInsects.length;
 
-        // 2. Si on a tout trouvé
         if (discoveredCount >= allInsectsCount) {
-            // Petit délai pour laisser le temps de voir l'animation de découverte
             setTimeout(() => {
                 this.triggerVictoryScreen();
             }, 1500);
@@ -115,7 +109,6 @@ const JournalManager = {
         const screen = document.getElementById("conclusion-screen");
         if (!screen) return;
 
-        // 1. Textes
         const title = screen.querySelector(".conclusion-title");
         const msg = screen.querySelector(".conclusion-message");
 
@@ -131,23 +124,17 @@ const JournalManager = {
             `;
         }
 
-        // 2. Affichage avec classe Active (pour l'anim CSS)
         screen.classList.add("active");
 
-        // 3. CONFETTIS !! (La partie fun)
-        this.fireConfetti();
+        this.fireConfetti(); // affichage des confettis
     },
 
+    // Animation des confettis
     fireConfetti() {
-        // Un tir central explosif continu
         if (typeof confetti === 'function') {
             const duration = 3000;
             const end = Date.now() + duration;
-
-            // Couleurs de l'archipel
             const colors = ['#1976d2', '#81c784', '#ffd54f'];
-
-            // ON DÉFINIT UN Z-INDEX TRÈS HAUT (supérieur à 3000 de l'overlay)
             const confettiZIndex = 4000;
 
             (function frame() {
@@ -158,17 +145,16 @@ const JournalManager = {
                     spread: 55,
                     origin: { x: 0 },
                     colors: colors,
-                    zIndex: confettiZIndex // <--- AJOUT ICI
+                    zIndex: confettiZIndex
                 });
 
-                // Canon de droite
                 confetti({
                     particleCount: 5,
                     angle: 120,
                     spread: 55,
                     origin: { x: 1 },
                     colors: colors,
-                    zIndex: confettiZIndex // <--- ET ICI
+                    zIndex: confettiZIndex
                 });
 
                 if (Date.now() < end) {
@@ -178,13 +164,12 @@ const JournalManager = {
         }
     },
 
-    // Appelle cette fonction depuis la console F12 pour tester : JournalManager.debugVictory()
+    // console F12 pour tester : JournalManager.debugVictory()
     debugVictory() {
         console.log("DEBUG: Lancement forcé de la victoire");
         this.triggerVictoryScreen();
     },
 
-    // GESTION DE LA MODALE & PRÉVISUALISATION 3D
     showInsectDetails(insectData) {
         const modal = document.getElementById("journal-modal");
         if(!modal) return;
@@ -197,16 +182,14 @@ const JournalManager = {
 
         const detailsContainer = modal.querySelector(".modal-data");
 
-        // couleur du badge selon le statut
-        let statusColor = "#2ecc71"; // Vert
+        let statusColor = "#2ecc71";
         const statusLower = insectData.status.toLowerCase();
-        if(statusLower.includes("danger") || statusLower.includes("menacé") || statusLower.includes("disparition")) statusColor = "#e74c3c"; // Rouge
-        if(statusLower.includes("vulnérable") || statusLower.includes("surveillance")) statusColor = "#f39c12"; // Orange
+        if(statusLower.includes("danger") || statusLower.includes("menacé") || statusLower.includes("disparition")) statusColor = "#e74c3c";
+        if(statusLower.includes("vulnérable") || statusLower.includes("surveillance")) statusColor = "#f39c12";
 
         const existingH2 = detailsContainer.querySelector("h2").outerHTML;
         const existingP = detailsContainer.querySelector(".modal-taxonomy").outerHTML;
 
-        // Dans JournalManager.showInsectDetails
         detailsContainer.innerHTML = `
     ${existingH2}
     ${existingP}
@@ -228,16 +211,13 @@ const JournalManager = {
     </div>
 `;
 
-        // AFFICHER LA MODALE
         modal.classList.add("active");
 
-        // INITIALISER LA 3D (COLONNE GAUCHE)
         setTimeout(() => {
             this.init3DPreview(insectData);
         }, 50);
     },
 
-    // Ferme la modale
     closeModal() {
         const modal = document.getElementById("journal-modal");
         if(modal) modal.classList.remove("active");
@@ -245,14 +225,11 @@ const JournalManager = {
         this.dispose3DPreview();
     },
 
-    /**
-     * Crée une scène BabylonJS dédiée à la prévisualisation de l'insecte
-     */
+    //creation d'une scène pour prévisualiser l'insecte
     init3DPreview(insectData) {
         const container = document.getElementById("journal-3d-container");
         if (!container) return;
 
-        // Nettoyage préventif
         container.innerHTML = "";
         this.dispose3DPreview();
 
@@ -263,26 +240,23 @@ const JournalManager = {
         canvas.style.outline = "none";
         container.appendChild(canvas);
 
-        // Initialisation Moteur
         this.previewEngine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
         this.previewScene = new BABYLON.Scene(this.previewEngine);
-        this.previewScene.clearColor = new BABYLON.Color4(0, 0, 0, 0); // Fond Transparent
+        this.previewScene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
 
-        // Caméra (Auto-rotation activée)
-        // Radius 6 pour avoir un peu de recul
         this.previewCamera = new BABYLON.ArcRotateCamera("journalCam", 0, Math.PI / 2.5, 6, BABYLON.Vector3.Zero(), this.previewScene);
         this.previewCamera.attachControl(canvas, true);
         this.previewCamera.wheelPrecision = 50;
         this.previewCamera.lowerRadiusLimit = 2;
         this.previewCamera.upperRadiusLimit = 15;
-        this.previewCamera.useAutoRotationBehavior = true; // L'insecte tourne tout seul
+        this.previewCamera.useAutoRotationBehavior = true;
 
         // Config de l'auto-rotation
         if(this.previewCamera.autoRotationBehavior) {
             this.previewCamera.autoRotationBehavior.idleRotationSpeed = 0.5;
         }
 
-        // Lumières (Studio)
+        // Lumières
         const hemi = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), this.previewScene);
         hemi.intensity = 1.0;
         const dir = new BABYLON.DirectionalLight("dir", new BABYLON.Vector3(1, -1, 1), this.previewScene);
@@ -294,20 +268,14 @@ const JournalManager = {
         BABYLON.SceneLoader.ImportMeshAsync("", "./assets/insects/", filename, this.previewScene)
             .then((result) => {
                 const root = result.meshes[0];
-
-                // --- NORMALISATION INTELLIGENTE ---
-                // Calcule la boite englobante pour redimensionner l'insecte parfaitement
                 const boundingInfo = root.getHierarchyBoundingVectors();
                 const sizeVec = boundingInfo.max.subtract(boundingInfo.min);
                 const maxDimension = Math.max(sizeVec.x, sizeVec.y, sizeVec.z);
-
-                // On veut que l'insecte fasse environ 4 unités dans la scène
                 const targetSize = 4;
                 const scaleFactor = targetSize / maxDimension;
 
                 root.scaling = new BABYLON.Vector3(scaleFactor, scaleFactor, scaleFactor);
 
-                // Centrage : on déplace l'insecte pour que son centre soit à (0,0,0)
                 const center = boundingInfo.max.add(boundingInfo.min).scale(0.5);
                 root.position = center.scale(-1 * scaleFactor);
             })
@@ -321,9 +289,6 @@ const JournalManager = {
         });
     },
 
-    /**
-     * Nettoyage propre de BabylonJS
-     */
     dispose3DPreview() {
         if (this.previewEngine) {
             this.previewEngine.stopRenderLoop();
@@ -335,7 +300,6 @@ const JournalManager = {
     }
 };
 
-// CHARGEMENT INITIAL DE LA SAUVEGARDE
 (function loadSaveGame() {
     const savedData = localStorage.getItem('archipelago_save');
     if (savedData) {
@@ -343,7 +307,7 @@ const JournalManager = {
             const parsed = JSON.parse(savedData);
             if(parsed.discoveredInsects) JOURNAL_STATE.discoveredInsects = parsed.discoveredInsects;
             if(parsed.exploredIslands) JOURNAL_STATE.exploredIslands = parsed.exploredIslands;
-            console.log("💾 Sauvegarde chargée avec succès.");
+            console.log("Sauvegarde chargée avec succès.");
         } catch (e) {
             console.error("Erreur lecture sauvegarde:", e);
         }

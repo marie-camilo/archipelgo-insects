@@ -105,12 +105,9 @@ const BoatScene = {
         // Configuration du travelling
         const startAlpha = Math.PI / 2.8;
         const endAlpha = Math.PI / 1.2;
-
-        // CORRECTION ICI : On regarde un peu plus de haut pour éviter les vagues
-        const startBeta = 1.1; // Vue plus plongeante au début
-        const endBeta = 1.3;   // Fin pas trop basse (avant c'était 1.45)
-
-        const startRadius = 25; // On recule un peu plus au début
+        const startBeta = 1.1;
+        const endBeta = 1.3;
+        const startRadius = 25;
         const endRadius = 18;
 
         const animAlpha = new BABYLON.Animation("camAlpha", "alpha", 60, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
@@ -136,13 +133,13 @@ const BoatScene = {
         const waveHeight = 1.5;
         const waveFreq = 0.15;
 
-        // 1. ANIMATION DE L'OCÉAN
+        // animation océan
         if (this.waterMesh && this.basePositions) {
             const positions = [...this.basePositions];
             for (let i = 0; i < positions.length; i += 3) {
                 const x = positions[i];
                 const z = positions[i + 2];
-                // On applique la formule de l'onde
+                // formule pour créer une onde de vague
                 const y = Math.sin(x * waveFreq + this.time) * Math.cos(z * waveFreq + this.time) * waveHeight;
                 positions[i + 1] = y;
             }
@@ -150,7 +147,7 @@ const BoatScene = {
             this.waterMesh.createNormals(false);
         }
 
-        // Animation bateau en fonction des mesh
+        // animer le bateau en fonction des mesh
         if (!GameSettings.boatAnim) {
             if (this.boatMesh) {
                 const bx = this.boatMesh.position.x;
