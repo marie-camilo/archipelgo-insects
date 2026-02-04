@@ -943,16 +943,6 @@ canvas {
     transition: all 0.3s ease;
 }
 
-.status-badge::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background-color: #7cb342;
-    border-radius: 50%;
-    display: inline-block;
-    box-shadow: 0 0 0 3px rgba(124, 179, 66, 0.1);
-}
-
 /* Interaction au survol */
 .status-badge:hover {
     border-color: #e2e8f0;

@@ -206,27 +206,27 @@ const JournalManager = {
         const existingH2 = detailsContainer.querySelector("h2").outerHTML;
         const existingP = detailsContainer.querySelector(".modal-taxonomy").outerHTML;
 
+        // Dans JournalManager.showInsectDetails
         detailsContainer.innerHTML = `
-            ${existingH2}
-            ${existingP}
-            
-            <div class="modal-divider"></div>
-            
-            <div class="info-section">
-                <h4>Description & Rôle</h4>
-                <p class="educational-text">${insectData.role}. ${insectData.anecdote}</p>
-            </div>
+    ${existingH2}
+    ${existingP}
+    
+    <div class="modal-divider"></div>
+    
+    <div class="info-section">
+        <h4>Description & Rôle</h4>
+        <p class="educational-text">${insectData.role}. ${insectData.anecdote}</p>
+    </div>
 
-            <div class="info-section">
-                <h4>Habitat</h4>
-                <p class="educational-text">${insectData.habitat}</p>
-            </div>
+    <div class="info-section">
+        <h4>Habitat</h4>
+        <p class="educational-text">${insectData.habitat}</p>
+    </div>
 
-            <div class="status-badge" style="margin-top:auto; align-self:start; border: 1px solid ${statusColor}; color:${statusColor}; background:rgba(255,255,255,0.8);">
-                <span style="background:${statusColor}; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px;"></span>
-                <span>${insectData.status}</span>
-            </div>
-        `;
+    <div class="status-badge" style="margin-top:auto; align-self:start; border: 1px solid ${statusColor}; color:${statusColor}; background:rgba(255,255,255,0.8);">
+        <span>${insectData.status}</span>
+    </div>
+`;
 
         // AFFICHER LA MODALE
         modal.classList.add("active");
