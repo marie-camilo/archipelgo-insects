@@ -402,9 +402,11 @@ const MapScene = {
 
     resetNavigation() {
         console.log("Retour vue carte");
-        this.isNavigating = false; this.islands = [];
+        this.isNavigating = false;
         this.camera.attachControl(document.getElementById("renderCanvas"), true);
-        this.camera.lowerRadiusLimit = 25; this.camera.upperRadiusLimit = 150;
+        this.camera.lowerRadiusLimit = 25;
+        this.camera.upperRadiusLimit = 150;
+
         const animRadius = new BABYLON.Animation("resetRad", "radius", 60, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
         animRadius.setKeys([{ frame: 0, value: this.camera.radius }, { frame: 60, value: 75 }]);
         this.scene.beginDirectAnimation(this.camera, [animRadius], 0, 60, false, 1);
@@ -431,9 +433,17 @@ const MapScene = {
         // ÎLES (PRINCIPALES)
         this.islands.forEach((obj) => {
             if (obj.pivot) {
-                // MODIF: Utilise le baseY stocké pour que les îles restent à leur hauteur Y définie
-                const baseY = obj.baseY !== undefined ? obj.baseY : 0;
-                obj.pivot.position.y = baseY + Math.sin(this.time + obj.offset) * 0.2;
+                // On vérifie si GameSettings existe, sinon on force à true par défaut
+                const animEnabled = (typeof GameSettings !== 'undefined') ? GameSettings.islandAnim : true;
+
+                if (animEnabled) {
+                    const amplitude = (obj.data.id === "floating_forest") ? 1.5 : 0.2;
+                    const baseY = obj.baseY || 0;
+                    obj.pivot.position.y = baseY + Math.sin(this.time + obj.offset) * amplitude;
+                } else {
+                    const baseY = obj.baseY || 0;
+                    obj.pivot.position.y = BABYLON.Scalar.Lerp(obj.pivot.position.y, baseY, 0.1);
+                }
             }
         });
 

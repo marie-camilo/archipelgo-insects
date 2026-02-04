@@ -89,6 +89,21 @@ const UIManager = {
         }
     },
 
+    toggleSettings() {
+        const modal = document.getElementById("settings-modal");
+        if (!modal) return;
+
+        if (modal.classList.contains("visible")) {
+            modal.classList.remove("visible");
+        } else {
+            // On ferme l'aide si elle est ouverte pour éviter la superposition
+            const helpModal = document.getElementById("global-help-modal");
+            if(helpModal) helpModal.classList.remove("visible");
+
+            modal.classList.add("visible");
+        }
+    },
+
     showBaseCampTooltip(mesh) {
         const tooltip = document.getElementById("island-tooltip");
         if(!tooltip) return;

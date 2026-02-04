@@ -61,6 +61,55 @@
     </div>
 </div>
 
+<button class="btn-settings-floating" onclick="UIManager.toggleSettings()" aria-label="Paramètres">
+    <i class="fas fa-cog"></i>
+</button>
+
+<div id="settings-modal" class="global-help-modal"> <div class="settings-content">
+    <button class="nav-close" onclick="UIManager.toggleSettings()">×</button>
+
+    <div class="settings-header">
+        <h2>Paramètres</h2>
+        <p>Personnalisez votre expérience de navigation.</p>
+    </div>
+
+    <div class="settings-list">
+        <div class="setting-item">
+            <div class="setting-info">
+                <span class="setting-label">Séquence de Navigation</span>
+                <span class="setting-desc">Si désactivé, le voyage vers les îles est instantané.</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="toggle-boat-anim" checked onchange="GameSettings.toggle('boatAnim')">
+                <span class="slider round"></span>
+            </label>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-info">
+                <span class="setting-label">Particules Météo</span>
+                <span class="setting-desc">Pluie, neige, feuilles et lucioles.</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="toggle-particles" checked onchange="GameSettings.toggle('particles')">
+                <span class="slider round"></span>
+            </label>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-info">
+                <span class="setting-label">Flottaison des Îles</span>
+                <span class="setting-desc">Animation de lévitation sur la carte.</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="toggle-island-anim" checked onchange="GameSettings.toggle('islandAnim')">
+                <span class="slider round"></span>
+            </label>
+        </div>
+    </div>
+</div>
+</div>
+
 <div id="navigation-modal" class="navigation-modal">
     <div class="nav-content">
         <button class="nav-close" onclick="UIManager.closeNavigation()">×</button>
@@ -329,6 +378,7 @@
 
 <script src="js/config.js"></script>
 <script src="js/data-islands.js"></script>
+<script src="js/game-settings.js"></script>
 <script src="js/ui-manager.js"></script>
 <script src="js/journal.js"></script>
 <script src="js/scene-map.js"></script>

@@ -85,7 +85,7 @@ const BoatScene = {
         BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", "boat.glb", this.scene)
             .then((result) => {
                 const root = result.meshes[0];
-                root.position.y = -2;
+                root.position.y = 0.5;
                 this.boatMesh = root;
                 this.camera.lockedTarget = this.boatMesh;
                 this.playCinematicTravelling();
@@ -106,11 +106,12 @@ const BoatScene = {
         const startAlpha = Math.PI / 2.8;
         const endAlpha = Math.PI / 1.2;
 
-        const startBeta = 1.35;
-        const endBeta = 1.45;
+        // CORRECTION ICI : On regarde un peu plus de haut pour éviter les vagues
+        const startBeta = 1.1; // Vue plus plongeante au début
+        const endBeta = 1.3;   // Fin pas trop basse (avant c'était 1.45)
 
-        const startRadius = 20;
-        const endRadius = 15;
+        const startRadius = 25; // On recule un peu plus au début
+        const endRadius = 18;
 
         const animAlpha = new BABYLON.Animation("camAlpha", "alpha", 60, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
         animAlpha.setKeys([{ frame: 0, value: startAlpha }, { frame: animationFrames, value: endAlpha }]);
@@ -150,21 +151,24 @@ const BoatScene = {
         }
 
         // Animation bateau en fonction des mesh
-        if (this.boatMesh) {
-            const bx = this.boatMesh.position.x;
-            const bz = this.boatMesh.position.z;
-            const currentWaveY = Math.sin(bx * waveFreq + this.time) * Math.cos(bz * waveFreq + this.time) * waveHeight;
+        if (!GameSettings.boatAnim) {
+            if (this.boatMesh) {
+                const bx = this.boatMesh.position.x;
+                const bz = this.boatMesh.position.z;
+                const currentWaveY = Math.sin(bx * waveFreq + this.time) * Math.cos(bz * waveFreq + this.time) * waveHeight;
 
-            this.boatMesh.position.y = currentWaveY + 0.3;
+                this.boatMesh.position.y = currentWaveY + 1.5;
 
-            const lookAhead = 1.0;
-            const waveNextX = Math.sin((bx + lookAhead) * waveFreq + this.time) * Math.cos(bz * waveFreq + this.time) * waveHeight;
-            const waveNextZ = Math.sin(bx * waveFreq + this.time) * Math.cos((bz + lookAhead) * waveFreq + this.time) * waveHeight;
-            const pitch = (waveNextX - currentWaveY) * 0.5;
-            const roll = (waveNextZ - currentWaveY) * 0.5;
-            this.boatMesh.rotation.z = BABYLON.Scalar.Lerp(this.boatMesh.rotation.z, -pitch, 0.1);
-            this.boatMesh.rotation.x = BABYLON.Scalar.Lerp(this.boatMesh.rotation.x, roll, 0.1);
-            this.boatMesh.rotation.y += Math.sin(this.time * 0.5) * 0.002;
+                const lookAhead = 1.0;
+                const waveNextX = Math.sin((bx + lookAhead) * waveFreq + this.time) * Math.cos(bz * waveFreq + this.time) * waveHeight;
+                const waveNextZ = Math.sin(bx * waveFreq + this.time) * Math.cos((bz + lookAhead) * waveFreq + this.time) * waveHeight;
+                const pitch = (waveNextX - currentWaveY) * 0.5;
+                const roll = (waveNextZ - currentWaveY) * 0.5;
+                this.boatMesh.rotation.z = BABYLON.Scalar.Lerp(this.boatMesh.rotation.z, -pitch, 0.1);
+                this.boatMesh.rotation.x = BABYLON.Scalar.Lerp(this.boatMesh.rotation.x, roll, 0.1);
+                this.boatMesh.rotation.y += Math.sin(this.time * 0.5) * 0.002;
+            }
+            return;
         }
     },
 

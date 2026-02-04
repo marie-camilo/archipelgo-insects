@@ -973,6 +973,103 @@ canvas {
     50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
 }
 
+/* --- BOUTON REGLAGES --- */
+.btn-settings-floating {
+    position: fixed;
+    top: 30px;
+    right: 90px; /* Décalé par rapport au bouton aide (qui est à 30px) */
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    color: #2c3e50;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-settings-floating:hover {
+    transform: rotate(90deg); /* Petite rotation sympa au survol */
+    color: #1976d2;
+    box-shadow: 0 8px 25px rgba(25, 118, 210, 0.2);
+}
+
+/* --- CONTENU MODALE REGLAGES --- */
+.settings-content {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    position: relative;
+    animation: slideUpFade 0.3s ease forwards;
+}
+
+.settings-header h2 {
+    font-family: var(--font-title);
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+.settings-header p {
+    color: #7f8c8d;
+    margin-bottom: 30px;
+    font-size: 0.9rem;
+}
+
+/* --- LISTE DES OPTIONS --- */
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #f0f2f5;
+}
+.setting-item:last-child { border-bottom: none; }
+
+.setting-info { display: flex; flex-direction: column; text-align: left; }
+.setting-label { font-weight: 600; color: #2c3e50; font-size: 1rem; }
+.setting-desc { font-size: 0.8rem; color: #95a5a6; margin-top: 4px; }
+
+/* --- SWITCH TOGGLE CSS (Style iOS) --- */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+    flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px; width: 20px;
+    left: 4px; bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider { background-color: #1976d2; }
+input:focus + .slider { box-shadow: 0 0 1px #1976d2; }
+input:checked + .slider:before { transform: translateX(22px); }
+
 /* ─────────────────────────────────────────────────────────────────────
    JOURNAL DE BORD - ÉDITION "NATURALISTE MODERNE" (MAJ)
    ───────────────────────────────────────────────────────────────────── */

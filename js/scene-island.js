@@ -128,7 +128,7 @@ const IslandScene = {
 
         // Texture "Flare" générique
         const particleTexture = new BABYLON.Texture("https://www.babylonjs-playground.com/textures/flare.png", this.scene);
-        // Texture "Triangle" pour les oiseaux/feuilles (générée dynamiquement si besoin, mais on utilise flare déformé ici)
+        if (!GameSettings.particles) return;
 
         const createSystem = (name, capacity) => {
             const sys = new BABYLON.ParticleSystem(name, capacity, this.scene);

@@ -44,18 +44,38 @@ const ArchipelagoApp = {
 
   selectIsland(islandId) {
     this.currentIsland = islandId;
+
+    // --- LOGIQUE VOYAGE RAPIDE (Si animation désactivée) ---
+    if (typeof GameSettings !== 'undefined' && !GameSettings.boatAnim) {
+      console.log("⚡ Voyage rapide activé : saut de la scène du bateau.");
+
+      // On lance directement l'exploration
+      // On met un tout petit délai (100ms) juste pour laisser le temps au navigateur de respirer
+      setTimeout(() => {
+        this.exploreIsland(islandId);
+      }, 100);
+
+      return; // On arrête la fonction ici, on ne joue pas la suite
+    }
+
+    // --- LOGIQUE CINÉMATIQUE (Si animation activée) ---
     this.showScreen("boat-travel");
 
     const island = ISLANDS_DATA.find(i => i.id === islandId);
-    document.getElementById("travel-text").textContent = `Cap vers ${island.name}...`;
+    // Petit check de sécurité
+    if(document.getElementById("travel-text")) {
+      document.getElementById("travel-text").textContent = `Cap vers ${island.name}...`;
+    }
 
+    // On lance la scène du bateau
     setTimeout(() => {
-      BoatScene.init();
+      if (typeof BoatScene !== 'undefined') BoatScene.init();
     }, 100);
 
-      setTimeout(() => {
-          this.exploreIsland(islandId);
-      }, 5000);
+    // On attend 5 secondes avant d'arriver
+    setTimeout(() => {
+      this.exploreIsland(islandId);
+    }, 5000);
   },
 
   exploreIsland(islandId) {
