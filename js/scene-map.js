@@ -335,7 +335,7 @@ const MapScene = {
                 birdMesh.rotationQuaternion = null;
                 birdMesh.rotation.y = Math.PI / 2;
                 birdMesh.scaling = new BABYLON.Vector3(6, 6, 6);
-                birdRoot.position = new BABYLON.Vector3(-250 - (i * 50), 2 + (i * 3), lanes[i]);
+                birdRoot.position = new BABYLON.Vector3(-250 - (i * 50), 15 + (i * 10), lanes[i]);
 
                 result.meshes.forEach(m => {
                     if(m.material) m.material.fogEnabled = false;

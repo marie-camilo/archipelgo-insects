@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Sniglet:wght@400;800&display=swap');
 
 :root {
-  /* Ocean & Nature Palette */
   --ocean-deep: #0d47a1;
   --ocean-medium: #1976d2;
   --ocean-light: #42a5f5;
@@ -121,7 +120,6 @@ canvas {
   50% { transform: translateY(-20px); }
 }
 
-/* BARRE SUPÉRIEURE MAP */
 .map-top-bar {
     position: absolute;
     top: 30px;
@@ -134,7 +132,6 @@ canvas {
     z-index: 1000;
 }
 
-/* --- BOUTON AIDE FLOTTANT --- */
 .btn-help-floating {
     position: fixed;
     top: 30px;
@@ -148,7 +145,7 @@ canvas {
     color: #2c3e50;
     font-size: 1.2rem;
     cursor: pointer;
-    z-index: 3000; /* Au-dessus de tout */
+    z-index: 3000;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     align-items: center;
@@ -157,18 +154,17 @@ canvas {
 
 .btn-help-floating:hover {
     transform: scale(1.1) rotate(15deg);
-    color: #1976d2; /* Ta couleur bleu océan */
+    color: #1976d2;
     box-shadow: 0 8px 25px rgba(25, 118, 210, 0.2);
 }
 
-/* --- MODALE D'AIDE GLOBALE --- */
 .global-help-modal {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(30, 40, 50, 0.85); /* Fond sombre flouté */
+    background: rgba(30, 40, 50, 0.85);
     backdrop-filter: blur(8px);
     z-index: 3001;
-    display: none; /* Caché par défaut */
+    display: none;
     opacity: 0;
     transition: opacity 0.3s ease;
     align-items: center;
@@ -206,7 +202,6 @@ canvas {
     font-size: 1.1rem;
 }
 
-/* Grille des instructions */
 .help-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -471,8 +466,6 @@ canvas {
     text-align: center;
 }
 
-/* MAP VIEW */
-
 #map-view {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
@@ -480,21 +473,18 @@ canvas {
 }
 
 #renderCanvas {
-    background-color: #e3f2fd; /* Bleu très pâle */
+    background-color: #e3f2fd;
 }
 
 .map-ui {
   position: absolute;
   top: var(--spacing-lg);
   left: var(--spacing-lg);
-
-  /* Style Perle / Verre */
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(15px) saturate(160%);
   -webkit-backdrop-filter: blur(15px) saturate(160%);
-
   padding: var(--spacing-lg);
-  border-radius: 24px; /* Bords très ronds */
+  border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
 
@@ -539,10 +529,9 @@ canvas {
 .legend-color {
   width: 14px;
   height: 14px;
-  border-radius: 4px; /* Petits carrés arrondis */
+  border-radius: 4px;
   box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
 }
-/* ISLAND TOOLTIP */
 
 .island-tooltip {
   position: fixed;
@@ -568,15 +557,14 @@ canvas {
 
 .island-tooltip.visible {
   opacity: 1;
-  transform: translateY(-20px) scale(1); /* Monte un peu au-dessus de l'île */
+  transform: translateY(-20px) scale(1);
 }
 
-/* Titre et contenu */
 .tooltip-title {
   font-family: var(--font-title);
   font-size: 1.2rem;
   margin-bottom: 4px;
-  color: #1a252f; /* Bleu-gris très foncé */
+  color: #1a252f;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -645,7 +633,6 @@ canvas {
     text-align: center;
 }
 
-/* Style des cartes */
 .destinations-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -678,37 +665,29 @@ canvas {
 
 @keyframes slideUp { to { transform: translateY(0); } }
 
-/* ─────────────────────────────────────────────────────────────────────
-   ISLAND EXPLORATION
-   ───────────────────────────────────────────────────────────────────── */
 
 #island-exploration {
-    background: transparent; /* Laisse voir la scène 3D derrière */
+    background: transparent;
 }
 
-/* Panneaux latéraux flottants */
 .side-panel {
     position: absolute;
     top: var(--spacing-lg);
     bottom: var(--spacing-lg);
     height: calc(100% - (var(--spacing-lg) * 2));
     width: 380px;
-
-    /* Effet Glassmorphism Perle */
     background: rgba(255, 255, 255, 0.75) !important;
     backdrop-filter: blur(15px) saturate(160%);
     -webkit-backdrop-filter: blur(15px) saturate(160%);
-
     padding: var(--spacing-xl);
-    border-radius: 30px; /* Bords arrondis modernes */
+    border-radius: 30px;
     border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow: 0 15px 45px rgba(0, 0, 0, 0.1);
-
     overflow-y: auto;
     z-index: 999 !important;
     pointer-events: auto;
     transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    color: #2c3e50; /* Texte sombre pour lisibilité */
+    color: #2c3e50;
 }
 
 .left-panel {
@@ -718,7 +697,7 @@ canvas {
 
 .right-panel {
     right: var(--spacing-lg);
-    transform: translateX(calc(100% + var(--spacing-xl))); /* Caché */
+    transform: translateX(calc(100% + var(--spacing-xl)));
     display: flex !important;
     flex-direction: column;
 }
@@ -727,7 +706,6 @@ canvas {
     transform: translateX(0) !important;
 }
 
-/* Bouton Fermer */
 .panel-close {
     position: absolute;
     top: var(--spacing-md);
@@ -753,7 +731,6 @@ canvas {
     transform: rotate(90deg);
 }
 
-/* Titres et Textes */
 .panel-title, .insect-name {
     font-family: var(--font-title);
     font-size: 1.8rem;
@@ -771,12 +748,10 @@ canvas {
     display: block;
 }
 
-/* Classes de couleurs pour les statuts */
 .status-safe { color: #2ecc71; border-color: rgba(46, 204, 113, 0.3); background: rgba(46, 204, 113, 0.05) !important; }
 .status-warning { color: #f39c12; border-color: rgba(243, 156, 18, 0.3); background: rgba(243, 156, 18, 0.05) !important; }
 .status-danger { color: #e74c3c; border-color: rgba(231, 76, 60, 0.3); background: rgba(231, 76, 60, 0.05) !important; }
 
-/* Style du texte scientifique */
 .scientific-name {
     font-style: italic;
     opacity: 0.8;
@@ -797,7 +772,6 @@ canvas {
 
 .italic { font-style: italic; }
 
-/* Section de progression */
 .progress-section {
     margin: var(--spacing-md) 0;
     padding: var(--spacing-md);
@@ -836,23 +810,20 @@ canvas {
     font-weight: 600;
 }
 
-/* Panneau Insecte Spécifique */
 .insect-header {
     margin-bottom: var(--spacing-lg);
 }
 
-/* --- HINT 3D PREVIEW --- */
 .insect-model-preview {
     position: relative;
     width: 100%;
-    height: 280px; /* IMPORTANT : Donne une hauteur à la fenêtre ! */
-    background: rgba(0, 0, 0, 0.03); /* Un fond gris très léger pour délimiter */
+    height: 280px;
+    background: rgba(0, 0, 0, 0.03);
     border-radius: 20px;
     margin-bottom: 20px;
-    overflow: hidden; /* Pour que le canvas ne dépasse pas des bords arrondis */
+    overflow: hidden;
 }
 
-/* Le reste du CSS pour l'indice (main) reste le même */
 .interaction-hint {
     position: absolute;
     bottom: 15px;
@@ -877,7 +848,6 @@ canvas {
 
 .hint-icon i { animation: handSwipe 2s infinite ease-in-out; }
 
-/* Le texte explicatif */
 .hint-text {
     background: rgba(44, 62, 80, 0.8);
     color: white;
@@ -891,7 +861,6 @@ canvas {
     white-space: nowrap;
 }
 
-/* On affiche le texte quand on survole la zone (ou tout le temps si tu préfères) */
 .insect-model-preview:hover .hint-text {
     opacity: 1;
     transform: translateX(0);
@@ -899,7 +868,7 @@ canvas {
 
 @keyframes handSwipe {
     0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(-3px); } /* Petit mouvement gauche */
+    50% { transform: translateX(-3px); }
 }
 
 .model-placeholder {
@@ -943,14 +912,12 @@ canvas {
     transition: all 0.3s ease;
 }
 
-/* Interaction au survol */
 .status-badge:hover {
     border-color: #e2e8f0;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* Overlay d'aide au centre */
 .help-overlay {
     position: absolute;
     bottom: var(--spacing-xl);
@@ -973,11 +940,10 @@ canvas {
     50% { opacity: 1; transform: translateX(-50%) scale(1.05); }
 }
 
-/* --- BOUTON REGLAGES --- */
 .btn-settings-floating {
     position: fixed;
     top: 30px;
-    right: 90px; /* Décalé par rapport au bouton aide (qui est à 30px) */
+    right: 90px;
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -995,12 +961,11 @@ canvas {
 }
 
 .btn-settings-floating:hover {
-    transform: rotate(90deg); /* Petite rotation sympa au survol */
+    transform: rotate(90deg);
     color: #1976d2;
     box-shadow: 0 8px 25px rgba(25, 118, 210, 0.2);
 }
 
-/* --- CONTENU MODALE REGLAGES --- */
 .settings-content {
     background: white;
     width: 90%;
@@ -1023,7 +988,6 @@ canvas {
     font-size: 0.9rem;
 }
 
-/* --- LISTE DES OPTIONS --- */
 .setting-item {
     display: flex;
     justify-content: space-between;
@@ -1037,7 +1001,6 @@ canvas {
 .setting-label { font-weight: 600; color: #2c3e50; font-size: 1rem; }
 .setting-desc { font-size: 0.8rem; color: #95a5a6; margin-top: 4px; }
 
-/* --- SWITCH TOGGLE CSS (Style iOS) --- */
 .switch {
     position: relative;
     display: inline-block;
@@ -1070,17 +1033,12 @@ input:checked + .slider { background-color: #1976d2; }
 input:focus + .slider { box-shadow: 0 0 1px #1976d2; }
 input:checked + .slider:before { transform: translateX(22px); }
 
-/* ─────────────────────────────────────────────────────────────────────
-   JOURNAL DE BORD - ÉDITION "NATURALISTE MODERNE" (MAJ)
-   ───────────────────────────────────────────────────────────────────── */
-
 #journal-screen {
     background: linear-gradient(135deg, #f8fbff 0%, #e3f2fd 100%);
     overflow-y: auto;
     padding: var(--spacing-xl) var(--spacing-md);
 }
 
-/* Le Container Principal */
 .journal-container {
     max-width: 1100px;
     width: 100%;
@@ -1097,7 +1055,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     position: relative;
 }
 
-/* CROIX DE FERMETURE (Journal & Modale) */
 .journal-close {
     position: absolute;
     top: 30px;
@@ -1125,7 +1082,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     border-color: #e74c3c;
 }
 
-/* Header du Journal */
 .journal-header {
     text-align: center;
     margin-bottom: var(--spacing-xl);
@@ -1147,8 +1103,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     margin-bottom: 3rem;
     display: block;
 }
-
-/* GRILLE ET CARTES D'INSECTES */
 
 .journal-grid {
     display: grid;
@@ -1177,7 +1131,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     border-color: var(--island-brown);
 }
 
-/* État Verrouillé */
 .journal-item.locked {
     background: rgba(255, 255, 255, 0.4);
     border: 2px dashed #ced4da;
@@ -1214,8 +1167,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     font-weight: 500;
 }
 
-/* FOOTER STATISTIQUES */
-
 .journal-stats {
     display: flex;
     justify-content: space-around;
@@ -1247,12 +1198,10 @@ input:checked + .slider:before { transform: translateX(22px); }
     font-weight: 700;
 }
 
-/* MODALE D'ENCYCLOPÉDIE */
-
 .journal-modal {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6); /* Fond plus sombre pour le focus */
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: none;
@@ -1278,17 +1227,17 @@ input:checked + .slider:before { transform: translateX(22px); }
     background: #ffffff;
     width: 90%;
     max-width: 1000px;
-    height: 70vh; /* Hauteur fixe pour éviter que ça dépasse */
+    height: 70vh;
     border-radius: 40px;
-    display: flex; /* C'est ici que la magie opère : Flex Row */
+    display: flex;
     flex-direction: row;
     box-shadow: 0 50px 100px rgba(0,0,0,0.3);
-    overflow: hidden; /* Empêche tout dépassement */
+    overflow: hidden;
     position: relative;
 }
 
 .modal-visual {
-    flex: 1; /* Prend 50% de l'espace */
+    flex: 1;
     background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
     position: relative;
     overflow: hidden;
@@ -1303,7 +1252,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     opacity: 0.2;
 }
 
-/* Colonne Informations */
 .modal-data {
     flex: 1;
     padding: 40px;
@@ -1330,7 +1278,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     margin-bottom: 20px;
 }
 
-/* Responsive */
 @media (max-width: 850px) {
     .modal-content {
         flex-direction: column;
@@ -1338,17 +1285,13 @@ input:checked + .slider:before { transform: translateX(22px); }
         overflow-y: auto;
     }
     .modal-visual {
-        flex: 0 0 300px; /* Hauteur fixe pour la 3D sur mobile */
+        flex: 0 0 300px;
         width: 100%;
     }
     .modal-data {
         flex: 1;
     }
 }
-
-/* ─────────────────────────────────────────────────────────────────────
-   ANIMATIONS
-   ───────────────────────────────────────────────────────────────────── */
 
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -1365,10 +1308,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     transform: translateY(0);
   }
 }
-
-/* ─────────────────────────────────────────────────────────────────────
-   RESPONSIVE
-   ───────────────────────────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
   .side-panel {
@@ -1407,7 +1346,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     outline: none;
 }
 
-/* --- OVERLAY GLOBAL --- */
 .travel-overlay {
     position: absolute;
     top: 0;
@@ -1416,28 +1354,24 @@ input:checked + .slider:before { transform: translateX(22px); }
     height: 100%;
     pointer-events: none;
     z-index: 10;
-
-    /* NOUVELLE DISPOSITION : Tout en bas */
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* Pousse le contenu vers le bas */
-    align-items: center;       /* Centre horizontalement */
-    padding-bottom: 8vh;       /* Marge confortable depuis le bas de l'écran (8% de la hauteur) */
+    justify-content: flex-end;
+    align-items: center;
+    padding-bottom: 8vh;
 }
 
-/* --- CONTENEUR MESSAGE (Groupe Titre + Quote) --- */
 .travel-message {
     position: relative;
     width: 90%;
     max-width: 900px;
     display: flex;
-    flex-direction: column; /* Empile les éléments verticalement */
+    flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 20px; /* Espace entre le Titre et la Citation */
+    gap: 20px;
 }
 
-/* --- LE TITRE --- */
 #travel-text {
     font-family: var(--font-title);
     font-size: clamp(2rem, 5vw, 3.5rem);
@@ -1445,25 +1379,18 @@ input:checked + .slider:before { transform: translateX(22px); }
     margin: 0;
     text-shadow: 0 4px 15px rgba(0,0,0,0.3);
     letter-spacing: 1px;
-
-    /* Animation d'arrivée */
     opacity: 0;
     animation: fadeInUp 1s ease-out forwards;
 }
 
-/* --- LA CITATION (Sous le titre) --- */
 .travel-quote {
-    /* Positionnement relatif (dans le flux, sous le titre) */
     position: relative;
     margin: 0;
-
     font-family: var(--font-body, sans-serif);
     font-size: 0.95rem;
     font-weight: 500;
     line-height: 1.5;
     color: rgba(255, 255, 255, 0.9);
-
-    /* Style "Pilule" moderne */
     background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -1471,17 +1398,13 @@ input:checked + .slider:before { transform: translateX(22px); }
     border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-
-    width: fit-content; /* S'adapte au texte */
+    width: fit-content;
     max-width: 80%;
-
-    /* Animation d'arrivée (légèrement décalée après le titre) */
     opacity: 0;
     transform: translateY(10px);
-    animation: fadeInUp 0.8s ease-out forwards 0.3s; /* Delay 0.3s */
+    animation: fadeInUp 0.8s ease-out forwards 0.3s;
 }
 
-/* Animation simple vers le haut */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -1493,17 +1416,16 @@ input:checked + .slider:before { transform: translateX(22px); }
     }
 }
 
-/* L'arrière-plan qui floute tout le jeu */
 .victory-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.3); /* Sombre léger */
-    backdrop-filter: blur(10px); /* LE FLOU MAGIQUE */
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
     z-index: 3000;
-    display: none; /* Caché par défaut */
+    display: none;
     justify-content: center;
     align-items: center;
     opacity: 0;
@@ -1515,19 +1437,18 @@ input:checked + .slider:before { transform: translateX(22px); }
     opacity: 1;
 }
 
-/* La carte en verre (Glassmorphism) */
 .victory-modal {
-    background: rgba(255, 255, 255, 0.85); /* Blanc semi-transparent */
-    backdrop-filter: blur(16px); /* Flou interne */
-    border: 1px solid rgba(255, 255, 255, 0.6); /* Bordure subtile */
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2); /* Belle ombre portée */
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
     border-radius: 24px;
     padding: 40px;
     max-width: 550px;
     width: 90%;
     text-align: center;
     transform: scale(0.9);
-    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Effet rebond */
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .victory-overlay.active .victory-modal {
