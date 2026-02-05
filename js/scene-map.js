@@ -393,15 +393,14 @@ const MapScene = {
 
     animateEnvironment() {
         this.time += 0.005;
+        const waveHeight = 1.0;
+        const waveFreq = 0.15;
 
-        // Aniamtion océan
         if (this.waterMesh && this.basePositions) {
             const positions = [...this.basePositions];
             for (let i = 0; i < positions.length; i += 3) {
                 const x = positions[i];
                 const z = positions[i + 2];
-                const waveHeight = 1.0;
-                const waveFreq = 0.15;
                 const y = Math.sin(x * waveFreq + this.time) * Math.cos(z * waveFreq + this.time) * waveHeight;
                 positions[i + 1] = y;
             }
@@ -409,11 +408,25 @@ const MapScene = {
             this.waterMesh.createNormals(false);
         }
 
-        // iles
+        if (this.boatMesh) {
+            const boatX = 38;
+            const boatZ = 30;
+
+            const waterLevelAtBoat = Math.sin(boatX * waveFreq + this.time) * Math.cos(boatZ * waveFreq + this.time) * waveHeight;
+
+            this.boatMesh.position.y = waterLevelAtBoat + 0.5;
+
+            this.boatMesh.rotation.x = Math.cos(this.time * 0.7) * 0.08;
+
+            this.boatMesh.rotation.z = Math.sin(this.time) * 0.05;
+        }
+
+
+
+        // Animation des Îles
         this.islands.forEach((obj) => {
             if (obj.pivot) {
                 const animEnabled = (typeof GameSettings !== 'undefined') ? GameSettings.islandAnim : true;
-
                 if (animEnabled) {
                     const amplitude = (obj.data.id === "floating_forest") ? 1.5 : 0.2;
                     const baseY = obj.baseY || 0;
@@ -425,7 +438,7 @@ const MapScene = {
             }
         });
 
-        // Décor et background
+        // Animation Décor
         this.decorMeshes.forEach((obj) => {
             if (obj.pivot) {
                 const currentBaseY = obj.baseY !== undefined ? obj.baseY : -1;
@@ -433,25 +446,16 @@ const MapScene = {
             }
         });
 
-        // Oiseaux animés avec models 3D
+        // Animation Oiseaux
         this.realBirds.forEach(bird => {
             if(bird.root) {
                 bird.root.position.x += bird.speed;
-
-                // Reset quand il sort à droite
                 if (bird.root.position.x > 250) {
                     bird.root.position.x = -250;
                     bird.root.position.z = (Math.random() * 100) - 50;
                 }
             }
         });
-
-        // bateau
-        if (this.boatMesh) {
-            this.boatMesh.rotation.x = Math.sin(this.time * 0.5) * 0.03;
-            this.boatMesh.rotation.z = Math.cos(this.time * 0.3) * 0.03;
-            this.boatMesh.position.y = 0.2 + Math.sin(this.time * 0.8) * 0.1;
-        }
     },
 
     dispose() {
