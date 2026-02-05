@@ -11,20 +11,21 @@ L'application met l'accent sur la découverte des écosystèmes (biomes) et four
 
 ## Installation et Lancement
 
-Le projet ne nécessite aucune installation de dépendance via npm, mais il requiert un serveur local pour charger correctement les textures et modèles 3D.
+Le projet ne nécessite aucune installation de dépendance via npm mais requiert un serveur local pour charger correctement les textures et modèles 3D.
 
-**Procédure :**
+**Procédure à suivre :**
 1. Décompresser l'archive zip du projet.
 2. Lancer un serveur local à la racine du dossier `archipelago-insects/`.
    - Avec VS Code : Extension "Live Server"
    - Avec Python : `python -m http.server`
 4. Ouvrir le navigateur à l'adresse locale indiquée (ex: `http://localhost:8000`).
+**En cas de problème, vous pouvez consulter le projet hébergé à l'url suivante :** https://marie-camilo.github.io/archipelgo-insects/
 
 ## Cartographie de l'Archipel
 
-L'application propose 8 environnements (îles) distincts. Chaque environnement est caractérisé par un biome spécifique, une ambiance météorologique et une faune endémique.
+L'application propose 8 environnements (îles). Chaque environnement est caractérisé par un biome spécifique, une ambiance météorologique et une faune endémique.
 
-### Liste des Îles et Espèces
+### Liste des Îles et Espèces - Consutable dans le fichier JSON
 
 1. **Vallée des Nectarivores** (Prairie tempérée méliphage)
    - *Espèces :* Abeille Mellifère, Grand Monarque, Grand Mars Changeant, Colibri d'Elena.
@@ -120,6 +121,5 @@ Les modèles 3D proviennent des banques libres **Poly Pizza** et **Sketchfab**. 
 - La génération des algorithmes mathématiques complexes (déformation des vagues, vecteurs de particules, fonctions sinusoïdales)
 - Le débogage de l'API BabylonJS
 
+**Pour consulter le code généré par IA, effectuez simplement la commande double shift et tapez les mots clés "Code généré par IA", vous trouverez toutes les sections générées dans le code.**
 L'architecture logicielle, la logique de gameplay, le style et l'intégration des assets sont le fruit du travail de mon travail.
-
-
