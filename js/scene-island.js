@@ -597,6 +597,49 @@ const IslandScene = {
         });
     },
 
+    triggerScanner() {
+        const btn = document.querySelector(".btn-scanner");
+        if(btn) {
+            btn.disabled = true;
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Localisation en cours...";
+        }
+
+        let hl = this.scene.getHighlightLayerByName("scanner_highlight");
+        if (!hl) {
+            hl = new BABYLON.HighlightLayer("scanner_highlight", this.scene, {
+                mainTextureRatio: 1,
+                blurHorizontalSize: 3,
+                blurVerticalSize: 3,
+
+                alphaBlendingMode: BABYLON.Engine.ALPHA_ADD
+            });
+            hl.innerGlow = false;
+            hl.outerGlow = true;
+        }
+
+        let foundCount = 0;
+        const modernGlowColor = new BABYLON.Color3(1.0, 0.95, 0.7);
+
+        this.insectsMeshes.forEach(insectObj => {
+            if (insectObj.visual) {
+                insectObj.visual.getChildMeshes().forEach(mesh => {
+                    hl.addMesh(mesh, modernGlowColor);
+                });
+                foundCount++;
+            }
+        });
+
+        console.log("Scan terminé :", foundCount, "spécimens révélés.");
+
+        setTimeout(() => {
+            hl.removeAllMeshes();
+            if(btn) {
+                btn.disabled = false;
+                btn.innerHTML = "<i class='fas fa-radar'></i> Révéler les spécimens";
+            }
+        }, 3000);
+    },
+
     animateScene() {
         this.time += 0.01;
         if (this.waterMesh && this.basePositions) {

@@ -55,7 +55,7 @@ const UIManager = {
 
                     <div class="help-card">
                         <div class="help-icon"><i class="fas fa-bug"></i></div>
-                        <h3>La Chasse</h3>
+                        <h3>Collection d'insectes</h3>
                         <p>Trouvez les insectes cachés dans le décor. Cliquez dessus pour les identifier et les ajouter au carnet.</p>
                     </div>
 

@@ -135,12 +135,16 @@ const ArchipelagoApp = {
 
   lastContext: "map",
 
-  openJournal() {
-    this.lastContext = "island";
-    this.showScreen("journal");
-    JournalManager.renderJournalGrid();
-    JournalManager.updateJournalStats();
-  },
+    openJournal() {
+        const journalScreen = document.getElementById("journal-screen");
+        if (journalScreen) {
+            journalScreen.classList.add("active");
+        }
+
+        if (typeof JournalManager !== 'undefined') {
+            JournalManager.render();
+        }
+    },
 
   openJournalFromMap() {
     this.lastContext = "map";
@@ -149,13 +153,12 @@ const ArchipelagoApp = {
     JournalManager.updateJournalStats();
   },
 
-  closeJournal() {
-    if (this.lastContext === "map") {
-      this.showScreen("map-view");
-    } else {
-      this.showScreen("island-exploration");
-    }
-  },
+    closeJournal() {
+        const journalScreen = document.getElementById("journal-screen");
+        if (journalScreen) {
+            journalScreen.classList.remove("active");
+        }
+    },
 
   returnToMap() {
     IslandScene.dispose();

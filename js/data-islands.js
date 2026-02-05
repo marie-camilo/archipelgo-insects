@@ -154,14 +154,30 @@ const ISLANDS_DATA = [
         ],
         interactiveElements: [
             {
-                id: "deer_zone",
+                id: "deer",
                 position: { x: -63.49, y: 0, z: 50.27 },
                 uiOffset: 0,
                 radius: 4,
                 title: "Pas vu, pas pris !",
                 icon: "🦌",
                 text: "Hé ! Bas les pattes ! \n\nJe sais ce que vous pensez : \"Il est bien gros pour un coléoptère celui-là\". \n\nEn effet, je suis un Cerf Élaphe. Je ne suis pas un insecte, mais sans moi, cette forêt serait une jungle impénétrable. En broutant, j'ouvre des clairières qui permettent au soleil de passer... et à vos amis les insectes de se dorer la pilule !",
-            }
+            },
+            {
+                id: "tree_canopy",
+                position: { x: -38.42, y: 0, z: -41.39 },
+                radius: 8,
+                uiOffset: 0,
+                title: "Wood Wibe Web",
+                icon: "🌲",
+                text: "Analyse du complexe racinaire. \n\nCes conifères utilisent un réseau de mycorhizes (symbiose champignons-racines) pour échanger des signaux biochimiques. En cas d'attaque de scolyte, l'arbre émet des composés organiques volatils pour prévenir ses congénères. \n\nC'est essentiellement un groupe Slack souterrain, la productivité en moins, la survie en plus."            },
+            {
+                id: "orange_flowers",
+                position: { x: -9.24, y: 0, z: 38.34 },
+                radius: 3,
+                uiOffset: 0,
+                title: "Marketing Floral",
+                icon: "🌸",
+                text: "Ces corolles pigmentées agissent comme des balises pour les pollinisateurs trichromates. Le nectar sert de monnaie d'échange : l'insecte obtient du carburant (sucres), l'arbre délègue son transport de gamètes (pollen). \n\nC'est la première économie de service au monde, et personne n'a encore trouvé le moyen d'y ajouter des taxes.."            }
         ]
     },
     {
@@ -227,6 +243,44 @@ const ISLANDS_DATA = [
                 habitat: "Nids en papier mâché (cellulose)",
                 anecdote: "Contrairement à l'abeille, elle ne meurt pas après avoir piqué car son dard est lisse. C'est une architecte hors pair.",
                 status: "Non menacée"
+            },
+        ],
+        interactiveElements: [
+            {
+                id: "purple_flowers_high",
+                position: { x: -7.22, y: 0, z: -2.54 },
+                radius: 4,
+                uiOffset: 0,
+                title: "Flore de haute altitude",
+                icon: "🌸",
+                text: "Ces fleurs violettes ont développé des pigments riches en anthocyanes pour se protéger des rayons UV, bien plus agressifs ici qu'en plaine. \n\nLeur couleur n'est pas un choix esthétique, c'est une crème solaire biologique. Elles attirent les bourdons, les seuls assez robustes pour voler dans ce vent à décorner les bœufs."
+            },
+            {
+                id: "rocky_cliffs",
+                position: { x: 7.49, y: 0, z: -5.17 },
+                radius: 10,
+                uiOffset: 0,
+                title: "Forteresse minérale",
+                icon: "⛰️",
+                text: "Analyse géologique : ces parois rocheuses sont les derniers remparts contre l'érosion éolienne. \n\nLes anfractuosités du rocher créent des micro-refuges thermiques indispensables. Pour un insecte, une fissure dans ce caillou, c'est l'équivalent d'un palace avec chauffage central, loin des courants d'air glaciaux de l'altitude."
+            },
+            {
+                id: "high_alpine_forest",
+                position: { x: 6.13, y: 0, z: -6.71 },
+                radius: 7,
+                uiOffset: 0,
+                title: "La forêt miniature",
+                icon: "🌲",
+                text: "Ici, les arbres ne poussent pas, ils luttent. Cette 'petite forêt' de sapins nains pratique le nanisme de survie. \n\nEn restant proches du sol, ils évitent de se transformer en drapeaux déchirés par le vent. C'est une stratégie de discrétion absolue : moins on dépasse, moins on casse. Une leçon de vie que beaucoup de coléoptères ont également adoptée."
+            },
+            {
+                id: "floating_stones",
+                position: { x: -3.24, y: 0, z: -13.05 },
+                radius: 5,
+                uiOffset: 0,
+                title: "Équilibre précaire",
+                icon: "🪨",
+                text: "Ces grands blocs erratiques semblent défier la gravité. En écologie, ils servent de perchoirs aux rapaces, ce qui en fait les zones les plus dangereuses de l'archipel pour un criquet distrait. \n\nC'est le paradoxe de la montagne : une vue magnifique, mais un risque constant de finir en amuse-bouche."
             }
         ],
     },
@@ -277,7 +331,7 @@ const ISLANDS_DATA = [
             },
             {
                 id: "winter_tree",
-                position: { x: 1.38, y: 0, z: -0.42 },
+                position: { x: -0.17, y: 0, z: -0.25 },
                 radius: 4,
                 uiOffset: 0,
                 title: "Manteau blanc",
@@ -562,7 +616,7 @@ const ISLANDS_DATA = [
             },
             {
                 id: "flower_mini_forest",
-                position: { x: -0.25, y: 0, z: -0.58 },
+                position: { x: 0.53, y: 0, z: 1.50 },
                 radius: 5,
                 uiOffset: 0,
                 title: "Le labyrinthe vert",
