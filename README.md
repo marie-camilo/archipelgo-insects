@@ -8,6 +8,7 @@
 Ce projet que j’ai réalisé individuellement consiste en la réalisation d'un site web éducatif permettant l'exploration d'un environnement 3D interactif. L'objectif est de placer l'utilisateur dans le rôle d'un naturaliste explorant un archipel fictif pour y découvrir, observer et cataloguer différentes espèces d'insectes.
 
 L'application met l'accent sur la découverte des écosystèmes (biomes) et fournit des informations détaillées sur la faune et la flore rencontrées.
+**Le projet est hébergé et accessible à l'url suivante :** https://marie-camilo.github.io/archipelgo-insects/ (Hébergement Github Page) 
 
 ## Installation et Lancement
 
