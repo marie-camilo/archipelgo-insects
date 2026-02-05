@@ -1,268 +1,125 @@
-# 🏝️ L'Archipel des Insectes
+# L'Archipel des Insectes 
 
-Une expérience éducative interactive en 3D pour explorer les écosystèmes d'insectes.
+**CAMILO–MARCHAL Marie - S6D1** 
+**Date :** Février 2026
 
-## 🎯 Concept
+## Descriptif du projet
 
-L'Archipel des Insectes est une expérience web 3D éducative où l'utilisateur explore un archipel composé de plusieurs îles, chacune représentant un écosystème d'insectes différent. À bord d'un bateau virtuel, il voyage d'île en île, observe les espèces et complète un carnet de bord scientifique.
+Ce projet que j’ai réalisé individuellement consiste en la réalisation d'un site web éducatif permettant l'exploration d'un environnement 3D interactif. L'objectif est de placer l'utilisateur dans le rôle d'un naturaliste explorant un archipel fictif pour y découvrir, observer et cataloguer différentes espèces d'insectes.
 
-## ✨ Fonctionnalités
+L'application met l'accent sur la découverte des écosystèmes (biomes) et fournit des informations détaillées sur la faune et la flore rencontrées.
 
-### 🗺️ **5 Îles à Explorer**
+## Installation et Lancement
 
-1. **Île des Pollinisateurs** - Prairies fleuries (Abeilles, Papillons, Bourdons)
-2. **Île de la Forêt** - Forêt tempérée (Scarabées, Fourmis, Lucioles)
-3. **Île des Décomposeurs** - Bois mort et sol (Bousiers, Vers de terre, Mille-pattes)
-4. **Île Aquatique** - Zones humides (Libellules, Gerris, Éphémères)
-5. **Île des Disparus** - Espèces menacées (Apollon, Grands Capricornes)
+Le projet ne nécessite aucune installation de dépendance via npm, mais il requiert un serveur local pour charger correctement les textures et modèles 3D.
 
-### 🐝 **20 Insectes à Découvrir**
+**Procédure :**
+1. Décompresser l'archive zip du projet.
+2. Lancer un serveur local à la racine du dossier `archipelago-insects/`.
+   - Avec VS Code : Extension "Live Server"
+   - Avec Python : `python -m http.server`
+4. Ouvrir le navigateur à l'adresse locale indiquée (ex: `http://localhost:8000`).
 
-Chaque insecte possède :
-- Nom commun et scientifique
-- Rôle écologique
-- Habitat naturel
-- Anecdote scientifique
-- Statut de conservation
+## Cartographie de l'Archipel
 
-### 📖 **Carnet de Bord Scientifique**
+L'application propose 8 environnements (îles) distincts. Chaque environnement est caractérisé par un biome spécifique, une ambiance météorologique et une faune endémique.
 
-- Collection progressive des insectes découverts
-- Statistiques de progression
-- Fiches détaillées consultables
-- Système de déverrouillage par exploration
+### Liste des Îles et Espèces
 
-### 🚤 **Navigation Immersive**
+1. **Vallée des Nectarivores** (Prairie tempérée méliphage)
+   - *Espèces :* Abeille Mellifère, Grand Monarque, Grand Mars Changeant, Colibri d'Elena.
+   - *Ambiance :* Venteuse.
 
-- Vue aérienne de l'archipel (hub central)
-- Transitions en bateau entre les îles
-- Exploration libre de chaque île
-- Caméra 3D interactive
+2. **Forêt des Coléoptères** (Forêt primaire à canopée dense)
+   - *Espèces :* Lucane Cerf-Volant, Mante Religieuse, Épeire Diadème.
+   - *Ambiance :* Pollen et particules organiques.
 
-## 🎮 Comment Jouer
+3. **Archipel des Cimes** (Forêt d'altitude subalpine)
+   - *Espèces :* Coccinelle à sept points, Grande Sauterelle Verte, Guêpe Commune.
+   - *Ambiance :* Vents d'altitude.
 
-1. **Page d'accueil** - Cliquez sur "Commencer l'exploration"
-2. **Introduction** - Lisez la narration, puis "Accéder à la carte"
-3. **Carte de l'archipel** - Cliquez sur une île pour la visiter
-4. **Voyage en bateau** - Admirez le trajet (automatique, 3 secondes)
-5. **Exploration** - Cliquez sur les sphères jaunes (insectes) pour les découvrir
-6. **Panneau d'information** - Lisez les détails, ajoutez au carnet
-7. **Carnet de bord** - Consultez votre collection via le bouton "📖 Carnet de Bord"
-8. **Retour à la carte** - Explorez d'autres îles
+4. **Toundra des Neiges** (Écotone boréal arctique)
+   - *Espèces :* Arpenteuse hivernale.
+   - *Ambiance :* Neige.
 
-## 🛠️ Technologies
+5. **Sanctuaire des Recycleurs** (Humus et litière forestière)
+   - *Espèces :* Cloporte Commun, Fourmi Rousse.
+   - *Ambiance :* Neutre/Humide.
 
-- **Babylon.js 6.x** - Moteur 3D WebGL
-- **HTML5 / CSS3** - Interface utilisateur
-- **Vanilla JavaScript** - Logique applicative
-- **Sphères simplifiées** - Placeholder pour les modèles 3D
+6. **Lagon des Odonates** (Zone humide lentique)
+   - *Espèces :* Anax Empereur, Criquet des Roseaux.
+   - *Ambiance :* Pluie.
 
-## 📂 Structure du Projet
+7. **Pic des Hautes-Alpes** (Pelouses alpines rocailleuses)
+   - *Espèces :* Apollon des Montagnes.
+   - *Ambiance :* Pluie froide.
 
-```
+8. **Atoll Florissant** (Jardin botanique insulaire)
+   - *Espèces :* Syrphe Ceinturé, Colibri Rubis.
+   - *Ambiance :* Pollen dense.
+
+## Fonctionnalités et Interactions
+
+L'expérience utilisateur s'articule autour de plusieurs aspects interactifs :
+
+### Navigation
+- **Carte Globale 3D :** Vue orbitale de l'archipel permettant la sélection des destinations (îles)
+- **Voyage en Bateau :** Séquence de transition entre la carte et l'île (désactivable dans les réglages pour un "voyage rapide")
+Pour "voyager", l'utilisateur peut cliquer directement sur les îles, ou sur le port puis sélectionner l'île qu'il souhaite explorer. 
+- **Exploration des îles :** Déplacement libre sur l'île via une caméra orbitale contrainte
+
+### Système Éducatif
+- **Découverte :** L'utilisateur doit repérer et cliquer sur les insectes modélisés en 3D sur chaque île. Pour chaque découverte
+- **Points d'intérêt :** Éléments de décors interactifs (arbres, rochers, structures) fournissant des informations sur la flore et la géologie
+- **Carnet de Bord Scientifique :**
+  - Enregistrement automatique des espèces découvertes
+  - Consultation des fiches taxonomiques (Ordre, Famille, Rôle écologique)
+  - Visualisation 3D individuelle des spécimens collectés
+
+### Accessibilité et UX
+- **Paramètres :** Gestion des préférences (activation/désactivation de l'animation du bateau, des systèmes de particules et de la météo)
+- **Aide :** Tutoriels contextuels et guide global (accessible via l'icone "?" en haut à droite de la page) 
+- **Progression :** Indicateurs visuels de complétion pour chaque île 
+
+## Structure du Projet
+
+```text
 archipelago-insects/
-├── index.html              # Page principale
+├── index.html              # Point d'entrée de l'application
 ├── css/
-│   └── main.css           # Styles complets
+│   └── main.css            # Feuilles de style
 └── js/
-    ├── config.js          # Configuration
-    ├── data-islands.js    # Données des îles et insectes
-    ├── scene-map.js       # Scène de la carte
-    ├── scene-boat.js      # Scène du bateau
-    ├── scene-island.js    # Scène d'exploration
-    ├── ui-manager.js      # Gestion de l'interface
-    ├── journal.js         # Carnet de bord
-    └── app.js             # Application principale
+    ├── app.js              # Contrôleur principal (Machine à états)
+    ├── config.js           # Variables globales
+    ├── game-settings.js    # Gestion des préférences utilisateur
+    ├── data-islands.js     # Base de données JSON (Îles, Insectes, Dialogues)
+    ├── journal.js          # Logique du carnet de bord et système de sauvegarde
+    ├── ui-manager.js       # Gestion du DOM et des interfaces 2D
+    ├── scene-map.js        # Scène de la carte globale avec tout l'Archipel
+    ├── scene-boat.js       # Scène de transition bateau
+    └── scene-island.js     # Scène d'exploration 
 ```
 
-## 🚀 Installation
+## Aspects Techniques 
+Le projet est développé en **JavaScript** et s'appuie sur le moteur BabylonJS 6.x.
 
-### Méthode 1 : Serveur Local Simple
+**Points techniques majeurs :** 
+- Gestion des états : Gestion des transitions entre les scènes (Map -> Boat -> Island) avec nettoyage mémoire (dispose)
+- Lancers de Rayons (Raycasting) : Positionnement dynamique des insectes sur le maillage du terrain (pickWithRay) pour s'adapter à la topographie variable des îles
+- Systèmes de Particules : Création d'ambiances météorologiques dynamiques adaptées aux données JSON de l'île chargée
+- Animation Procédurale : Déformation des vertices de l'océan grâce à des fonctions sinusoïdales pour simuler la houle
+- Sauvegarde Locale : Utilisation de localStorage pour la persistance de la progression (insectes découverts, îles visitées et préférences)
 
-```bash
-# Python 3
-cd archipelago-insects
-python -m http.server 8000
+## Ressources et crédits 
+Les modèles 3D proviennent des banques libres **Poly Pizza** et **Sketchfab**. Ils ont été retravaillés sur Blender (optimisation du maillage, recentrage des pivots, mise à l'échelle, gestion des couleurs) pour harmoniser le rendu global. 
 
-# Node.js
-npx http-server archipelago-insects -p 8000
 
-# PHP
-php -S localhost:8000
-```
+## Utilisation de l'IA
+**Dans le cadre de ce projet éducatif, l'IA générative a été utilisée pour :**
+- La rédaction du contenu textuel scientifique (descriptions et anecdotes)
+- La génération des algorithmes mathématiques complexes (déformation des vagues, vecteurs de particules, fonctions sinusoïdales)
+- Le débogage de l'API BabylonJS
 
-Puis ouvrez : `http://localhost:8000`
+L'architecture logicielle, la logique de gameplay, le style et l'intégration des assets sont le fruit du travail de mon travail.
 
-### Méthode 2 : Double-clic (Limité)
 
-Ouvrez directement `index.html` dans votre navigateur (certaines fonctionnalités peuvent être limitées)
-
-## 🎨 Version Simplifiée
-
-Cette version utilise des **sphères colorées** pour représenter :
-- 🟢 **Îles** - Grosses sphères vertes/bleues/marron selon l'écosystème
-- 🟡 **Insectes** - Petites sphères jaunes flottantes
-
-### Prochaines Étapes
-
-Pour une version complète :
-1. Remplacer les sphères par des modèles 3D réalistes (.glb)
-2. Ajouter des textures et végétation sur les îles
-3. Créer un vrai modèle de bateau animé
-4. Ajouter des effets sonores et musique d'ambiance
-5. Implémenter des animations d'insectes (vol, marche)
-
-## 🎯 Objectifs Pédagogiques
-
-- ✅ Comprendre le rôle écologique des insectes
-- ✅ Découvrir différents écosystèmes
-- ✅ Apprendre par l'exploration et l'observation
-- ✅ Associer narration, interaction et données scientifiques
-
-## ⌨️ Contrôles
-
-### Sur la Carte
-- **Clic gauche** - Sélectionner une île
-- **Clic droit + Glisser** - Tourner la caméra
-- **Molette** - Zoom
-
-### Sur une Île
-- **Clic gauche** - Sélectionner un insecte
-- **Clic droit + Glisser** - Tourner la caméra
-- **Molette** - Zoom
-
-### Boutons UI
-- **📖 Carnet de Bord** - Ouvrir le journal
-- **← Retour à la carte** - Retourner à la vue d'ensemble
-
-## 🐛 Notes Techniques
-
-### Gestion des Scènes
-
-Le projet utilise **3 scènes Babylon.js distinctes** :
-1. `MapScene` - Vue aérienne de l'archipel
-2. `BoatScene` - Animation de voyage
-3. `IslandScene` - Exploration détaillée
-
-Chaque scène est **disposée** quand on passe à une autre pour optimiser les performances.
-
-### État du Jeu
-
-```javascript
-JOURNAL_STATE = {
-  discoveredInsects: [],  // IDs des insectes trouvés
-  exploredIslands: [],    // IDs des îles visitées
-}
-```
-
-## 📊 Données
-
-### Format d'une Île
-
-```javascript
-{
-  id: "pollinators",
-  name: "Île des Pollinisateurs",
-  ecosystem: "Prairies fleuries",
-  position: { x: -15, y: 0, z: 10 },
-  color: "#ffeb3b",
-  status: "unexplored",
-  insects: [/* array of insects */]
-}
-```
-
-### Format d'un Insecte
-
-```javascript
-{
-  id: "bee",
-  name: "Abeille Domestique",
-  scientific: "Apis mellifera",
-  position: { x: 2, y: 1, z: 2 },
-  icon: "🐝",
-  role: "Pollinisation des cultures",
-  habitat: "Prairies, jardins",
-  anecdote: "Visite 1000 fleurs par jour",
-  status: "menacé"
-}
-```
-
-## 🎨 Personnalisation
-
-### Ajouter une Île
-
-Dans `js/data-islands.js`, ajoutez un objet dans `ISLANDS_DATA` :
-
-```javascript
-{
-  id: "desert",
-  name: "Île Désertique",
-  ecosystem: "Zone aride",
-  position: { x: 20, y: 0, z: 20 },
-  color: "#ffd54f",
-  status: "unexplored",
-  insects: [/* vos insectes */]
-}
-```
-
-### Modifier les Couleurs
-
-Dans `css/main.css` :
-
-```css
-:root {
-  --ocean-deep: #0d47a1;
-  --island-green: #7cb342;
-  --ui-accent: #ffb74d;
-}
-```
-
-### Ajuster les Caméras
-
-Dans `js/config.js` :
-
-```javascript
-camera: {
-  mapRadius: 50,      // Distance de la caméra sur la carte
-  islandRadius: 15,   // Distance sur une île
-}
-```
-
-## 🌊 Effets Visuels
-
-- **Océan animé** - Mouvement sinusoïdal des vagues
-- **Insectes flottants** - Animation verticale douce
-- **Transitions fluides** - Fondu entre les écrans
-- **Tooltips informatifs** - Au survol des îles
-
-## 📱 Responsive
-
-L'interface s'adapte automatiquement aux écrans :
-- Desktop (>768px) - Panneaux latéraux larges
-- Tablet (768px) - Panneaux réduits
-- Mobile (<768px) - Panneaux plein écran
-
-## 🔮 Améliorations Futures
-
-- [ ] Modèles 3D réalistes d'insectes
-- [ ] Végétation procédurale sur les îles
-- [ ] Sons d'ambiance par écosystème
-- [ ] Animations de vol pour les insectes
-- [ ] Mini-jeux éducatifs
-- [ ] Mode multijoueur
-- [ ] Export du carnet en PDF
-- [ ] Quiz de fin d'exploration
-
-## 📄 Licence
-
-Projet éducatif libre d'utilisation.
-
-## 👥 Crédits
-
-- **Concept** : Expérience éducative interactive
-- **Technologies** : Babylon.js, HTML5, CSS3, JavaScript
-- **Données scientifiques** : Sources entomologiques variées
-
----
-
-**Bon voyage dans l'Archipel ! 🦋🏝️**
