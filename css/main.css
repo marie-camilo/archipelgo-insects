@@ -523,10 +523,11 @@ canvas {
 }
 
 .panel-actions {
+    margin-top: auto !important;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin-top: var(--spacing-lg);
 }
 
 .mission-icon i {
@@ -782,6 +783,8 @@ canvas {
 .left-panel {
     left: var(--spacing-lg);
     transform: translateX(0);
+    display: flex;
+    flex-direction: column;
 }
 
 .right-panel {
@@ -830,11 +833,10 @@ canvas {
 }
 
 .panel-ecosystem, .insect-scientific {
-    font-size: 0.9rem;
+    font-size: 1rem;
+    font-family: 'Sniglet', sans-serif;
     color: #5d6d7e;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
+    margin-top: var(--spacing-md);
     margin-bottom: var(--spacing-md);
     display: block;
 }
@@ -872,11 +874,11 @@ canvas {
 }
 
 .progress-section h4 {
-    font-family: var(--font-body);
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-family: var(--font-title);
+    font-size: 1rem;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
+    font-weight: 400;
     margin-bottom: 15px;
     color: #546e7a;
     display: flex;
@@ -982,11 +984,11 @@ canvas {
 }
 
 .info-section h4 {
-    font-size: 0.8rem;
+    font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #85929e;
-    margin-bottom: 6px;
+    color: #1a252f;
+    margin-bottom: 1rem;
 }
 
 .info-section p {
