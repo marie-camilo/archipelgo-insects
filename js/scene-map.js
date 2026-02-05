@@ -11,7 +11,6 @@ const DECOR_DATA = [
     { model: "island.glb", pos: { x: 76.42, y: -15, z: -54.33 }, scale: 23, rot: 4 },
     { model: "island.glb", pos: { x: 79, y: -7, z: -13 }, scale: 10, rot: 4 },
 
-
     { model: "floating-little-islands.glb", pos: { x: 17.91, y: 5, z: -55.78 }, scale: 10, rot: 1.5 },
     { model: "floating-little-islands.glb", pos: { x: -15.99, y: 3, z: 51.55 },scale: 8, rot: 1.5 },
 
@@ -20,7 +19,6 @@ const DECOR_DATA = [
     { model: "island.glb", pos: { x: -12.53, y: -7, z: 112.39 }, scale: 12, rot: 1.5 },
     { model: "island.glb", pos: { x: -10.22, y: -8, z: -85.64 }, scale: 12, rot: 1.5 },
     { model: "island.glb", pos: { x: 4.07, y: -15, z: -111.22 }, scale: 22, rot: 1.5 },
-
 
     { model: "island-fox.glb", pos: { x: -2.15, y: 2.4, z: -9.29 }, scale: 2, rot: 0.5 },
 ];
@@ -194,8 +192,6 @@ const MapScene = {
     loadDecor(shadowGenerator) {
         DECOR_DATA.forEach((item, i) => {
             const pivot = new BABYLON.TransformNode("decor_" + i, this.scene);
-
-            //  récupère la position Y définie dans les données, sinon -1 par défaut
             const baseY = item.pos.y !== undefined ? item.pos.y : -1;
 
             pivot.position = new BABYLON.Vector3(item.pos.x, baseY, item.pos.z);
@@ -211,8 +207,6 @@ const MapScene = {
                     m.receiveShadows = true;
                     if(m.material) m.material.fogEnabled = false;
                 });
-
-                // stocke le baseY pour l'animation
                 this.decorMeshes.push({ pivot: pivot, offset: Math.random() * 100, baseY: baseY });
             });
         });
@@ -223,7 +217,6 @@ const MapScene = {
         ISLANDS_DATA.forEach((islandData, index) => {
             const pivot = new BABYLON.TransformNode("pivot_" + islandData.id, this.scene);
 
-            // Gestion de la hauteur de base
             const baseY = islandData.position.y || 0;
             pivot.position = new BABYLON.Vector3(islandData.position.x, baseY, islandData.position.z);
 
@@ -283,48 +276,16 @@ const MapScene = {
         });
     },
 
-    // création oiseaux
     createBirds() {
-        const birdSystem = new BABYLON.ParticleSystem("birds", 200, this.scene);
-        birdSystem.particleTexture = new BABYLON.Texture("https://www.babylonjs-playground.com/textures/flare.png", this.scene);
+        const texture = new BABYLON.Texture("https://www.babylonjs-playground.com/textures/flare.png", this.scene);
 
-        birdSystem.emitter = new BABYLON.Vector3(0, 20, 0);
-        birdSystem.minEmitBox = new BABYLON.Vector3(-150, 0, -150);
-        birdSystem.maxEmitBox = new BABYLON.Vector3(150, 10, 150);
-        birdSystem.minSize = 0.2;
-        birdSystem.maxSize = 0.5;
-
-        birdSystem.isBillboardBased = true;
-
-        birdSystem.color1 = new BABYLON.Color4(1, 1, 1, 0.6);
-        birdSystem.color2 = new BABYLON.Color4(0.8, 0.8, 0.8, 0.6);
-        birdSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0.0);
-
-        birdSystem.minLifeTime = 10; birdSystem.maxLifeTime = 20;
-        birdSystem.emitRate = 10;
-
-        birdSystem.direction1 = new BABYLON.Vector3(-1, 0, -1);
-        birdSystem.direction2 = new BABYLON.Vector3(1, 0.2, 1);
-
-        birdSystem.updateFunction = function(particles) {
-            for (var index = 0; index < particles.length; index++) {
-                var particle = particles[index];
-                particle.age += this._scaledUpdateSpeed;
-                particle.position.x += Math.cos(particle.age * 0.5) * 0.2;
-                particle.position.z += Math.sin(particle.age * 0.5) * 0.2;
-                if (particle.age >= particle.lifeTime) {
-                    this.recycleParticle(particle);
-                    index--;
-                    continue;
-                }
-            }
-        };
+        // Délégation complète de la création et configuration à l'IA
+        const birdSystem = IAParticles.createMapBirds(this.scene, texture);
         birdSystem.start();
     },
 
-    // Animation et chargement des models 3D oiseaux
     loadRealBirds() {
-        const lanes = [-20, 10, 40]; // Profondeur de vol
+        const lanes = [-20, 10, 40];
 
         for(let i=0; i<3; i++) {
             BABYLON.SceneLoader.ImportMeshAsync("", "./assets/", "flying-bird.glb", this.scene).then((result) => {
@@ -341,7 +302,6 @@ const MapScene = {
                     if(m.material) m.material.fogEnabled = false;
                 });
 
-                // Animation des ailes
                 if(result.animationGroups.length > 0) {
                     result.animationGroups[0].speedRatio = 1.5;
                     result.animationGroups[0].play(true);
@@ -393,35 +353,24 @@ const MapScene = {
 
     animateEnvironment() {
         this.time += 0.005;
-        const waveHeight = 1.0;
-        const waveFreq = 0.15;
 
+        // Océan
         if (this.waterMesh && this.basePositions) {
-            const positions = [...this.basePositions];
-            for (let i = 0; i < positions.length; i += 3) {
-                const x = positions[i];
-                const z = positions[i + 2];
-                const y = Math.sin(x * waveFreq + this.time) * Math.cos(z * waveFreq + this.time) * waveHeight;
-                positions[i + 1] = y;
-            }
-            this.waterMesh.updateVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
-            this.waterMesh.createNormals(false);
+            IAMath.updateOceanVertices(this.waterMesh, this.basePositions, this.time, 1.0, 0.15);
         }
 
         if (this.boatMesh) {
             const boatX = 38;
             const boatZ = 30;
+            const waveHeight = 1.0;
+            const waveFreq = 0.15;
 
-            const waterLevelAtBoat = Math.sin(boatX * waveFreq + this.time) * Math.cos(boatZ * waveFreq + this.time) * waveHeight;
-
+            // Calcul de hauteur via IA Helper
+            const waterLevelAtBoat = IAMath.calculateWaveHeight(boatX, boatZ, this.time, waveHeight, waveFreq);
             this.boatMesh.position.y = waterLevelAtBoat + 0.5;
-
             this.boatMesh.rotation.x = Math.cos(this.time * 0.7) * 0.08;
-
             this.boatMesh.rotation.z = Math.sin(this.time) * 0.05;
         }
-
-
 
         // Animation des Îles
         this.islands.forEach((obj) => {

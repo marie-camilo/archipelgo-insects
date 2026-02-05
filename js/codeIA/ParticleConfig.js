@@ -115,5 +115,44 @@ const IAParticles = {
             }
         };
         return birds;
+    },
+
+    createMapBirds: function(scene, texture) {
+        const birdSystem = new BABYLON.ParticleSystem("birds", 200, scene);
+        birdSystem.particleTexture = texture;
+
+        birdSystem.emitter = new BABYLON.Vector3(0, 20, 0);
+        birdSystem.minEmitBox = new BABYLON.Vector3(-150, 0, -150);
+        birdSystem.maxEmitBox = new BABYLON.Vector3(150, 10, 150);
+        birdSystem.minSize = 0.2;
+        birdSystem.maxSize = 0.5;
+
+        birdSystem.isBillboardBased = true;
+
+        birdSystem.color1 = new BABYLON.Color4(1, 1, 1, 0.6);
+        birdSystem.color2 = new BABYLON.Color4(0.8, 0.8, 0.8, 0.6);
+        birdSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0.0);
+
+        birdSystem.minLifeTime = 10; birdSystem.maxLifeTime = 20;
+        birdSystem.emitRate = 10;
+
+        birdSystem.direction1 = new BABYLON.Vector3(-1, 0, -1);
+        birdSystem.direction2 = new BABYLON.Vector3(1, 0.2, 1);
+
+        // La logique complexe de mouvement circulaire
+        birdSystem.updateFunction = function(particles) {
+            for (var index = 0; index < particles.length; index++) {
+                var particle = particles[index];
+                particle.age += this._scaledUpdateSpeed;
+                particle.position.x += Math.cos(particle.age * 0.5) * 0.2;
+                particle.position.z += Math.sin(particle.age * 0.5) * 0.2;
+                if (particle.age >= particle.lifeTime) {
+                    this.recycleParticle(particle);
+                    index--;
+                    continue;
+                }
+            }
+        };
+        return birdSystem;
     }
 };
