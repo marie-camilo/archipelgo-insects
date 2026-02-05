@@ -56,7 +56,7 @@ const IslandScene = {
 
         // Lumières
         const hemiLight = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(0, 1, 0), this.scene);
-        hemiLight.intensity = (this.currentIsland.ambiance === "rain") ? 0.6 : 0.9; // Plus sombre s'il pleut
+        hemiLight.intensity = (this.currentIsland.ambiance === "rain") ? 0.6 : 0.9;
 
         const dirLight = new BABYLON.DirectionalLight("dirLight", new BABYLON.Vector3(-1, -0.8, -1), this.scene);
         dirLight.position = new BABYLON.Vector3(100, 100, 50);
@@ -71,7 +71,7 @@ const IslandScene = {
             setTimeout(() => {
                 this.createInsects();
                 this.createInteractiveElements();
-                this.createAtmosphere(); // lancer la météo
+                this.createAtmosphere();
             }, 200);
         });
 
@@ -83,191 +83,36 @@ const IslandScene = {
             }
         });
 
-        // this.scene.onPointerObservable.add((pointerInfo) => {
-        //     if (pointerInfo.type === BABYLON.PointerEventTypes.POINTERDOWN) {
-        //         const pick = pointerInfo.pickInfo;
-        //
-        //         // On ignore l'océan et le ciel
-        //         if (pick.hit && pick.pickedMesh.name !== "ocean" && pick.pickedMesh.name !== "skyBox") {
-        //
-        //             // On récupère le point exact dans le monde (World Coordinates)
-        //             const p = pick.pickedPoint;
-        //
-        //             let islandScale = (this.currentIsland.scale || 1) * 15;
-        //             // Exception pour la forêt verte qui n'utilise pas le scale dans ton code actuel
-        //             if (this.currentIsland.id === 'forest_green') islandScale = 1;
-        //
-        //             const rawX = p.x / islandScale;
-        //             const rawZ = p.z / islandScale;
-        //
-        //             console.log(`Mesh touché: "${pick.pickedMesh.name}"`);
-        //             console.log(`position: { x: ${rawX.toFixed(2)}, y: 0, z: ${rawZ.toFixed(2)} },`);
-        //
-        //             // Marqueur visuel (Sphère Rouge)
-        //             const marker = BABYLON.MeshBuilder.CreateSphere("debugMarker", {diameter: 2}, this.scene);
-        //             marker.position = p;
-        //             const mat = new BABYLON.StandardMaterial("debugMat", this.scene);
-        //             mat.emissiveColor = new BABYLON.Color3(1, 0, 0);
-        //             marker.material = mat;
-        //         }
-        //     }
-        // });
-
         window.addEventListener("resize", () => this.engine.resize());
     },
 
-    // Gestion des ambiances et météo
     createAtmosphere() {
         const type = this.currentIsland.ambiance;
         if (!type) return;
 
         this.disposeAtmosphere();
         const particleTexture = new BABYLON.Texture("https://www.babylonjs-playground.com/textures/flare.png", this.scene);
-        if (!GameSettings.particles) return;
+        if (typeof GameSettings !== 'undefined' && !GameSettings.particles) return;
 
-        const createSystem = (name, capacity) => {
-            const sys = new BABYLON.ParticleSystem(name, capacity, this.scene);
-            sys.particleTexture = particleTexture;
+        // Liste des systèmes actifs
+        const addSystem = (sys) => {
+            sys.start();
             this.activeSystems.push(sys);
-            return sys;
         };
 
         if (type === "snow") {
-
-            // neige
-            const snow = createSystem("snow", 5000);
-            snow.emitter = new BABYLON.Vector3(0, 150, 0);
-            snow.minEmitBox = new BABYLON.Vector3(-300, 0, -300);
-            snow.maxEmitBox = new BABYLON.Vector3(300, 0, 300);
-
-            snow.color1 = new BABYLON.Color4(1, 1, 1, 0.9);
-            snow.color2 = new BABYLON.Color4(1, 1, 1, 0.9);
-            snow.colorDead = new BABYLON.Color4(1, 1, 1, 0.0);
-            snow.minSize = 0.5; snow.maxSize = 1.2;
-            snow.minLifeTime = 8; snow.maxLifeTime = 12;
-            snow.emitRate = 400;
-            snow.gravity = new BABYLON.Vector3(0, -3, 0);
-            snow.start();
+            addSystem(IAParticles.createSnow(this.scene, particleTexture));
         }
         else if (type === "pollen") {
-            // pollen et lucioles
-            const pollen = createSystem("pollen", 1000);
-            pollen.emitter = new BABYLON.Vector3(0, 30, 0);
-            pollen.minEmitBox = new BABYLON.Vector3(-100, 0, -100);
-            pollen.maxEmitBox = new BABYLON.Vector3(100, 0, 100);
-            pollen.color1 = new BABYLON.Color4(0.9, 0.9, 0.7, 0.4);
-            pollen.color2 = new BABYLON.Color4(0.9, 0.9, 0.7, 0.1);
-            pollen.minSize = 0.1; pollen.maxSize = 0.4;
-            pollen.minLifeTime = 8; pollen.maxLifeTime = 12;
-            pollen.emitRate = 80;
-            pollen.gravity = new BABYLON.Vector3(0, -0.1, 0);
-            pollen.start();
-
-            const fireflies = createSystem("fireflies", 200);
-            fireflies.emitter = new BABYLON.Vector3(0, 10, 0);
-            fireflies.minEmitBox = new BABYLON.Vector3(-80, -5, -80);
-            fireflies.maxEmitBox = new BABYLON.Vector3(80, 20, 80);
-            fireflies.color1 = new BABYLON.Color4(1, 0.8, 0.2, 1.0);
-            fireflies.color2 = new BABYLON.Color4(1, 0.5, 0.1, 1.0);
-            fireflies.minSize = 0.8; fireflies.maxSize = 1.2;
-            fireflies.minLifeTime = 3; fireflies.maxLifeTime = 6;
-            fireflies.emitRate = 30;
-            fireflies.gravity = new BABYLON.Vector3(0, 0.5, 0);
-            fireflies.start();
+            addSystem(IAParticles.createPollen(this.scene, particleTexture));
+            addSystem(IAParticles.createFireflies(this.scene, particleTexture));
         }
         else if (type === "rain") {
-
-            // Pluie
-            const rain = createSystem("rain", 4000);
-            rain.emitter = new BABYLON.Vector3(0, 100, 0);
-            rain.minEmitBox = new BABYLON.Vector3(-150, 0, -150);
-            rain.maxEmitBox = new BABYLON.Vector3(150, 0, 150);
-
-            // Couleur gris-bleu semi-transparent
-            rain.color1 = new BABYLON.Color4(0.6, 0.7, 0.8, 0.6);
-            rain.color2 = new BABYLON.Color4(0.6, 0.7, 0.8, 0.4);
-            rain.colorDead = new BABYLON.Color4(0.5, 0.5, 0.6, 0.0);
-
-            rain.minSize = 0.4;
-            rain.maxSize = 0.8;
-
-            rain.isBillboardBased = false;
-
-            rain.minLifeTime = 0.5;
-            rain.maxLifeTime = 0.8;
-            rain.emitRate = 1200; // Forte pluie
-
-            // Vitesse de chute très rapide
-            rain.gravity = new BABYLON.Vector3(0, -150, 0);
-            rain.direction1 = new BABYLON.Vector3(0, -30, 0);
-            rain.direction2 = new BABYLON.Vector3(0, -30, 0);
-
-            rain.start();
+            addSystem(IAParticles.createRain(this.scene, particleTexture));
         }
         else if (type === "wind") {
-            // Feuilles / Poussière portées par le vent
-            const wind = createSystem("windParticles", 500);
-            wind.emitter = new BABYLON.Vector3(-200, 50, -50); // Vient de côté
-            wind.minEmitBox = new BABYLON.Vector3(0, -50, -100);
-            wind.maxEmitBox = new BABYLON.Vector3(0, 50, 100);
-
-            wind.color1 = new BABYLON.Color4(1, 1, 1, 0.5);
-            wind.color2 = new BABYLON.Color4(1, 1, 1, 0.0);
-
-            wind.minSize = 0.5;
-            wind.maxSize = 1.5;
-            wind.minLifeTime = 4;
-            wind.maxLifeTime = 6;
-            wind.emitRate = 50;
-
-            // Vent horizontal fort
-            wind.gravity = new BABYLON.Vector3(30, -2, 0);
-            wind.direction1 = new BABYLON.Vector3(40, 0, 0);
-            wind.direction2 = new BABYLON.Vector3(60, 5, 0);
-            wind.minAngularSpeed = 0;
-            wind.maxAngularSpeed = Math.PI;
-
-            wind.start();
-
-            // Oiseaux au loin (Particules déformées)
-            const birds = createSystem("birds", 40);
-            birds.emitter = new BABYLON.Vector3(0, 60, 0);
-            birds.minEmitBox = new BABYLON.Vector3(-200, 0, -200);
-            birds.maxEmitBox = new BABYLON.Vector3(200, 20, 200);
-
-            birds.color1 = new BABYLON.Color4(0.2, 0.2, 0.2, 1); // Noirs
-            birds.color2 = new BABYLON.Color4(0.2, 0.2, 0.2, 1);
-
-            birds.minSize = 1;
-            birds.maxSize = 2;
-            birds.isBillboardBased = true;
-
-            birds.minLifeTime = 10;
-            birds.maxLifeTime = 15;
-            birds.emitRate = 2; // Rares
-
-            // Vol circulaire large
-            birds.gravity = new BABYLON.Vector3(0, 0, 0);
-
-            // Update function custom pour faire tourner les oiseaux
-            birds.updateFunction = function(particles) {
-                for (var index = 0; index < particles.length; index++) {
-                    var particle = particles[index];
-                    particle.age += this._scaledUpdateSpeed;
-
-                    // Mouvement circulaire
-                    particle.position.x += Math.cos(particle.age) * 0.5;
-                    particle.position.z += Math.sin(particle.age) * 0.5;
-                    particle.position.y += Math.sin(particle.age * 3) * 0.1; // Battement ailes
-
-                    if (particle.age >= particle.lifeTime) {
-                        this.recycleParticle(particle);
-                        index--;
-                    }
-                }
-            };
-
-            birds.start();
+            addSystem(IAParticles.createWindParticles(this.scene, particleTexture));
+            addSystem(IAParticles.createDistantBirds(this.scene, particleTexture));
         }
     },
 
@@ -313,6 +158,7 @@ const IslandScene = {
 
                 const boatActionManager = new BABYLON.ActionManager(this.scene);
 
+                // Interactions Boat UI (Ancre)
                 boatActionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
                     document.body.style.cursor = "pointer";
                     if (this.btnCircle) {
@@ -329,7 +175,6 @@ const IslandScene = {
                         this.btnCircle.background = "rgba(255, 255, 255, 0.9)";
                     }
                 }));
-
                 boatActionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
                     UIManager.showReturnMapConfirmation();
                 }));
@@ -352,7 +197,6 @@ const IslandScene = {
                 circle.thickness = 1;
                 circle.background = "rgba(255, 255, 255, 0.9)";
 
-                // attacher les controles
                 this.guiTexture.addControl(circle);
                 circle.linkWithMesh(boatRoot);
                 circle.linkOffsetY = -70;
@@ -366,13 +210,11 @@ const IslandScene = {
                 icon.fontSize = 20;
                 circle.addControl(icon);
 
-                // Interactivité du bouton UI
                 circle.isPointerBlocker = true;
                 circle.onPointerUpObservable.add(() => {
                     UIManager.showReturnMapConfirmation();
                 });
 
-                // Animations Hover sur l'UI directement
                 circle.onPointerEnterObservable.add(() => {
                     document.body.style.cursor = "pointer";
                     circle.scaleX = 1.15;
@@ -504,6 +346,7 @@ const IslandScene = {
                 hitBox.isPickable = true;
                 if(parentMesh) parentMesh.parent = hitBox;
 
+                // Point interactif UI (Cercle pulsant)
                 if (this.guiTexture) {
                     const pulseCircle = new BABYLON.GUI.Ellipse();
                     pulseCircle.width = "16px";
@@ -513,31 +356,28 @@ const IslandScene = {
                     pulseCircle.alpha = 0.8;
 
                     this.guiTexture.addControl(pulseCircle);
-
                     pulseCircle.linkWithMesh(hitBox);
                     pulseCircle.linkOffsetY = data.uiOffset !== undefined ? data.uiOffset : -60;
 
+                    // Animation simple pulse
                     let pulseAnim = 0;
-                    const pulseObserver = this.scene.onBeforeRenderObservable.add(() => {
+                    this.scene.onBeforeRenderObservable.add(() => {
                         pulseAnim += 0.03;
                         const scale = 1 + Math.sin(pulseAnim) * 0.5;
                         pulseCircle.scaleX = scale;
                         pulseCircle.scaleY = scale;
                         pulseCircle.alpha = 0.8 - (scale - 1) * 1.5;
-
-                        if (pulseCircle.alpha <= 0) {
-                            pulseAnim = 0;
-                        }
+                        if (pulseCircle.alpha <= 0) pulseAnim = 0;
                     });
 
-                    // point central fixe
+                    // Point central fixe
                     const dot = new BABYLON.GUI.Ellipse();
                     dot.width = "10px";
                     dot.height = "10px";
                     dot.color = "white";
                     dot.thickness = 1;
                     dot.background = "white";
-                    dot.shadowBlur = 10; // halo
+                    dot.shadowBlur = 10;
                     dot.shadowColor = "rgba(255,255,255,0.5)";
 
                     this.guiTexture.addControl(dot);
@@ -549,36 +389,27 @@ const IslandScene = {
 
                     dot.onPointerEnterObservable.add(() => {
                         document.body.style.cursor = "pointer";
-                        dot.scaleX = 1.5;
-                        dot.scaleY = 1.5;
-                        dot.thickness = 3;
-                        dot.shadowBlur = 20; // lueur
+                        dot.scaleX = 1.5; dot.scaleY = 1.5; dot.thickness = 3; dot.shadowBlur = 20;
                         pulseCircle.isVisible = false;
                     });
-
                     dot.onPointerOutObservable.add(() => {
                         document.body.style.cursor = "default";
-                        dot.scaleX = 1;
-                        dot.scaleY = 1;
-                        dot.thickness = 1;
-                        dot.shadowBlur = 10;
+                        dot.scaleX = 1; dot.scaleY = 1; dot.thickness = 1; dot.shadowBlur = 10;
                         pulseCircle.isVisible = true;
                     });
                 }
 
-                // Interaction 3D (Hitbox)
+                // Interaction 3D (Hitbox invisible)
                 const actionManager = new BABYLON.ActionManager(this.scene);
                 actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
                     UIManager.showInteractiveModal(data);
                 }));
-                hitBox.actionManager = actionManager;
                 actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
                     document.body.style.cursor = "pointer";
                 }));
                 actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
                     document.body.style.cursor = "default";
                 }));
-
                 hitBox.actionManager = actionManager;
             };
 
@@ -604,18 +435,8 @@ const IslandScene = {
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Localisation en cours...";
         }
 
-        let hl = this.scene.getHighlightLayerByName("scanner_highlight");
-        if (!hl) {
-            hl = new BABYLON.HighlightLayer("scanner_highlight", this.scene, {
-                mainTextureRatio: 1,
-                blurHorizontalSize: 3,
-                blurVerticalSize: 3,
-
-                alphaBlendingMode: BABYLON.Engine.ALPHA_ADD
-            });
-            hl.innerGlow = false;
-            hl.outerGlow = true;
-        }
+        // Création du layer via IA Helper
+        const hl = IABabylon.createScannerEffect(this.scene);
 
         let foundCount = 0;
         const modernGlowColor = new BABYLON.Color3(1.0, 0.95, 0.7);
@@ -642,24 +463,25 @@ const IslandScene = {
 
     animateScene() {
         this.time += 0.01;
+
+        // Océan
         if (this.waterMesh && this.basePositions) {
-            const positions = [...this.basePositions];
-            const waveHeight = 1.2;
-            const waveFreq = 0.15;
-            for (let i = 0; i < positions.length; i += 3) {
-                const x = positions[i];
-                const z = positions[i + 2];
-                const y = Math.sin(x * waveFreq + this.time) * Math.cos(z * waveFreq + this.time) * waveHeight;
-                positions[i + 1] = y;
-            }
-            this.waterMesh.updateVerticesData(BABYLON.VertexBuffer.PositionKind, positions);
-            this.waterMesh.createNormals(false);
+            IAMath.updateOceanVertices(this.waterMesh, this.basePositions, this.time, 1.2, 0.15);
         }
+
+        // Bateau
         if (this.arrivalBoat) {
-            this.arrivalBoat.position.y = (this.currentIsland.waterLevel || 0) + Math.sin(this.time * 1.5) * 0.4;
+            const bx = this.arrivalBoat.position.x;
+            const bz = this.arrivalBoat.position.z;
+            const waterY = this.currentIsland.waterLevel || 0;
+            const waveY = IAMath.calculateWaveHeight(bx, bz, this.time, 1.2, 0.15);
+
+            this.arrivalBoat.position.y = waterY + waveY + 0.4;
             this.arrivalBoat.rotation.z = Math.sin(this.time) * 0.05;
             this.arrivalBoat.rotation.x = Math.cos(this.time * 0.7) * 0.03;
         }
+
+        // Insectes
         this.insectsMeshes.forEach(item => {
             if(item.visual) {
                 item.visual.position.y = Math.sin(this.time * 2 + item.offset) * 0.2;
