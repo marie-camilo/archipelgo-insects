@@ -1,7 +1,6 @@
 # L'Archipel des Insectes 
 
 **CAMILO–MARCHAL Marie - S6D1** 
-**Date :** Février 2026
 
 ## Descriptif du projet
 
