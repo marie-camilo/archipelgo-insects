@@ -64,6 +64,12 @@ const UIManager = {
                         <h3>Progression</h3>
                         <p>Consultez le <strong>menu latéral gauche</strong> pour voir combien d'espèces il vous reste à découvrir ici.</p>
                     </div>
+                    
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-tower-broadcast"></i></div>
+                        <h3>Scanner de Recherche</h3>
+                        <p>Un spécimen vous échappe ? Cliquez sur <strong>"Révéler les spécimens"</strong> dans le panneau gauche pour les mettre en évidence.</p>
+                    </div>
 
                     <div class="help-card">
                         <div class="help-icon"><i class="fas fa-lightbulb"></i></div>
