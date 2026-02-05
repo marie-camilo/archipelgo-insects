@@ -92,11 +92,17 @@ const ArchipelagoApp = {
       UIManager.updateIslandProgress(islandId);
 
       setTimeout(() => {
-        document.getElementById("help-overlay").style.display = "block";
-        setTimeout(() => {
-          document.getElementById("help-overlay").style.display = "none";
-        }, 3000);
-      }, 500);
+        if (typeof UIManager !== 'undefined') {
+          UIManager.triggerHelpAttention();
+        }
+      }, 1000);
+
+      // setTimeout(() => {
+      //   document.getElementById("help-overlay").style.display = "block";
+      //   setTimeout(() => {
+      //     document.getElementById("help-overlay").style.display = "none";
+      //   }, 3000);
+      // }, 500);
     }, 100);
   },
 

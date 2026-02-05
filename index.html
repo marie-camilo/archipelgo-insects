@@ -65,6 +65,11 @@
     <i class="fas fa-cog"></i>
 </button>
 
+
+<button class="btn-help-floating" onclick="UIManager.toggleGlobalHelp()" aria-label="Aide">
+    <i class="fas fa-question"></i>
+</button>
+
 <div id="settings-modal" class="global-help-modal"> <div class="settings-content">
     <button class="nav-close" onclick="UIManager.toggleSettings()">×</button>
 
@@ -170,10 +175,6 @@
 <div id="map-view-screen" class="screen active">
     <canvas id="renderCanvas"></canvas>
 
-    <button class="btn-help-floating" onclick="UIManager.toggleGlobalHelp()" aria-label="Aide">
-        <i class="fas fa-question"></i>
-    </button>
-
     <div class="map-top-bar">
         <div class="map-titles">
             <h1 class="map-title">Archipel de la Biodiversité</h1>
@@ -265,43 +266,6 @@
         </div>
     </div>
 
-    <div id="right-panel" class="side-panel right-panel">
-        <button class="panel-close" onclick="ArchipelagoApp.closeInsectPanel()">×</button>
-
-        <div class="insect-header">
-            <h3 class="insect-name" id="insect-name">Nom Insecte</h3>
-            <div class="insect-meta">
-                <p id="insect-scientific" class="scientific-name">Nom latin</p>
-                <p id="insect-taxonomy" class="taxonomy-info">Classification</p>
-            </div>
-        </div>
-
-        <div class="insect-model-preview" id="insect-preview">
-            <div class="model-placeholder">?</div>
-        </div>
-
-        <div class="insect-info-scroll">
-            <div class="info-section">
-                <h4>Rôle Écologique</h4>
-                <p id="insect-role" class="educational-text">...</p>
-            </div>
-
-            <div class="info-section">
-                <h4>Habitat Spécifique</h4>
-                <p id="insect-habitat" class="educational-text">...</p>
-            </div>
-
-            <div class="info-section">
-                <h4>Note du Naturaliste</h4>
-                <p id="insect-anecdote" class="educational-text italic">...</p>
-            </div>
-
-            <div class="status-badge" id="insect-status">
-                <span>Statut de conservation</span>
-            </div>
-        </div>
-    </div>
-
     <div class="help-overlay" id="help-overlay">
         <p>Explorez l'île et cliquez sur les insectes pour les découvrir puis les ajouter à votre carnet de bord.</p>
     </div>
@@ -373,6 +337,43 @@
         <button class="btn-primary btn-victory" onclick="ArchipelagoApp.restart()">
             Nouvelle Expédition
         </button>
+    </div>
+</div>
+
+<div id="right-panel" class="side-panel right-panel">
+    <button class="panel-close" onclick="ArchipelagoApp.closeInsectPanel()">×</button>
+
+    <div class="insect-header">
+        <h3 class="insect-name" id="insect-name">Nom Insecte</h3>
+        <div class="insect-meta">
+            <p id="insect-scientific" class="scientific-name">Nom latin</p>
+            <p id="insect-taxonomy" class="taxonomy-info">Classification</p>
+        </div>
+    </div>
+
+    <div class="insect-model-preview" id="insect-preview">
+        <div class="model-placeholder">?</div>
+    </div>
+
+    <div class="insect-info-scroll">
+        <div class="info-section">
+            <h4>Rôle Écologique</h4>
+            <p id="insect-role" class="educational-text">...</p>
+        </div>
+
+        <div class="info-section">
+            <h4>Habitat Spécifique</h4>
+            <p id="insect-habitat" class="educational-text">...</p>
+        </div>
+
+        <div class="info-section">
+            <h4>Note du Naturaliste</h4>
+            <p id="insect-anecdote" class="educational-text italic">...</p>
+        </div>
+
+        <div class="status-badge" id="insect-status">
+            <span>Statut de conservation</span>
+        </div>
     </div>
 </div>
 

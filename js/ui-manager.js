@@ -4,11 +4,129 @@ const UIManager = {
     previewCamera: null,
     currentPreviewMesh: null,
 
+    triggerHelpAttention() {
+        const btn = document.querySelector(".btn-help-floating");
+        if (btn) {
+            btn.classList.add("btn-attention");
+        }
+    },
+
+    // désactiver animation au click
+    toggleGlobalHelp() {
+        const modal = document.getElementById("global-help-modal");
+        const btn = document.querySelector(".btn-help-floating");
+
+        if (btn) {
+            btn.classList.remove("btn-attention");
+        }
+
+        if (!modal) return;
+
+        if (modal.classList.contains("visible")) {
+            modal.classList.remove("visible");
+            return;
+        }
+
+        this.updateHelpContent();
+
+        const settings = document.getElementById("settings-modal");
+        if(settings) settings.classList.remove("visible");
+
+        modal.classList.add("visible");
+    },
+
+    updateHelpContent() {
+        const title = document.querySelector("#global-help-modal h2");
+        const subtitle = document.querySelector("#global-help-modal .help-header p");
+        const grid = document.querySelector("#global-help-modal .help-grid");
+
+        // si on est sur une ile
+        if (ArchipelagoApp.currentScreen === "island-exploration") {
+            if(title) title.textContent = "Guide de Terrain";
+            if(subtitle) subtitle.textContent = "Observation et collecte sur l'île.";
+
+            if(grid) {
+                grid.innerHTML = `
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-anchor"></i></div>
+                        <h3>Retour Carte</h3>
+                        <p>Pour quitter l'île, cliquez sur le <strong>bateau</strong> amarré ou sur le bouton d'ancrage flottant.</p>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-bug"></i></div>
+                        <h3>La Chasse</h3>
+                        <p>Trouvez les insectes cachés dans le décor. Cliquez dessus pour les identifier et les ajouter au carnet.</p>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-list-check"></i></div>
+                        <h3>Progression</h3>
+                        <p>Consultez le <strong>menu latéral gauche</strong> pour voir combien d'espèces il vous reste à découvrir ici.</p>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-lightbulb"></i></div>
+                        <h3>Curiosités</h3>
+                        <p>Interagissez avec les éléments du décor (arbres, fleurs, rochers) pour apprendre des anecdotes fascinantes.</p>
+                    </div>
+                `;
+            }
+        }
+        // si on est sur la carte (scene map)
+        else {
+            if(title) title.textContent = "Guide de l'Explorateur";
+            if(subtitle) subtitle.textContent = "Bienvenue dans l'Archipel. Voici comment mener votre mission à bien.";
+
+            if(grid) {
+                grid.innerHTML = `
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-mouse-pointer"></i></div>
+                        <h3>Navigation 3D</h3>
+                        <p><strong>Maintenez le clic gauche</strong> pour tourner autour de l'archipel. Utilisez la <strong>molette</strong> pour zoomer/dézoomer.</p>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-ship"></i></div>
+                        <h3>Le Port d'Attache</h3>
+                        <p>C'est votre hub central. Cliquez sur le <strong>Port ou le Bateau</strong> pour choisir une île et lancer une expédition.</p>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-chart-pie"></i></div>
+                        <h3>Exploration</h3>
+                        <p>Survolez les îles pour voir votre progression. Chaque île possède un écosystème unique.</p>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon"><i class="fas fa-book-journal-whills"></i></div>
+                        <h3>Carnet de Bord</h3>
+                        <p>Toutes vos découvertes sont enregistrées. Consultez-le via le bouton en bas à gauche.</p>
+                    </div>
+                `;
+            }
+        }
+    },
+
+    toggleSettings() {
+        const modal = document.getElementById("settings-modal");
+        if (!modal) return;
+
+        if (modal.classList.contains("visible")) {
+            modal.classList.remove("visible");
+        } else {
+            const helpModal = document.getElementById("global-help-modal");
+            if(helpModal) helpModal.classList.remove("visible");
+
+            modal.classList.add("visible");
+        }
+    },
+
     showIslandTooltip(islandData, mesh) {
         const tooltip = document.getElementById("island-tooltip");
         if(!tooltip) return;
 
-        // récupération du moteur actif (Map ou Island)
+        // Récupération du moteur actif (Map ou Island)
         const engine = MapScene.engine || IslandScene.engine;
         const scene = MapScene.scene || IslandScene.scene;
         const camera = MapScene.camera || IslandScene.camera;
@@ -23,7 +141,7 @@ const UIManager = {
             camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
         );
 
-        // calcul Progression
+        // Calcul Progression
         const discovered = JOURNAL_STATE.discoveredInsects.filter(
             id => islandData.insects.some(i => i.id === id)
         ).length;
@@ -63,42 +181,10 @@ const UIManager = {
             </div>
         `;
 
+        // Positionnement
         tooltip.style.left = screenPos.x + "px";
         tooltip.style.top = screenPos.y + "px";
         tooltip.classList.add("visible");
-    },
-
-    toggleGlobalHelp() {
-        const modal = document.getElementById("global-help-modal");
-        const mapScreen = document.getElementById("map-view-screen");
-
-        if (!modal) return;
-
-        if (mapScreen && !mapScreen.classList.contains("active")) {
-            modal.classList.remove("visible");
-            return;
-        }
-
-        if (modal.classList.contains("visible")) {
-            modal.classList.remove("visible");
-        } else {
-            modal.classList.add("visible");
-        }
-    },
-
-    toggleSettings() {
-        const modal = document.getElementById("settings-modal");
-        if (!modal) return;
-
-        if (modal.classList.contains("visible")) {
-            modal.classList.remove("visible");
-        } else {
-            // ferme l'aide si elle est ouverte : éviter la superposition
-            const helpModal = document.getElementById("global-help-modal");
-            if(helpModal) helpModal.classList.remove("visible");
-
-            modal.classList.add("visible");
-        }
     },
 
     showBaseCampTooltip(mesh) {
@@ -232,12 +318,14 @@ const UIManager = {
         if(!modal) return;
 
         const confirmBtn = document.getElementById("btn-confirm-return-map");
+
+        // On clone pour éviter de cumuler les event listeners
         const newBtn = confirmBtn.cloneNode(true);
         confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
 
         newBtn.onclick = () => {
             this.closeReturnMapConfirmation();
-            ArchipelagoApp.returnToMap();
+            ArchipelagoApp.returnToMap(); // Appelle la fonction de retour globale
         };
 
         modal.classList.add("visible");
@@ -318,7 +406,6 @@ const UIManager = {
         document.getElementById("insect-habitat").textContent = insectData.habitat;
         document.getElementById("insect-anecdote").textContent = insectData.anecdote;
 
-        // Gestion du badge de statut
         const statusBadge = document.getElementById("insect-status");
         const statusText = insectData.status.toLowerCase();
         statusBadge.classList.remove('status-safe', 'status-warning', 'status-danger');
@@ -332,7 +419,6 @@ const UIManager = {
         }
         statusBadge.querySelector('span:last-child').textContent = insectData.status;
 
-        // preview 3D
         this.initInsectPreview(insectData);
 
         panel.classList.add("open");
@@ -342,7 +428,6 @@ const UIManager = {
         const panel = document.getElementById("right-panel");
         if (panel) panel.classList.remove("open");
 
-        // arreter moteur de preview pour économiser les ressources
         if (this.previewEngine) {
             this.previewEngine.stopRenderLoop();
         }
