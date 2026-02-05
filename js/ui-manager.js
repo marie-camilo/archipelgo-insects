@@ -380,7 +380,16 @@ const UIManager = {
         if (fill) fill.style.width = percentage + "%";
 
         const text = document.getElementById("progress-text");
-        if (text) text.textContent = `${discoveredCount}/${totalCount} spécimens identifiés`;
+        if (text) {
+            text.textContent = `${discoveredCount}/${totalCount} spécimens identifiés`;
+
+            if (discoveredCount === totalCount) {
+                text.style.color = "#43a047";
+                text.innerHTML += " <i class='fas fa-check-circle'></i>";
+            } else {
+                text.style.color = "";
+            }
+        }
     },
 
     showHelp(text, duration = 3000) {

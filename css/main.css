@@ -818,41 +818,51 @@ canvas {
 .italic { font-style: italic; }
 
 .progress-section {
-    margin: var(--spacing-md) 0;
-    padding: var(--spacing-md);
-    background: rgba(0, 0, 0, 0.03);
-    border-radius: 18px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    margin: 20px 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 .progress-section h4 {
+    font-family: var(--font-body);
     font-size: 0.8rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: var(--spacing-sm);
-    color: #85929e;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    color: #546e7a;
+    display: flex;
+    justify-content: space-between;
 }
 
 .progress-bar {
     width: 100%;
-    height: 10px;
-    background: rgba(0, 0, 0, 0.06);
-    border-radius: 10px;
+    height: 6px;
+    background-color: rgba(0, 0, 0, 0.08);
+    border-radius: 3px;
     overflow: hidden;
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: 10px;
+    position: relative;
 }
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--island-green), #9ccc65);
     width: 0%;
-    transition: width 1s cubic-bezier(0.23, 1, 0.32, 1);
+    background: var(--ocean-medium);
+    border-radius: 3px;
+    transition: width 0.8s ease-out;
+    box-shadow: none;
 }
 
 .progress-text {
+    font-family: var(--font-body);
     font-size: 0.85rem;
-    color: #5d6d7e;
+    color: var(--ocean-medium);
     font-weight: 600;
+    text-align: right;
+    letter-spacing: 0.5px;
 }
 
 .insect-header {
