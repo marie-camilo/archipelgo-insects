@@ -1,6 +1,6 @@
 /** CODE GÉNÉRÉ PAR IA **/
-/** Ce fichier regroupe les fonctions mathématiques complexes utilisées pour simuler la physique des fluides (vagues) et les interpolations.
-* Il est détaché de la logique métier pour alléger le code principal. **/
+/* Ce fichier regroupe les fonctions mathématiques complexes utilisées pour simuler la physique des fluides (vagues) et les interpolations. Il est détaché de la logique métier pour alléger le code principal. **/
+
 const IAMath = {
     /**
      * Calcule la hauteur Y d'une vague à une position X, Z donnée et un temps T.
