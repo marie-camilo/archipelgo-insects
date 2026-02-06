@@ -129,7 +129,6 @@ const UIManager = {
     },
 
     capturePhoto() {
-        // 1. Détecter quelle scène est active pour savoir quel moteur/caméra utiliser
         const engine = (ArchipelagoApp.currentScreen === "island-exploration") ? IslandScene.engine : MapScene.engine;
         const camera = (ArchipelagoApp.currentScreen === "island-exploration") ? IslandScene.camera : MapScene.camera;
 
@@ -150,15 +149,13 @@ const UIManager = {
 
         uiElements.forEach(el => el.classList.add('ui-hidden'));
 
-        // On force un petit délai pour le rendu du flash
         setTimeout(() => {
             flash.style.opacity = "1";
 
-            // 4. Lancer la capture via le helper IA
             setTimeout(() => {
                 IABabylon.executeScreenshot(engine, camera);
 
-                // 5. Retirer le flash et réafficher l'UI
+                // retirer le flash et réafficher l'UI
                 flash.style.opacity = "0";
                 setTimeout(() => {
                     flash.remove();
