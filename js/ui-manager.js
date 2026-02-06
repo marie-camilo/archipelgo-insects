@@ -42,8 +42,8 @@ const UIManager = {
 
         // si on est sur une ile
         if (ArchipelagoApp.currentScreen === "island-exploration") {
-            if(title) title.textContent = "Guide de Terrain";
-            if(subtitle) subtitle.textContent = "Observation et collecte sur l'île.";
+            if(title) title.textContent = "Guide d'Exploration des Îles";
+            if(subtitle) subtitle.textContent = "Vous souhaitez explorer et collecter les différents insectes sur l'île ?";
 
             if(grid) {
                 grid.innerHTML = `
@@ -56,7 +56,7 @@ const UIManager = {
                     <div class="help-card">
                         <div class="help-icon"><i class="fas fa-bug"></i></div>
                         <h3>Collection d'insectes</h3>
-                        <p>Trouvez les insectes cachés dans le décor. Cliquez dessus pour les identifier et les ajouter au carnet.</p>
+                        <p>Trouvez les insectes cachés dans le décor. Cliquez dessus pour les identifier et les ajouter au carnet !</p>
                     </div>
 
                     <div class="help-card">
@@ -74,15 +74,15 @@ const UIManager = {
                     <div class="help-card">
                         <div class="help-icon"><i class="fas fa-lightbulb"></i></div>
                         <h3>Curiosités</h3>
-                        <p>Interagissez avec les éléments du décor (arbres, fleurs, rochers) pour apprendre des anecdotes fascinantes.</p>
+                        <p>Interagissez avec les éléments du décor (arbres, fleurs, rochers) pour apprendre des anecdotes !</p>
                     </div>
                 `;
             }
         }
         // si on est sur la carte (scene map)
         else {
-            if(title) title.textContent = "Guide de l'Explorateur";
-            if(subtitle) subtitle.textContent = "Bienvenue dans l'Archipel. Voici comment mener votre mission à bien.";
+            if(title) title.textContent = "Guide d'Exploration";
+            if(subtitle) subtitle.textContent = "Bienvenue dans l'Archipel ! Voici quelques informations pour mener votre mission à bien.";
 
             if(grid) {
                 grid.innerHTML = `
@@ -95,13 +95,13 @@ const UIManager = {
                     <div class="help-card">
                         <div class="help-icon"><i class="fas fa-ship"></i></div>
                         <h3>Le Port d'Attache</h3>
-                        <p>C'est votre hub central. Cliquez sur le <strong>Port ou le Bateau</strong> pour choisir une île et lancer une expédition.</p>
+                        <p>Vous souhaitez explorer une île ? Cliquez sur le <strong>Port ou le Bateau</strong> pour choisir une île et lancer une expédition.</p>
                     </div>
 
                     <div class="help-card">
                         <div class="help-icon"><i class="fas fa-chart-pie"></i></div>
                         <h3>Exploration</h3>
-                        <p>Survolez les îles pour voir votre progression. Chaque île possède un écosystème unique.</p>
+                        <p>Survolez les îles pour voir votre progression. Chaque île possède un écosystème unique et des espèces à découvrir !</p>
                     </div>
 
                     <div class="help-card">
