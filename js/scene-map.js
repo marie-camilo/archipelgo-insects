@@ -53,8 +53,8 @@ const MapScene = {
         this.scene.fogEnd = 300.0;
         this.scene.fogColor = skyColor;
 
-        const gl = new BABYLON.GlowLayer("glow", this.scene);
-        gl.intensity = 0.3;
+        this.glowLayer = new BABYLON.GlowLayer("glow", this.scene);
+        this.glowLayer.intensity = 0.3;
 
         // Caméra réglages
         this.camera = new BABYLON.ArcRotateCamera("camera", -Math.PI/2, 1.2, 90, BABYLON.Vector3.Zero(), this.scene);
@@ -366,8 +366,9 @@ const MapScene = {
             sunLight.direction = sunDir;
         }
 
-        const gl = this.scene.getLayerByName("glow");
-        if (gl) gl.intensity = (mode === 'day') ? 0.2 : 0.6;
+        if (this.glowLayer) {
+            this.glowLayer.intensity = (mode === 'day') ? 0.2 : 0.6;
+        }
     },
 
     zoomToBaseCamp(targetPos, callbackOnArrival) {
