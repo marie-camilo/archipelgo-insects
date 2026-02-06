@@ -3,6 +3,8 @@ const UIManager = {
     previewScene: null,
     previewCamera: null,
     currentPreviewMesh: null,
+    inspectionEngine: null,
+    currentInsectData: null,
 
     triggerHelpAttention() {
         const btn = document.querySelector(".btn-help-floating");
@@ -368,7 +370,7 @@ const UIManager = {
 
         newBtn.onclick = () => {
             this.closeReturnMapConfirmation();
-            ArchipelagoApp.returnToMap(); // Appelle la fonction de retour globale
+            ArchipelagoApp.returnToMap();
         };
 
         modal.classList.add("visible");
@@ -485,6 +487,70 @@ const UIManager = {
         }
     },
 
+    openInspectionFromJournal() {
+        const data = JournalManager.currentInsectData;
+
+        if (data) {
+            this.currentInsectData = data;
+            this.openInspection();
+        } else {
+            console.error("Erreur : Aucun insecte sélectionné dans le journal.");
+        }
+    },
+
+    openInspection: function() {
+        const modal = document.getElementById("inspection-modal");
+        const container = document.getElementById("inspection-canvas-container");
+
+        if (!modal || !this.currentInsectData) return;
+
+        // On force l'affichage avant d'ajouter la classe
+        modal.style.display = "flex";
+
+        // Petit délai pour la transition CSS
+        setTimeout(() => {
+            modal.classList.add("visible");
+        }, 10);
+
+        document.getElementById("inspection-name").textContent = this.currentInsectData.name;
+        container.innerHTML = '<canvas id="inspectCanvasFull" style="width:100%; height:100%; outline:none;"></canvas>';
+
+        const canvas = document.getElementById("inspectCanvasFull");
+        const result = IABabylon.createInspectionScene(canvas, this.currentInsectData.modelFile);
+
+        this.inspectionEngine = result.engine;
+
+        setTimeout(() => {
+            if(this.inspectionEngine) this.inspectionEngine.resize();
+        }, 150);
+    },
+
+    closeInspection: function() {
+        console.log("Fermeture de l'inspection...");
+        const modal = document.getElementById("inspection-modal");
+
+        if (modal) {
+            modal.classList.remove("visible");
+            setTimeout(() => {
+                if(!modal.classList.contains("visible")) {
+                    modal.style.display = "none";
+                }
+            }, 300);
+        }
+
+        if (this.inspectionEngine) {
+            this.inspectionEngine.dispose();
+            this.inspectionEngine = null;
+        }
+    },
+
+    openInspectionFromIsland: function() {
+        if (ArchipelagoApp.selectedInsect) {
+            this.currentInsectData = ArchipelagoApp.selectedInsect;
+            this.openInspection();
+        }
+    },
+
     initInsectPreview(insectData) {
         const container = document.getElementById("insect-preview");
         if (!container) return;
@@ -574,5 +640,5 @@ const UIManager = {
         window.addEventListener("resize", () => {
             if(this.previewEngine) this.previewEngine.resize();
         });
-    }
+    },
 };

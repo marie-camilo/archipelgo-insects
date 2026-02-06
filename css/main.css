@@ -1007,6 +1007,163 @@ canvas {
     overflow: hidden;
 }
 
+.inspection-container {
+    background: radial-gradient(circle, #ffffff 0%, #f0f4f8 100%);
+    width: 95%;
+    height: 90%;
+    border-radius: 40px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+}
+
+#journal-3d-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: radial-gradient(circle, #ffffff 0%, #e3f2fd 100%);
+}
+
+#inspectCanvas {
+    width: 100%;
+    height: 100%;
+    outline: none;
+    cursor: grab;
+}
+
+#inspectCanvas:active { cursor: grabbing; }
+
+.inspection-controls {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+    pointer-events: none;
+    color: #1976d2;
+    font-family: var(--font-body), sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.btn-precision-mode {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    color: #1976d2;
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.btn-precision-mode:hover {
+    transform: rotate(10deg) scale(1.1);
+    background: #f0f7ff;
+}
+
+.inspection-header {
+    padding: 40px;
+    text-align: left;
+    z-index: 10;
+}
+
+.inspection-title-dark {
+    color: #1a252f !important;
+    font-size: 2.4rem;
+    margin-bottom: 5px;
+    text-shadow: none;
+}
+
+.inspection-subtitle-dark {
+    color: #455a64 !important;
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.tooltip-precision {
+    visibility: hidden;
+    position: absolute;
+    right: 65px;
+    top: 100%;
+    transform: translateY(-50%) rotate(-10deg);
+    background: rgba(26, 37, 47, 0.95);
+    color: white;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    white-space: nowrap !important;
+    display: block;
+    width: auto;
+    pointer-events: none;
+    font-family: var(--font-body), sans-serif;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.btn-precision-mode:hover .tooltip-precision {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip-precision::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent rgba(26, 37, 47, 0.95);
+}
+
+#inspection-modal {
+    z-index: 9999 !important;
+}
+
+#inspection-modal .panel-close {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    width: 45px;
+    height: 45px;
+    background: #f0f2f5;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: all 0.2s ease;
+    z-index: 10001;
+}
+
+#inspection-modal .panel-close:hover {
+    background: #e74c3c;
+    color: white;
+    transform: rotate(90deg);
+}
+
+#inspection-canvas-container {
+    flex: 1;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
 .interaction-hint {
     position: absolute;
     bottom: 15px;

@@ -10,7 +10,6 @@ const IABabylon = {
         offsetPosition.y += 1.0;
         system.emitter = offsetPosition;
 
-        // --- COULEURS : BLANC PUR ÉCLATANT ---
         system.color1 = new BABYLON.Color4(1.0, 1.0, 1.0, 1.0);
         system.color2 = new BABYLON.Color4(1.0, 1.0, 1.0, 0.6);
         system.colorDead = new BABYLON.Color4(1, 1, 1, 0);
@@ -20,7 +19,6 @@ const IABabylon = {
         system.minLifeTime = 0.8;
         system.maxLifeTime = 1.5;
 
-        // --- DISPERSION TRÈS LARGE ---
         // On garde un rayon large (6.0) pour le côté très diffus
         system.createSphereEmitter(6.0);
 
@@ -28,7 +26,6 @@ const IABabylon = {
         system.minEmitPower = 0.1;
         system.maxEmitPower = 0.3;
 
-        // --- MOUVEMENT DOUX ET FLOTTANT ---
         system.updateFunction = function(particles) {
             for (let index = 0; index < particles.length; index++) {
                 let particle = particles[index];
@@ -78,5 +75,84 @@ const IABabylon = {
             link.href = data;
             link.click();
         });
+    },
+
+    initInspectionEngine: function(canvas, modelFile) {
+        // Nettoyage si un moteur existe déjà sur ce canvas
+        const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
+
+        const camera = new BABYLON.ArcRotateCamera("inspectCam", -Math.PI / 2, Math.PI / 3, 4, BABYLON.Vector3.Zero(), scene);
+        camera.attachControl(canvas, true);
+        camera.wheelPrecision = 50;
+        camera.lowerRadiusLimit = 2;
+        camera.upperRadiusLimit = 10;
+
+        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+        light.intensity = 1.2;
+
+        BABYLON.SceneLoader.ImportMeshAsync("", "./assets/insects/", modelFile, scene).then((result) => {
+            const root = result.meshes[0];
+
+            // Calcul automatique pour que l'insecte tienne toujours dans la vue
+            const boundingInfo = root.getHierarchyBoundingVectors();
+            const size = boundingInfo.max.subtract(boundingInfo.min);
+            const maxDimension = Math.max(size.x, size.y, size.z);
+
+            // On force une taille de 2.5 unités
+            const scaleFactor = 2.5 / maxDimension;
+            root.scaling = new BABYLON.Vector3(scaleFactor, scaleFactor, scaleFactor);
+
+            // Centrage parfait
+            const center = boundingInfo.max.add(boundingInfo.min).scale(0.5);
+            root.position = center.scale(-scaleFactor);
+        });
+
+        engine.runRenderLoop(() => {
+            scene.render();
+        });
+
+        return engine;
+    },
+
+    createInspectionScene: function(canvas, modelFile) {
+        const engine = new BABYLON.Engine(canvas, true);
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
+
+        const camera = new BABYLON.ArcRotateCamera("inspectCam", -Math.PI/2, Math.PI/2.5, 5, BABYLON.Vector3.Zero(), scene);
+        camera.attachControl(canvas, true);
+
+        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+        light.intensity = 1.5;
+
+        BABYLON.SceneLoader.ImportMeshAsync("", "./assets/insects/", modelFile, scene).then((result) => {
+            const root = result.meshes[0];
+
+            // On récupère la boîte englobante réelle du modèle
+            const boundingInfo = root.getHierarchyBoundingVectors();
+            const size = boundingInfo.max.subtract(boundingInfo.min);
+            const maxDimension = Math.max(size.x, size.y, size.z);
+
+            // On définit une taille cible (ex: 2.5 unités)
+            const targetSize = 2.5;
+            const scaleFactor = targetSize / maxDimension;
+
+            // On applique le scale calculé pour que tous les insectes aient la même taille à l'écran
+            root.scaling = new BABYLON.Vector3(scaleFactor, scaleFactor, scaleFactor);
+
+            // On centre parfaitement le modèle sur ses nouveaux axes
+            const center = boundingInfo.max.add(boundingInfo.min).scale(0.5);
+            root.position = center.scale(-scaleFactor);
+
+            // Rotation automatique
+            scene.onBeforeRenderObservable.add(() => {
+                root.rotation.y += 0.005;
+            });
+        });
+
+        engine.runRenderLoop(() => scene.render());
+        return { engine, scene };
     }
 };

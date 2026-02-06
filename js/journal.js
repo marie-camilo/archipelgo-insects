@@ -2,56 +2,54 @@ const JournalManager = {
     previewEngine: null,
     previewScene: null,
     previewCamera: null,
+    currentEngine: null,
+    currentInsectData: null,
 
     init() {
         this.renderJournalGrid();
         this.updateJournalStats();
-
-        // redimensionner la modale
         window.addEventListener("resize", () => {
             if (this.previewEngine) this.previewEngine.resize();
+            if (this.currentEngine) this.currentEngine.resize();
         });
+    },
+
+    render() {
+        this.renderJournalGrid();
+        this.updateJournalStats();
     },
 
     // génréer la grille des insectes découverts
     renderJournalGrid() {
         const grid = document.getElementById("journal-grid");
         if (!grid) return;
-
         grid.innerHTML = "";
 
         const allInsects = [];
         ISLANDS_DATA.forEach(island => {
             island.insects.forEach(insect => {
-                insect.islandId = island.id; // ref à l'ile
                 allInsects.push(insect);
             });
         });
 
         allInsects.forEach(insect => {
             const isDiscovered = JOURNAL_STATE.discoveredInsects.includes(insect.id);
-
             const card = document.createElement("div");
             card.className = `journal-item ${isDiscovered ? '' : 'locked'}`;
 
             if (isDiscovered) {
-                // carte verrouillée
                 card.innerHTML = `
                     <div class="journal-item-icon">${insect.icon}</div>
                     <div class="journal-item-name">${insect.name}</div>
                     <div class="journal-item-scientific">${insect.scientific}</div>
                 `;
-                // ouverture de la modale 3D au click
                 card.onclick = () => this.showInsectDetails(insect);
             } else {
-                // carte verrouillée
                 card.innerHTML = `
                     <div class="journal-item-icon" style="filter:grayscale(1); opacity:0.3">❓</div>
                     <div class="journal-item-name">???</div>
-                    <div class="journal-item-scientific">Non découvert</div>
                 `;
             }
-
             grid.appendChild(card);
         });
     },
@@ -171,8 +169,12 @@ const JournalManager = {
     },
 
     showInsectDetails(insectData) {
+        this.currentInsectData = insectData;
         const modal = document.getElementById("journal-modal");
         if(!modal) return;
+
+        document.getElementById("modal-name").textContent = insectData.name;
+        document.getElementById("modal-taxonomy").textContent = insectData.scientific;
 
         const nameTitle = document.getElementById("modal-name");
         const taxoTitle = document.getElementById("modal-taxonomy");
@@ -218,11 +220,39 @@ const JournalManager = {
         }, 50);
     },
 
+    openModal(insectData) {
+        const modal = document.getElementById("journal-modal");
+        modal.classList.add("active");
+
+        document.getElementById("modal-name").textContent = insectData.name;
+        document.getElementById("modal-taxonomy").textContent = insectData.scientific;
+        document.getElementById("modal-description").textContent = insectData.anecdote;
+        document.getElementById("modal-role").textContent = insectData.role;
+
+        const canvas = document.getElementById("inspectCanvas");
+
+        // détruit l'ancien moteur s'il existe
+        if (this.currentEngine) {
+            this.currentEngine.dispose();
+        }
+
+        this.currentEngine = IABabylon.initInspectionEngine(canvas, insectData.modelFile);
+
+        modal.classList.add("active");
+
+        setTimeout(() => {
+            this.init3DPreview(insectData);
+        }, 50);
+    },
+
     closeModal() {
         const modal = document.getElementById("journal-modal");
-        if(modal) modal.classList.remove("active");
+        modal.classList.remove("active");
 
-        this.dispose3DPreview();
+        if (this.currentEngine) {
+            this.currentEngine.dispose();
+            this.currentEngine = null;
+        }
     },
 
     //creation d'une scène pour prévisualiser l'insecte
