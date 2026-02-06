@@ -271,12 +271,13 @@ const IslandScene = {
             const posX = insectData.position.x * islandScale;
             const posZ = insectData.position.z * islandScale;
             const ray = new BABYLON.Ray(new BABYLON.Vector3(posX, 1000, posZ), new BABYLON.Vector3(0, -1, 0), 2000);
-            const hit = this.scene.pickWithRay(ray, (m) => m.name !== "ocean" && m.isVisible && m.isPickable !== false);
+            const hit = this.scene.pickWithRay(ray, (m) => m.name !== "ocean" && m.isVisible);
+
             let groundY = hit.hit ? hit.pickedPoint.y : 0;
             let altitude = insectData.altitude !== undefined ? insectData.altitude : 0.5;
             let finalY = groundY + altitude;
 
-            const hitBox = BABYLON.MeshBuilder.CreateSphere("hit_" + insectData.id, {diameter: 5}, this.scene);
+            const hitBox = BABYLON.MeshBuilder.CreateSphere("hit_" + insectData.id, {diameter: 6}, this.scene);
             hitBox.position = new BABYLON.Vector3(posX, finalY, posZ);
             hitBox.visibility = 0;
             hitBox.isPickable = true;
@@ -287,30 +288,38 @@ const IslandScene = {
             BABYLON.SceneLoader.ImportMeshAsync("", "./assets/insects/", modelName, this.scene)
                 .then((result) => {
                     const insectRoot = result.meshes[0];
-                    insectRoot.parent = hitBox;
+                    insectRoot.parent = hitBox; // L'insecte suit la hitbox
                     insectRoot.scaling = new BABYLON.Vector3(scale, scale, scale);
                     insectRoot.position = BABYLON.Vector3.Zero();
-                    result.meshes.forEach(m => { m.isPickable = false; });
+
+                    result.meshes.forEach(m => {
+                        m.isPickable = false;
+                    });
+
                     this.insectsMeshes.push({ visual: insectRoot, hitbox: hitBox, offset: Math.random() * 100 });
                 });
 
+            // Gestionnaire d'actions sur la Hitbox
             hitBox.actionManager = new BABYLON.ActionManager(this.scene);
+
+            // Hover
             hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOverTrigger, () => {
                 document.body.style.cursor = "pointer";
             }));
             hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPointerOutTrigger, () => {
                 document.body.style.cursor = "default";
             }));
+
             hitBox.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, () => {
-                this.camera.detachControl();
+                console.log("Insecte cliqué : " + insectData.name);
+
                 this.zoomOnInsect(hitBox.position);
+
                 setTimeout(() => {
                     if(typeof ArchipelagoApp !== 'undefined') {
                         ArchipelagoApp.selectInsect(insectData);
                     }
-                    const canvas = document.getElementById("islandCanvas");
-                    if(canvas) this.camera.attachControl(canvas, true);
-                }, 500);
+                }, 400);
             }));
         });
     },

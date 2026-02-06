@@ -365,18 +365,26 @@
     <div class="insect-header">
         <h3 class="insect-name" id="insect-name">Nom Insecte</h3>
         <p id="insect-scientific" class="scientific-name">Nom latin</p>
+        <p id="insect-taxonomy" class="taxonomy-info"></p>
     </div>
     <div class="insect-model-preview" id="insect-preview"></div>
+
     <div class="insect-info-scroll">
         <div class="info-section">
             <h4>Rôle Écologique</h4>
             <p id="insect-role" class="educational-text">...</p>
         </div>
+        <div class="info-section">
+            <h4>Habitat</h4>
+            <p id="insect-habitat" class="educational-text">...</p>
+        </div>
+        <div class="info-section">
+            <h4>Note du Naturaliste</h4>
+            <p id="insect-anecdote" class="educational-text italic">...</p>
+        </div>
+
         <div class="status-badge" id="insect-status"><span>Statut</span></div>
     </div>
-    <button class="btn-primary" onclick="UIManager.openInspectionFromIsland()" style="width: 100%; margin-top: 15px;">
-        <i class="fas fa-search-plus"></i> Examen de précision
-    </button>
 </div>
 
 <div id="inspection-modal" class="global-help-modal" style="z-index: 9999;"> <div class="inspection-container">

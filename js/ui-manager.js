@@ -504,10 +504,8 @@ const UIManager = {
 
         if (!modal || !this.currentInsectData) return;
 
-        // On force l'affichage avant d'ajouter la classe
         modal.style.display = "flex";
 
-        // Petit délai pour la transition CSS
         setTimeout(() => {
             modal.classList.add("visible");
         }, 10);
@@ -526,7 +524,6 @@ const UIManager = {
     },
 
     closeInspection: function() {
-        console.log("Fermeture de l'inspection...");
         const modal = document.getElementById("inspection-modal");
 
         if (modal) {
