@@ -76,6 +76,9 @@ Navigation Rapide :
 Visualisation Journal :
 * L'ouverture d'une fiche dans le journal 2D instancie un deuxième moteur 3D (miniature) dans une modale pour afficher le modèle de l'insecte hors contexte, permettant sa rotation à 360°.
 
+Examen de précision : 
+* Un clic sur le bouton déclenche l'instanciation d'une scène 3D qui permet un examen plus précis des spécimens. Un algorithme de normalisation de la boîte englobante est utilisé pour centrer et mettre à l'échelle automatiquement n'importe quel spécimen, quel que soit son volume initial.
+
 ## Difficultés Rencontrées et Solutions
 Le développement a présenté plusieurs difficultés surtout liés à l'utilisation de BabylonJS :
 
