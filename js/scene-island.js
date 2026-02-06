@@ -432,25 +432,25 @@ const IslandScene = {
         const btn = document.querySelector(".btn-scanner");
         if(btn) {
             btn.disabled = true;
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Localisation en cours...";
+            btn.innerHTML = "<i class='fas fa-bolt'></i> Scan flash...";
         }
 
-        // Création du layer via IA Helper
         const hl = IABabylon.createScannerEffect(this.scene);
-
-        let foundCount = 0;
-        const modernGlowColor = new BABYLON.Color3(1.0, 0.95, 0.7);
+        const particleTexture = new BABYLON.Texture("https://www.babylonjs-playground.com/textures/flare.png", this.scene);
+        const whiteColor = new BABYLON.Color3(1, 1, 1);
 
         this.insectsMeshes.forEach(insectObj => {
-            if (insectObj.visual) {
-                insectObj.visual.getChildMeshes().forEach(mesh => {
-                    hl.addMesh(mesh, modernGlowColor);
-                });
-                foundCount++;
+            if (insectObj.visual && insectObj.hitbox) {
+                insectObj.visual.getChildMeshes().forEach(m => hl.addMesh(m, whiteColor));
+
+                const fireflies = IABabylon.createScannerCloud(
+                    this.scene,
+                    insectObj.hitbox.absolutePosition.clone(),
+                    particleTexture
+                );
+                fireflies.start();
             }
         });
-
-        console.log("Scan terminé :", foundCount, "spécimens révélés.");
 
         setTimeout(() => {
             hl.removeAllMeshes();
@@ -458,7 +458,7 @@ const IslandScene = {
                 btn.disabled = false;
                 btn.innerHTML = "<i class='fas fa-radar'></i> Révéler les spécimens";
             }
-        }, 3000);
+        }, 1000); // temps de l'aniamtion des particules
     },
 
     animateScene() {
