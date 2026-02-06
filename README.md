@@ -79,6 +79,9 @@ Visualisation Journal :
 Examen de précision : 
 * Un clic sur le bouton déclenche l'instanciation d'une scène 3D qui permet un examen plus précis des spécimens. Un algorithme de normalisation de la boîte englobante est utilisé pour centrer et mettre à l'échelle automatiquement n'importe quel spécimen, quel que soit son volume initial.
 
+Cycle Lumineux Dynamique :
+* La sélection d'un mode (Jour, Crépuscule, Nuit) via un menu déroulant HTML modifie en temps réel les propriétés de la scène 3D : intensité et couleur des lumières (DirectionalLight), densité du brouillard et couleur du ciel (clearColor).
+
 ## Difficultés Rencontrées et Solutions
 Le développement a présenté plusieurs difficultés surtout liés à l'utilisation de BabylonJS :
 
