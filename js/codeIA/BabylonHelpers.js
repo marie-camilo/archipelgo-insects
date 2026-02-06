@@ -69,5 +69,14 @@ const IABabylon = {
             });
         }
         return hl;
+    },
+
+    executeScreenshot: function(engine, camera) {
+        BABYLON.Tools.CreateScreenshot(engine, camera, { precision: 2 }, (data) => {
+            const link = document.createElement('a');
+            link.download = `Archipel_Exploration_${new Date().getTime()}.png`;
+            link.href = data;
+            link.click();
+        });
     }
 };

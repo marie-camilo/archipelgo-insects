@@ -158,6 +158,86 @@ canvas {
     box-shadow: 0 8px 25px rgba(25, 118, 210, 0.2);
 }
 
+.btn-photo-floating {
+    position: fixed;
+    top: 30px;
+    right: 210px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    color: #2c3e50;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-photo-floating:hover {
+    transform: translateY(-3px);
+    color: #1976d2;
+    box-shadow: 0 8px 25px rgba(25, 118, 210, 0.2);
+}
+
+.btn-photo-floating .tooltip-text {
+    visibility: hidden;
+    width: 120px;
+    background-color: rgba(44, 62, 80, 0.9);
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1001;
+    top: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    pointer-events: none;
+}
+
+.btn-photo-floating:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.btn-photo-floating .tooltip-text::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent rgba(44, 62, 80, 0.9) transparent;
+}
+
+.photo-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: white;
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.1s ease-in;
+}
+
+.ui-hidden {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
 @keyframes pulse-attention {
     0% {
         transform: scale(1);
