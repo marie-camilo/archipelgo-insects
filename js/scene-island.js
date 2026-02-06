@@ -13,6 +13,7 @@ const IslandScene = {
 
     init(islandId) {
         const canvas = document.getElementById("islandCanvas");
+        const currentCycle = GameSettings.timeCycle || 'day';
         if (!canvas) return;
 
         this.engine = new BABYLON.Engine(canvas, true);
@@ -56,11 +57,40 @@ const IslandScene = {
 
         // Lumières
         const hemiLight = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(0, 1, 0), this.scene);
-        hemiLight.intensity = (this.currentIsland.ambiance === "rain") ? 0.6 : 0.9;
-
         const dirLight = new BABYLON.DirectionalLight("dirLight", new BABYLON.Vector3(-1, -0.8, -1), this.scene);
+
         dirLight.position = new BABYLON.Vector3(100, 100, 50);
         dirLight.intensity = (this.currentIsland.ambiance === "rain") ? 1.0 : 2.0;
+
+        if (currentCycle === 'night') {
+            // Mode Nuit sur l'île
+            hemiLight.intensity = 0.2;
+            hemiLight.groundColor = new BABYLON.Color3(0, 0, 0.1);
+
+            dirLight.diffuse = new BABYLON.Color3(0.4, 0.5, 0.8); // Lumière lunaire
+            dirLight.intensity = 0.6;
+
+            // Ajout lune
+            const moon = BABYLON.MeshBuilder.CreateSphere("islandMoon", {diameter: 15}, this.scene);
+            moon.position = new BABYLON.Vector3(-200, 150, -200);
+            const moonMat = new BABYLON.StandardMaterial("m", this.scene);
+            moonMat.emissiveColor = new BABYLON.Color3(0.8, 0.8, 1);
+            moon.material = moonMat;
+
+            this.scene.clearColor = new BABYLON.Color4(0.01, 0.01, 0.05, 1);
+            this.scene.fogColor = new BABYLON.Color3(0.01, 0.01, 0.05);
+        }
+        else if (currentCycle === 'sunset') {
+            hemiLight.intensity = 0.4;
+            dirLight.diffuse = new BABYLON.Color3(1, 0.6, 0.3);
+            dirLight.intensity = 1.5;
+            this.scene.clearColor = new BABYLON.Color4(0.2, 0.1, 0.05, 1);
+            this.scene.fogColor = new BABYLON.Color3(0.2, 0.1, 0.05);
+        }
+        else {
+            hemiLight.intensity = (this.currentIsland.ambiance === "rain") ? 0.6 : 0.9;
+            dirLight.intensity = (this.currentIsland.ambiance === "rain") ? 1.0 : 2.0;
+        }
 
         const shadowGenerator = new BABYLON.ShadowGenerator(2048, dirLight);
         shadowGenerator.useBlurExponentialShadowMap = true;
@@ -116,6 +146,71 @@ const IslandScene = {
         }
     },
 
+    applyTimeCycle(mode) {
+        if (!this.scene) return;
+
+        const hemiLight = this.scene.getLightByName("hemiLight");
+        const dirLight = this.scene.getLightByName("dirLight");
+
+        const oldMoon = this.scene.getMeshByName("islandMoon");
+        if (oldMoon) oldMoon.dispose();
+
+        switch(mode) {
+            case 'night':
+                this.scene.clearColor = new BABYLON.Color4(0.01, 0.01, 0.05, 1);
+                this.scene.fogColor = new BABYLON.Color3(0.01, 0.01, 0.05);
+                if(hemiLight) {
+                    hemiLight.intensity = 0.2;
+                    hemiLight.groundColor = new BABYLON.Color3(0, 0, 0.1);
+                }
+                if(dirLight) {
+                    dirLight.diffuse = new BABYLON.Color3(0.4, 0.5, 0.8);
+                    dirLight.intensity = 0.6;
+                }
+                // Recréer la lune
+                const moon = BABYLON.MeshBuilder.CreateSphere("islandMoon", {diameter: 15}, this.scene);
+                moon.position = new BABYLON.Vector3(-200, 150, -200);
+                const moonMat = new BABYLON.StandardMaterial("m", this.scene);
+                moonMat.emissiveColor = new BABYLON.Color3(0.8, 0.8, 1);
+                moon.material = moonMat;
+                break;
+
+            case 'sunset':
+                this.scene.clearColor = new BABYLON.Color4(0.2, 0.1, 0.05, 1);
+                this.scene.fogColor = new BABYLON.Color3(0.2, 0.1, 0.05);
+                if(hemiLight) hemiLight.intensity = 0.4;
+                if(dirLight) {
+                    dirLight.diffuse = new BABYLON.Color3(1, 0.6, 0.3);
+                    dirLight.intensity = 1.5;
+                }
+                break;
+
+            case 'day':
+            default:
+                const sky = (this.currentIsland.ambiance === "rain") ? new BABYLON.Color3(0.4, 0.45, 0.5) : new BABYLON.Color3(0.65, 0.85, 0.95);
+                this.scene.clearColor = new BABYLON.Color4(sky.r, sky.g, sky.b, 1);
+                this.scene.fogColor = sky;
+                if(hemiLight) hemiLight.intensity = (this.currentIsland.ambiance === "rain") ? 0.6 : 0.9;
+                if(dirLight) {
+                    dirLight.diffuse = new BABYLON.Color3(1, 1, 1);
+                    dirLight.intensity = (this.currentIsland.ambiance === "rain") ? 1.0 : 2.0;
+                }
+                break;
+        }
+
+        // Mettre à jour l'océan
+        if (this.waterMesh && this.waterMesh.material) {
+            const waterMat = this.waterMesh.material;
+            if (mode === 'night') {
+                waterMat.diffuseColor = new BABYLON.Color3(0, 0.01, 0.05);
+                waterMat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.3);
+            } else {
+                waterMat.diffuseColor = new BABYLON.Color3(0.02, 0.05, 0.15);
+                waterMat.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+            }
+        }
+    },
+
     disposeAtmosphere() {
         if (this.activeSystems.length > 0) {
             this.activeSystems.forEach(sys => {
@@ -127,9 +222,19 @@ const IslandScene = {
     },
 
     createOcean() {
+        const currentCycle = GameSettings.timeCycle || 'day';
+        const waterMat = new BABYLON.StandardMaterial("waterMat", this.scene);
+
+        if (currentCycle === 'night') {
+            waterMat.diffuseColor = new BABYLON.Color3(0, 0.01, 0.05);
+            waterMat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.3);
+        } else {
+            waterMat.diffuseColor = new BABYLON.Color3(0.02, 0.05, 0.15);
+            waterMat.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+        }
+
         const waterMesh = BABYLON.MeshBuilder.CreateGround("ocean", { width: 2000, height: 2000, subdivisions: 120, updatable: true }, this.scene);
         waterMesh.convertToFlatShadedMesh();
-        const waterMat = new BABYLON.StandardMaterial("waterMat", this.scene);
         waterMat.diffuseColor = new BABYLON.Color3(0.02, 0.05, 0.15);
         waterMat.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
         waterMat.alpha = 0.95;

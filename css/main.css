@@ -1288,6 +1288,29 @@ canvas {
     display: none;
 }
 
+.settings-list select.btn-secondary {
+    min-width: 120px;
+    max-width: 150px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.settings-list select.btn-secondary:hover {
+    border-color: #1976d2;
+    background-color: #fff;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
 .btn-settings-floating {
     position: fixed;
     top: 30px;

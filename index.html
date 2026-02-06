@@ -89,6 +89,20 @@
     <div class="settings-list">
         <div class="setting-item">
             <div class="setting-info">
+                <span class="setting-label">Cycle Lumineux</span>
+                <span class="setting-desc">Ambiance visuelle de l'Archipel.</span>
+            </div>
+            <select id="select-time-cycle" class="btn-secondary"
+                    style="padding: 5px 10px; width: 140px; font-size: 0.85rem; text-align: center;"
+                    onchange="GameSettings.changeTime(this.value)">
+                <option value="day">Jour</option>
+                <option value="sunset">Crépuscule</option>
+                <option value="night">Nuit</option>
+            </select>
+        </div>
+
+        <div class="setting-item">
+            <div class="setting-info">
                 <span class="setting-label">Séquence de Navigation</span>
                 <span class="setting-desc">Si désactivé, le voyage vers les îles est instantané.</span>
             </div>

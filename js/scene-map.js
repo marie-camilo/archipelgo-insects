@@ -315,6 +315,61 @@ const MapScene = {
         }
     },
 
+    applyTimeCycle(mode) {
+        if (!this.scene || !this.waterMesh) return;
+        if(this.moonMesh) this.moonMesh.isVisible = (mode === 'night');
+
+        let skyColor, fogColor, fogDensity, sunColor, sunIntensity, sunDir;
+        const waterMat = this.waterMesh.material;
+
+        switch(mode) {
+            case 'day':
+                skyColor = new BABYLON.Color3(0.65, 0.85, 0.95);
+                fogColor = skyColor;
+                fogDensity = 0.002;
+                sunColor = new BABYLON.Color3(1, 1, 0.9);
+                sunIntensity = 2.0;
+                sunDir = new BABYLON.Vector3(-1, -0.8, -1);
+                waterMat.diffuseColor = new BABYLON.Color3(0.02, 0.1, 0.2);
+                break;
+
+            case 'night':
+                skyColor = new BABYLON.Color3(0.02, 0.02, 0.1);
+                fogColor = new BABYLON.Color3(0.01, 0.01, 0.05);
+                fogDensity = 0.008;
+                sunColor = new BABYLON.Color3(0.4, 0.5, 1.0);
+                sunIntensity = 0.8;
+                sunDir = new BABYLON.Vector3(0.5, -1, 0.5);
+                waterMat.diffuseColor = new BABYLON.Color3(0.005, 0.005, 0.02);
+                break;
+
+            case 'sunset':
+            default:
+                skyColor = new BABYLON.Color3(0.05, 0.05, 0.15);
+                fogColor = new BABYLON.Color3(0.7, 0.3, 0.15);
+                fogDensity = 0.003;
+                sunColor = new BABYLON.Color3(1, 0.5, 0.2);
+                sunIntensity = 1.8;
+                sunDir = new BABYLON.Vector3(1, -0.3, 1);
+                waterMat.diffuseColor = new BABYLON.Color3(0.01, 0.02, 0.08);
+                break;
+        }
+
+        this.scene.clearColor = new BABYLON.Color4(skyColor.r, skyColor.g, skyColor.b, 1);
+        this.scene.fogColor = fogColor;
+        this.scene.fogDensity = fogDensity;
+
+        const sunLight = this.scene.getLightByName("sunLight");
+        if (sunLight) {
+            sunLight.diffuse = sunColor;
+            sunLight.intensity = sunIntensity;
+            sunLight.direction = sunDir;
+        }
+
+        const gl = this.scene.getLayerByName("glow");
+        if (gl) gl.intensity = (mode === 'day') ? 0.2 : 0.6;
+    },
+
     zoomToBaseCamp(targetPos, callbackOnArrival) {
         if (typeof UIManager !== 'undefined') UIManager.hideIslandTooltip();
         this.isNavigating = true;
