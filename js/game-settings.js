@@ -3,7 +3,7 @@ const GameSettings = {
     boatAnim: true,
     particles: true,
     islandAnim: true,
-    timeCycle: 'sunset',
+    timeCycle: 'day',
 
     init() {
         const saved = localStorage.getItem('archipelago_settings');
@@ -12,7 +12,7 @@ const GameSettings = {
             this.boatAnim = parsed.boatAnim !== undefined ? parsed.boatAnim : true;
             this.particles = parsed.particles !== undefined ? parsed.particles : true;
             this.islandAnim = parsed.islandAnim !== undefined ? parsed.islandAnim : true;
-            this.timeCycle = parsed.timeCycle || 'sunset';
+            this.timeCycle = parsed.timeCycle || 'day';
         }
         this.updateUI();
     },
